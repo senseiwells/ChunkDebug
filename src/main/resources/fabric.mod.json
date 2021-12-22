@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "chunkdebug",
+  "version": "${version}",
+
+  "name": "Chunk Debug",
+  "description": "Chunk Debug server side support",
+  "authors": [
+	"Sensei"
+  ],
+  "contact": {
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "chunkdebug.ChunkDebugServer"
+    ]
+  },
+  "mixins": [
+    "chunkdebug.mixins.json"
+  ],
+
+  "depends": {
+    "minecraft": "1.16.x",
+    "fabricloader": ">=0.10.0"
+  }
+}
