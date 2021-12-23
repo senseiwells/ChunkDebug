@@ -3,6 +3,12 @@
   "package": "chunkdebug.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "ChunkHolderMixin",
+    "CustomPayloadC2SPacketAccessor",
+    "MinecraftServerMixin",
+    "PlayerManagerMixin",
+    "ServerPlayNetworkHandlerMixin",
+    "ThreadedAnvilChunkStorageAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
