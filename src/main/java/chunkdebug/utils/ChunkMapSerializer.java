@@ -2,27 +2,42 @@ package chunkdebug.utils;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.ChunkPos;
 
-import java.util.Map;
+import java.util.Set;
 
 public class ChunkMapSerializer {
-	public static NbtCompound serialize(ServerWorld world, Map<ChunkPos, ChunkHolder.LevelType> chunkMap) {
+	public static NbtCompound serialize(ServerWorld world, Set<ChunkData> chunkDataSet) {
 		NbtList list = new NbtList();
-		for (Map.Entry<ChunkPos, ChunkHolder.LevelType> entry : chunkMap.entrySet()) {
+		for (ChunkData chunkData : chunkDataSet) {
 			NbtCompound innerCompound = new NbtCompound();
-			ChunkPos chunkPos = entry.getKey();
-			ChunkHolder.LevelType levelType = entry.getValue();
-			innerCompound.putInt("x", chunkPos.x);
-			innerCompound.putInt("z", chunkPos.z);
-			innerCompound.putInt("type", levelType.ordinal());
+			innerCompound.putInt("x", chunkData.chunkPos.x);
+			innerCompound.putInt("z", chunkData.chunkPos.z);
+			innerCompound.putInt("t", chunkData.levelType.ordinal());
+			innerCompound.putInt("l", chunkData.ticketCode);
 			list.add(innerCompound);
 		}
 		NbtCompound baseCompound = new NbtCompound();
 		baseCompound.put("chunks", list);
 		baseCompound.putString("world", world.getRegistryKey().getValue().getPath());
 		return baseCompound;
+	}
+
+	public static int getTicketCode(ChunkTicketType<?> chunkTicketType) {
+		if (chunkTicketType == null) {
+			return 0;
+		}
+		return switch (chunkTicketType.toString()) {
+			default -> 0;
+			case "start" -> 1;
+			case "dragon" -> 2;
+			case "player" -> 3;
+			case "forced" -> 4;
+			case "light" -> 5;
+			case "portal" -> 6;
+			case "post_teleport" -> 7;
+			case "unknown" -> 8;
+		};
 	}
 }
