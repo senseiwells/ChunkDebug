@@ -5,10 +5,10 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 
-import java.util.Set;
+import java.util.Collection;
 
 public class ChunkMapSerializer {
-	public static NbtCompound serialize(ServerWorld world, Set<ChunkData> chunkDataSet) {
+	public static NbtCompound serialize(ServerWorld world, Collection<ChunkData> chunkDataSet) {
 		NbtList list = new NbtList();
 		for (ChunkData chunkData : chunkDataSet) {
 			NbtCompound innerCompound = new NbtCompound();
