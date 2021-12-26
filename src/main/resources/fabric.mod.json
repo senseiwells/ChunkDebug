@@ -22,7 +22,7 @@
   "mixins": [
     "chunkdebug.mixins.json"
   ],
-
+  "accessWidener" : "chunkdebug.accesswidener",
   "depends": {
     "minecraft": "1.16.x",
     "fabricloader": ">=0.10.0"

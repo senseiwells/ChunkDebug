@@ -37,7 +37,8 @@ public class ChunkMapSerializer {
 			case "light" -> 5;
 			case "portal" -> 6;
 			case "post_teleport" -> 7;
-			case "unknown" -> 8;
+			case "chonk" -> 8;
+			case "unknown" -> 9;
 		};
 	}
 }
