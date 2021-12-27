@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "chunkdebug",
-  "version": "${version}",
+  "version": "1.0.0",
 
   "name": "Chunk Debug",
   "description": "Chunk Debug server side support",
@@ -24,7 +24,7 @@
   ],
   "accessWidener" : "chunkdebug.accesswidener",
   "depends": {
-    "minecraft": "1.16.x",
+    "minecraft": "1.17.x",
     "fabricloader": ">=0.10.0"
   }
 }

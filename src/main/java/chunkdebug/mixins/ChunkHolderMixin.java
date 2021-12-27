@@ -15,13 +15,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.concurrent.Executor;
+
 @Mixin(ChunkHolder.class)
 public abstract class ChunkHolderMixin {
 	@Shadow
 	private int level;
 	@Shadow
 	@Final
-	private ChunkPos pos;
+	ChunkPos pos;
 
 	@Shadow
 	public static ChunkHolder.LevelType getLevelType(int distance) {
@@ -29,7 +31,7 @@ public abstract class ChunkHolderMixin {
 	}
 
 	@Inject(method = "tick", at = @At("RETURN"))
-	private void onTick(ThreadedAnvilChunkStorage chunkStorage, CallbackInfo ci) {
+	private void onTick(ThreadedAnvilChunkStorage chunkStorage, Executor executor, CallbackInfo ci) {
 		ChunkHolder.LevelType levelType = getLevelType(this.level);
 		ServerWorld world = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getWorld();
 		ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getTicketManager();
