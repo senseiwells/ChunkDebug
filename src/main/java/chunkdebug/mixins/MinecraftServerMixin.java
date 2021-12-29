@@ -13,9 +13,6 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
-	@Shadow
-	public abstract Iterable<ServerWorld> getWorlds();
-
 	@Inject(method = "tick", at = @At("HEAD"))
 	private void onTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		ChunkDebugServer.chunkNetHandler.tickUpdate();
@@ -24,10 +21,5 @@ public abstract class MinecraftServerMixin {
 	@Inject(method = "loadWorld", at = @At("HEAD"))
 	private void onLoadWorldPre(CallbackInfo ci) {
 		ChunkDebugServer.server = (MinecraftServer) (Object) this;
-	}
-
-	@Inject(method = "loadWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;createWorlds(Lnet/minecraft/server/WorldGenerationProgressListener;)V", shift = At.Shift.AFTER))
-	private void onLoadWorldPost(CallbackInfo ci) {
-		this.getWorlds().forEach(ChunkDebugServer.chunkNetHandler::addWorld);
 	}
 }
