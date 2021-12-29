@@ -10,7 +10,7 @@
   ],
   "contact": {
   },
-
+  "accessWidener": "chunkdebug.accesswidener",
   "license": "MIT",
 
   "environment": "*",

@@ -67,6 +67,7 @@ public class ChunkServerNetworkHandler {
 	public synchronized void updateChunkMap(ServerWorld world, ChunkData chunkData) {
 		Set<ChunkData> chunkDataSet = this.serverWorldChunks.get(world);
 		Set<ChunkData> tickChunkDataSet = this.updatesInLastTick.get(world);
+		if (chunkDataSet == null || tickChunkDataSet == null) return;
 		chunkDataSet.remove(chunkData);
 		tickChunkDataSet.remove(chunkData);
 		if (chunkData.levelType != ChunkHolder.LevelType.INACCESSIBLE) {
