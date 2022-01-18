@@ -18,7 +18,7 @@ public class PlayerManagerMixin {
 	private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
 		player.networkHandler.sendPacket(new CustomPayloadS2CPacket(
 			ChunkServerNetworkHandler.ESSENTIAL_CHANNEL,
-			new PacketByteBuf(Unpooled.buffer()).writeVarInt(ChunkServerNetworkHandler.HELLO)
+			new PacketByteBuf(Unpooled.buffer()).writeVarInt(ChunkServerNetworkHandler.HELLO).writeVarInt(ChunkServerNetworkHandler.VERSION)
 		));
 	}
 }

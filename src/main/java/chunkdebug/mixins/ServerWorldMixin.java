@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 
 @Mixin(ServerWorld.class)
 public class ServerWorldMixin {
-	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;<init>(Lnet/minecraft/server/world/ServerWorld;Ljava/util/function/Predicate;Ljava/util/function/Function;Ljava/util/function/Consumer;)V"))
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;<init>(Lnet/minecraft/world/MutableWorldProperties;Lnet/minecraft/util/registry/RegistryKey;Lnet/minecraft/world/dimension/DimensionType;Ljava/util/function/Supplier;ZZJ)V", shift = At.Shift.AFTER))
 	private void onCreateServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<?> worldKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean debugWorld, long seed, List<?> spawners, boolean shouldTickTime, CallbackInfo ci) {
 		ChunkDebugServer.chunkNetHandler.addWorld((ServerWorld) (Object) this);
 	}

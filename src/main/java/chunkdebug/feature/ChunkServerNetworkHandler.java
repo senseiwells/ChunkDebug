@@ -3,11 +3,9 @@ package chunkdebug.feature;
 import chunkdebug.ChunkDebugServer;
 import chunkdebug.mixins.ThreadedAnvilChunkStorageAccessor;
 import chunkdebug.utils.ChunkData;
-import chunkdebug.utils.ChunkMapSerializer;
 import chunkdebug.utils.IChunkTicketManager;
 import com.google.common.collect.Iterables;
 import io.netty.buffer.Unpooled;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,6 +13,7 @@ import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
@@ -26,15 +25,21 @@ public class ChunkServerNetworkHandler {
 	public static final int
 		HELLO = 0,
 		RELOAD = 15,
-		DATA = 16;
+		DATA = 16,
+		VERSION = 1_0_1;
 
 	private final Map<ServerPlayerEntity, ServerWorld> validPlayersEnabled = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> serverWorldChunks = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> updatesInLastTick = new HashMap<>();
 
-	public void onHello(ServerPlayerEntity player) {
+	public void onHello(ServerPlayerEntity player, PacketByteBuf packetByteBuf) {
+		String essentialVersion = packetByteBuf.readString(32767);
+		if (packetByteBuf.readableBytes() == 0 || packetByteBuf.readVarInt() < VERSION) {
+			player.sendMessage(new LiteralText("You cannot use ChunkDebug, client out of date"), false);
+			return;
+		}
 		this.validPlayersEnabled.put(player, null);
-		ChunkDebugServer.LOGGER.info("%s has logged in with ChunkDebug".formatted(player.getEntityName()));
+		ChunkDebugServer.LOGGER.info("%s has logged in with ChunkDebug. EssentialClient %s".formatted(player.getEntityName(), essentialVersion));
 	}
 
 	public void removePlayer(ServerPlayerEntity player) {
@@ -44,7 +49,7 @@ public class ChunkServerNetworkHandler {
 	public void handlePacket(PacketByteBuf packetByteBuf, ServerPlayerEntity player) {
 		if (packetByteBuf != null) {
 			switch (packetByteBuf.readVarInt()) {
-				case HELLO -> this.onHello(player);
+				case HELLO -> this.onHello(player, packetByteBuf);
 				case DATA -> this.processPacket(packetByteBuf, player);
 				case RELOAD -> this.forceReloadChunks();
 			}
@@ -69,7 +74,7 @@ public class ChunkServerNetworkHandler {
 		Set<ChunkData> tickChunkDataSet = this.updatesInLastTick.get(world);
 		chunkDataSet.remove(chunkData);
 		tickChunkDataSet.remove(chunkData);
-		if (chunkData.levelType != ChunkHolder.LevelType.INACCESSIBLE) {
+		if (!chunkData.isLevelType(ChunkHolder.LevelType.INACCESSIBLE)) {
 			chunkDataSet.add(chunkData);
 		}
 		tickChunkDataSet.add(chunkData);
@@ -98,8 +103,8 @@ public class ChunkServerNetworkHandler {
 		if (chunkDataSet == null || chunkDataSet.isEmpty()) {
 			return;
 		}
-		if (chunkDataSet.size() > 10000) {
-			for (List<ChunkData> subChunkDataSet : Iterables.partition(chunkDataSet, 10000)) {
+		if (chunkDataSet.size() > 100000) {
+			for (List<ChunkData> subChunkDataSet : Iterables.partition(chunkDataSet, 100000)) {
 				this.sendClientChunkData(player, world, subChunkDataSet);
 			}
 			return;
@@ -108,10 +113,22 @@ public class ChunkServerNetworkHandler {
 	}
 
 	private void sendClientChunkData(ServerPlayerEntity player, ServerWorld world, Collection<ChunkData> chunkDataCollection) {
-		NbtCompound serializedMap = ChunkMapSerializer.serialize(world, chunkDataCollection);
+		int size = chunkDataCollection.size();
+		long[] chunkPositions = new long[size];
+		byte[] levelTypes = new byte[size];
+		byte[] ticketTypes = new byte[size];
+		int i = 0;
+		for (ChunkData chunkData : chunkDataCollection) {
+			chunkPositions[i] = chunkData.getLongPos();
+			levelTypes[i] = chunkData.getLevelByte();
+			ticketTypes[i] = chunkData.getTicketByte();
+			i++;
+		}
 		player.networkHandler.sendPacket(new CustomPayloadS2CPacket(
 			ESSENTIAL_CHANNEL,
-			new PacketByteBuf(Unpooled.buffer()).writeVarInt(DATA).writeNbt(serializedMap)
+			new PacketByteBuf(Unpooled.buffer()).writeVarInt(DATA)
+				.writeVarInt(size).writeLongArray(chunkPositions).writeByteArray(levelTypes).writeByteArray(ticketTypes)
+				.writeString(world.getRegistryKey().getValue().getPath())
 		));
 	}
 
