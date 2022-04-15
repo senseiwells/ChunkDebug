@@ -8,6 +8,9 @@ import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,12 +31,16 @@ public abstract class ChunkHolderMixin {
 		throw new AssertionError();
 	}
 
+	@Shadow public abstract @Nullable Chunk getCurrentChunk();
+
 	@Inject(method = "tick", at = @At("RETURN"))
 	private void onTick(ThreadedAnvilChunkStorage chunkStorage, CallbackInfo ci) {
 		ChunkHolder.LevelType levelType = getLevelType(this.level);
 		ServerWorld world = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getWorld();
 		ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getTicketManager();
 		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(this.pos.toLong());
-		ChunkDebugServer.chunkNetHandler.updateChunkMap(world, new ChunkData(this.pos, levelType, ticketType));
+		Chunk chunk = this.getCurrentChunk();
+		ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
+		ChunkDebugServer.chunkNetHandler.updateChunkMap(world, new ChunkData(this.pos, levelType, status, ticketType));
 	}
 }

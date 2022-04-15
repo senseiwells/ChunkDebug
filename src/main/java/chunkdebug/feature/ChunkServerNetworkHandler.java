@@ -15,8 +15,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
 
 import java.util.*;
 
@@ -26,7 +29,7 @@ public class ChunkServerNetworkHandler {
 		HELLO = 0,
 		RELOAD = 15,
 		DATA = 16,
-		VERSION = 1_0_1;
+		VERSION = 1_0_3;
 
 	private final Map<ServerPlayerEntity, ServerWorld> validPlayersEnabled = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> serverWorldChunks = new HashMap<>();
@@ -86,9 +89,12 @@ public class ChunkServerNetworkHandler {
 			ThreadedAnvilChunkStorage storage = world.getChunkManager().threadedAnvilChunkStorage;
 			ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) storage).getTicketManager();
 			((ThreadedAnvilChunkStorageAccessor) storage).getChunkHolderMap().values().forEach(chunkHolder -> {
+				ChunkPos pos = chunkHolder.getPos();
 				ChunkHolder.LevelType levelType = ChunkHolder.getLevelType(chunkHolder.getLevel());
-				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(chunkHolder.getPos().toLong());
-				chunkDataSet.add(new ChunkData(chunkHolder.getPos(), levelType, ticketType));
+				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(pos.toLong());
+				Chunk chunk = chunkHolder.getCurrentChunk();
+				ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
+				chunkDataSet.add(new ChunkData(pos, levelType, status, ticketType));
 			});
 			this.updatesInLastTick.get(world).addAll(chunkDataSet);
 		});
@@ -116,18 +122,21 @@ public class ChunkServerNetworkHandler {
 		int size = chunkDataCollection.size();
 		long[] chunkPositions = new long[size];
 		byte[] levelTypes = new byte[size];
+		byte[] statusTypes = new byte[size];
 		byte[] ticketTypes = new byte[size];
 		int i = 0;
 		for (ChunkData chunkData : chunkDataCollection) {
 			chunkPositions[i] = chunkData.getLongPos();
 			levelTypes[i] = chunkData.getLevelByte();
+			statusTypes[i] = chunkData.getStatusByte();
 			ticketTypes[i] = chunkData.getTicketByte();
 			i++;
 		}
 		player.networkHandler.sendPacket(new CustomPayloadS2CPacket(
 			ESSENTIAL_CHANNEL,
 			new PacketByteBuf(Unpooled.buffer()).writeVarInt(DATA)
-				.writeVarInt(size).writeLongArray(chunkPositions).writeByteArray(levelTypes).writeByteArray(ticketTypes)
+				.writeVarInt(size).writeLongArray(chunkPositions).writeByteArray(levelTypes)
+				.writeByteArray(statusTypes).writeByteArray(ticketTypes)
 				.writeString(world.getRegistryKey().getValue().getPath())
 		));
 	}
