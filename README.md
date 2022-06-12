@@ -2,7 +2,7 @@
 
 ## What is ChunkDebug?
 
-Chunk debug is a tool that was originaly made for [CarpetClient 1.12.2](https://github.com/X-com/CarpetClient). I have ported it to modern versions of Minecraft, ChunkDebug supports 1.16.5, 1.17.1, and 1.18.1.
+Chunk debug is a tool that was originaly made for [CarpetClient 1.12.2](https://github.com/X-com/CarpetClient). I have ported it to modern versions of Minecraft, ChunkDebug supports 1.16.5, 1.17.1, 1.18.2, and 1.19.
 
 This tool allows you to have a live view of currently loaded chunks in your worlds with a GUI and minimap, it provides you with information such as why the chunk is currently loaded and what type of loaded chunk it is.
 
