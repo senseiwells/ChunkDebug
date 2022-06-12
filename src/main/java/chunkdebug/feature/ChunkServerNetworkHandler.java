@@ -13,7 +13,7 @@ import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
@@ -38,7 +38,7 @@ public class ChunkServerNetworkHandler {
 	public void onHello(ServerPlayerEntity player, PacketByteBuf packetByteBuf) {
 		String essentialVersion = packetByteBuf.readString(32767);
 		if (packetByteBuf.readableBytes() == 0 || packetByteBuf.readVarInt() < VERSION) {
-			player.sendMessage(new LiteralText("You cannot use ChunkDebug, client out of date"), false);
+			player.sendMessage(Text.of("You cannot use ChunkDebug, client out of date"), false);
 			return;
 		}
 		this.validPlayersEnabled.put(player, null);

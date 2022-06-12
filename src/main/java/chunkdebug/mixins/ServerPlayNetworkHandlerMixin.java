@@ -18,8 +18,8 @@ public class ServerPlayNetworkHandlerMixin {
 
 	@Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
 	private void onCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo ci) {
-		if (ChunkServerNetworkHandler.ESSENTIAL_CHANNEL.equals(((CustomPayloadC2SPacketAccessor) packet).getChannel())) {
-			ChunkDebugServer.chunkNetHandler.handlePacket(((CustomPayloadC2SPacketAccessor) packet).getData(), this.player);
+		if (ChunkServerNetworkHandler.ESSENTIAL_CHANNEL.equals(packet.getChannel())) {
+			ChunkDebugServer.chunkNetHandler.handlePacket(packet.getData(), this.player);
 			ci.cancel();
 		}
 	}
