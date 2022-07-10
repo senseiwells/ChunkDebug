@@ -91,7 +91,12 @@ public class ChunkServerNetworkHandler {
 			((ThreadedAnvilChunkStorageAccessor) storage).getChunkHolderMap().values().forEach(chunkHolder -> {
 				ChunkPos pos = chunkHolder.getPos();
 				ChunkHolder.LevelType levelType = ChunkHolder.getLevelType(chunkHolder.getLevel());
-				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(pos.toLong());
+				long posLong = pos.toLong();
+				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
+				if (levelType == ChunkHolder.LevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
+					levelType = ChunkHolder.LevelType.TICKING;
+					ticketType = null;
+				}
 				Chunk chunk = chunkHolder.getCurrentChunk();
 				ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
 				chunkDataSet.add(new ChunkData(pos, levelType, status, ticketType));

@@ -40,7 +40,12 @@ public abstract class ChunkHolderMixin {
 		ChunkHolder.LevelType levelType = getLevelType(this.level);
 		ServerWorld world = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getWorld();
 		ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getTicketManager();
-		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(this.pos.toLong());
+		long posLong = this.pos.toLong();
+		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
+		if (levelType == ChunkHolder.LevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
+			levelType = ChunkHolder.LevelType.TICKING;
+			ticketType = null;
+		}
 		Chunk chunk = this.getCurrentChunk();
 		ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
 		ChunkDebugServer.chunkNetHandler.updateChunkMap(world, new ChunkData(this.pos, levelType, status, ticketType));
