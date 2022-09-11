@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
 
 @Mixin(ServerWorld.class)
 public class ServerWorldMixin {
-	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
 	private void onCreateServerWorld(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime, CallbackInfo ci) {
 		ChunkDebugServer.chunkNetHandler.addWorld((ServerWorld) (Object) this);
 	}

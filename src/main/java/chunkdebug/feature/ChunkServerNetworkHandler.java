@@ -9,10 +9,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ChunkHolder;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import net.minecraft.server.world.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
@@ -146,7 +143,52 @@ public class ChunkServerNetworkHandler {
 		));
 	}
 
+	private void forceUpdateChunkData() {
+		this.serverWorldChunks.forEach((world, chunks) -> {
+			if (this.validPlayersEnabled.containsValue(world)) {
+				ServerChunkManager chunkManager = world.getChunkManager();
+				ChunkTicketManager manager = chunkManager.threadedAnvilChunkStorage.getTicketManager();
+				List<ChunkData> updatedChunks = new LinkedList<>();
+				for (ChunkData chunkData : chunks) {
+					long longPos = chunkData.getLongPos();
+					boolean entityTicking = manager.shouldTickEntities(longPos);
+					boolean dirty = false;
+					ChunkHolder.LevelType newType;
+					if (chunkData.isLevelType(ChunkHolder.LevelType.TICKING) && entityTicking) {
+						newType = ChunkHolder.LevelType.ENTITY_TICKING;
+						dirty = true;
+					} else if (chunkData.isLevelType(ChunkHolder.LevelType.ENTITY_TICKING) && !entityTicking) {
+						newType = ChunkHolder.LevelType.TICKING;
+						dirty = true;
+					} else {
+						newType = chunkData.getLevelType();
+					}
+
+					byte ticket = ChunkData.getTicketCode(((IChunkTicketManager) manager).getTicketType(longPos));
+					if (chunkData.getTicketByte() != ticket) {
+						dirty = true;
+					}
+
+					ChunkPos chunkPos = chunkData.getChunkPos();
+					Chunk chunk = chunkManager.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.EMPTY, false);
+					byte status = (byte) (chunk == null ? ChunkStatus.EMPTY : chunk.getStatus()).getIndex();
+					if (chunkData.getStatusByte() != status) {
+						dirty = true;
+					}
+
+					if (dirty) {
+						updatedChunks.add(new ChunkData(chunkData.getChunkPos(), newType, status, ticket));
+					}
+				}
+				for (ChunkData updatedChunk : updatedChunks) {
+					this.updateChunkMap(world, updatedChunk);
+				}
+			}
+		});
+	}
+
 	public void tickUpdate() {
+		this.forceUpdateChunkData();
 		for (ServerPlayerEntity players : this.validPlayersEnabled.keySet()) {
 			this.sendClientUpdate(players, false);
 		}

@@ -11,19 +11,31 @@ public class ChunkData {
 	private final byte statusCode;
 	private final byte ticketCode;
 
-	public ChunkData(ChunkPos chunkPos, ChunkHolder.LevelType levelType, ChunkStatus status, ChunkTicketType<?> ticketType) {
+	public ChunkData(ChunkPos chunkPos, ChunkHolder.LevelType levelType, byte status, byte ticketCode) {
 		this.chunkPos = chunkPos;
 		this.levelType = levelType;
-		this.statusCode = (byte) status.getIndex();
-		this.ticketCode = getTicketCode(ticketType);
+		this.statusCode = status;
+		this.ticketCode = ticketCode;
+	}
+
+	public ChunkData(ChunkPos chunkPos, ChunkHolder.LevelType levelType, ChunkStatus status, ChunkTicketType<?> ticketType) {
+		this(chunkPos, levelType, (byte) status.getIndex(), getTicketCode(ticketType));
 	}
 
 	public boolean isLevelType(ChunkHolder.LevelType other) {
 		return this.levelType == other;
 	}
 
+	public ChunkPos getChunkPos() {
+		return this.chunkPos;
+	}
+
 	public long getLongPos() {
 		return this.chunkPos.toLong();
+	}
+
+	public ChunkHolder.LevelType getLevelType() {
+		return this.levelType;
 	}
 
 	public byte getLevelByte() {
@@ -38,7 +50,7 @@ public class ChunkData {
 		return this.ticketCode;
 	}
 
-	private static byte getTicketCode(ChunkTicketType<?> chunkTicketType) {
+	public static byte getTicketCode(ChunkTicketType<?> chunkTicketType) {
 		if (chunkTicketType != null) {
 			return (byte) switch (chunkTicketType.toString()) {
 				default -> 0;
