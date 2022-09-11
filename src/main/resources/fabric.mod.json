@@ -1,18 +1,13 @@
 {
   "schemaVersion": 1,
   "id": "chunkdebug",
-  "version": "1.0.4",
-
+  "version": "${version}",
   "name": "Chunk Debug",
   "description": "Chunk Debug server side support",
   "authors": [
 	"Sensei"
   ],
-  "contact": {
-  },
-
   "license": "MIT",
-
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -22,9 +17,9 @@
   "mixins": [
     "chunkdebug.mixins.json"
   ],
-  "accessWidener" : "chunkdebug.accesswidener",
+  "accessWidener": "chunkdebug.accesswidener",
   "depends": {
-    "minecraft": ">=1.18.2",
+    "minecraft": "${minecraft_dependency}",
     "fabricloader": ">=0.10.0"
   }
 }

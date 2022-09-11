@@ -26,7 +26,11 @@ public abstract class ChunkHolderMixin {
 	private int level;
 	@Shadow
 	@Final
+	//#if MC >= 11700
 	ChunkPos pos;
+	//#else
+	//$$private ChunkPos pos;
+	//#endif
 
 	@Shadow
 	public static ChunkHolder.LevelType getLevelType(int distance) {
@@ -36,16 +40,21 @@ public abstract class ChunkHolderMixin {
 	@Shadow public abstract @Nullable Chunk getCurrentChunk();
 
 	@Inject(method = "tick", at = @At("RETURN"))
+	//#if MC >= 11700
 	private void onTick(ThreadedAnvilChunkStorage chunkStorage, Executor executor, CallbackInfo ci) {
+		//#else
+		//$$private void onTick(ThreadedAnvilChunkStorage chunkStorage, CallbackInfo ci) {
+		//#endif
 		ChunkHolder.LevelType levelType = getLevelType(this.level);
 		ServerWorld world = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getWorld();
 		ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getTicketManager();
 		long posLong = this.pos.toLong();
 		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
+		//#if MC >= 11800
 		if (levelType == ChunkHolder.LevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
 			levelType = ChunkHolder.LevelType.TICKING;
-			ticketType = null;
 		}
+		//#endif
 		Chunk chunk = this.getCurrentChunk();
 		ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
 		ChunkDebugServer.chunkNetHandler.updateChunkMap(world, new ChunkData(this.pos, levelType, status, ticketType));

@@ -90,10 +90,12 @@ public class ChunkServerNetworkHandler {
 				ChunkHolder.LevelType levelType = ChunkHolder.getLevelType(chunkHolder.getLevel());
 				long posLong = pos.toLong();
 				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
+				//#if MC >= 11800
 				if (levelType == ChunkHolder.LevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
 					levelType = ChunkHolder.LevelType.TICKING;
 					ticketType = null;
 				}
+				//#endif
 				Chunk chunk = chunkHolder.getCurrentChunk();
 				ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
 				chunkDataSet.add(new ChunkData(pos, levelType, status, ticketType));
@@ -147,12 +149,13 @@ public class ChunkServerNetworkHandler {
 		this.serverWorldChunks.forEach((world, chunks) -> {
 			if (this.validPlayersEnabled.containsValue(world)) {
 				ServerChunkManager chunkManager = world.getChunkManager();
-				ChunkTicketManager manager = chunkManager.threadedAnvilChunkStorage.getTicketManager();
+				ChunkTicketManager manager = ((ThreadedAnvilChunkStorageAccessor) chunkManager.threadedAnvilChunkStorage).getTicketManager();
 				List<ChunkData> updatedChunks = new LinkedList<>();
 				for (ChunkData chunkData : chunks) {
 					long longPos = chunkData.getLongPos();
-					boolean entityTicking = manager.shouldTickEntities(longPos);
 					boolean dirty = false;
+					//#if MC >= 11800
+					boolean entityTicking = manager.shouldTickEntities(longPos);
 					ChunkHolder.LevelType newType;
 					if (chunkData.isLevelType(ChunkHolder.LevelType.TICKING) && entityTicking) {
 						newType = ChunkHolder.LevelType.ENTITY_TICKING;
@@ -163,6 +166,9 @@ public class ChunkServerNetworkHandler {
 					} else {
 						newType = chunkData.getLevelType();
 					}
+					//#else
+					//$$ChunkHolder.LevelType newType = chunkData.getLevelType();
+					//#endif
 
 					byte ticket = ChunkData.getTicketCode(((IChunkTicketManager) manager).getTicketType(longPos));
 					if (chunkData.getTicketByte() != ticket) {
