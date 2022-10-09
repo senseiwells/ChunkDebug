@@ -62,7 +62,7 @@ public class ChunkData {
 				case "portal" -> 6;
 				case "post_teleport" -> 7;
 				case "chonk" -> 8;
-				case "unknown" -> 9;
+				// case "unknown" -> 9;
 			};
 		}
 		return 0;
