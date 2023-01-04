@@ -4,8 +4,13 @@ import chunkdebug.ChunkDebugServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+
+//#if MC >= 11903
+import net.minecraft.registry.RegistryKey;
+//#else
+//$$import net.minecraft.util.registry.RegistryKey;
+//#endif
 
 //#if MC >= 11900
 import net.minecraft.world.dimension.DimensionOptions;

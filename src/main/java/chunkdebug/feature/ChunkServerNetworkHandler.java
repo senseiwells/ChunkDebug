@@ -13,10 +13,16 @@ import net.minecraft.server.world.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
+
+//#if MC >= 11903
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+//#else
+//$$import net.minecraft.util.registry.Registry;
+//$$import net.minecraft.util.registry.RegistryKey;
+//#endif
 
 import java.util.*;
 
@@ -59,7 +65,15 @@ public class ChunkServerNetworkHandler {
 	private void processPacket(PacketByteBuf packetByteBuf, ServerPlayerEntity player) {
 		if (this.validPlayersEnabled.containsKey(player)) {
 			Identifier identifier = packetByteBuf.readIdentifier();
-			this.validPlayersEnabled.replace(player, ChunkDebugServer.server.getWorld(RegistryKey.of(Registry.WORLD_KEY, identifier)));
+
+			this.validPlayersEnabled.replace(player, ChunkDebugServer.server.getWorld(RegistryKey.of(
+				//#if MC >= 11903
+				RegistryKeys.WORLD,
+				//#else
+				//$$Registry.WORLD_KEY,
+				//#endif
+				identifier
+			)));
 			this.sendClientUpdate(player, true);
 		}
 	}
