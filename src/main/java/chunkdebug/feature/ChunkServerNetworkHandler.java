@@ -25,6 +25,7 @@ import net.minecraft.registry.RegistryKeys;
 //#endif
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkServerNetworkHandler {
 	public static Identifier ESSENTIAL_CHANNEL = new Identifier("essentialclient", "chunkdebug");
@@ -79,11 +80,19 @@ public class ChunkServerNetworkHandler {
 	}
 
 	public void addWorld(ServerWorld world) {
-		this.serverWorldChunks.put(world, new HashSet<>());
+		// Using concurrent key set because of: https://github.com/senseiwells/ChunkDebug/issues/5
+		// Honestly I cannot for the life of me figure out why on earth it is throwing a CME.
+		// There are no off-thread shenanigans, and as far as I can see there is no mutating
+		// of the set while iterating over the set.
+		// This is the most likely cause, I suspect related to #updateChunkMap being called
+		// from #forceUpdateChunkData while iterating over the set.
+		// The most likely contender being from ServerChunkManager#getChunk which afaik
+		// may only call #updateChunkMap if create = true, I cannot find any other instances which would cause this issue.
+		this.serverWorldChunks.put(world, ConcurrentHashMap.newKeySet());
 		this.updatesInLastTick.put(world, new HashSet<>());
 	}
 
-	public synchronized void updateChunkMap(ServerWorld world, ChunkData chunkData) {
+	public void updateChunkMap(ServerWorld world, ChunkData chunkData) {
 		Set<ChunkData> chunkDataSet = this.serverWorldChunks.get(world);
 		Set<ChunkData> tickChunkDataSet = this.updatesInLastTick.get(world);
 		chunkDataSet.remove(chunkData);
@@ -94,7 +103,7 @@ public class ChunkServerNetworkHandler {
 		tickChunkDataSet.add(chunkData);
 	}
 
-	public synchronized void forceReloadChunks() {
+	public void forceReloadChunks() {
 		this.serverWorldChunks.forEach((world, chunkDataSet) -> {
 			chunkDataSet.clear();
 			ThreadedAnvilChunkStorage storage = world.getChunkManager().threadedAnvilChunkStorage;
@@ -118,7 +127,7 @@ public class ChunkServerNetworkHandler {
 		});
 	}
 
-	private synchronized void sendClientUpdate(ServerPlayerEntity player, boolean force) {
+	private void sendClientUpdate(ServerPlayerEntity player, boolean force) {
 		ServerWorld world = this.validPlayersEnabled.get(player);
 		if (world == null) {
 			return;
