@@ -6,6 +6,7 @@ import chunkdebug.utils.ChunkData;
 import chunkdebug.utils.IChunkTicketManager;
 import com.google.common.collect.Iterables;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,7 +14,6 @@ import net.minecraft.server.world.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 
 //#if MC >= 11903
@@ -25,7 +25,6 @@ import net.minecraft.registry.RegistryKeys;
 //#endif
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkServerNetworkHandler {
 	public static Identifier ESSENTIAL_CHANNEL = new Identifier("essentialclient", "chunkdebug");
@@ -80,15 +79,7 @@ public class ChunkServerNetworkHandler {
 	}
 
 	public void addWorld(ServerWorld world) {
-		// Using concurrent key set because of: https://github.com/senseiwells/ChunkDebug/issues/5
-		// Honestly I cannot for the life of me figure out why on earth it is throwing a CME.
-		// There are no off-thread shenanigans, and as far as I can see there is no mutating
-		// of the set while iterating over the set.
-		// This is the most likely cause, I suspect related to #updateChunkMap being called
-		// from #forceUpdateChunkData while iterating over the set.
-		// The most likely contender being from ServerChunkManager#getChunk which afaik
-		// may only call #updateChunkMap if create = true, I cannot find any other instances which would cause this issue.
-		this.serverWorldChunks.put(world, ConcurrentHashMap.newKeySet());
+		this.serverWorldChunks.put(world, new HashSet<>());
 		this.updatesInLastTick.put(world, new HashSet<>());
 	}
 
@@ -119,9 +110,8 @@ public class ChunkServerNetworkHandler {
 					ticketType = null;
 				}
 				//#endif
-				Chunk chunk = chunkHolder.getCurrentChunk();
-				ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
-				chunkDataSet.add(new ChunkData(pos, levelType, status, ticketType));
+				ChunkStatus status = chunkHolder.getCurrentStatus();
+				chunkDataSet.add(new ChunkData(pos, levelType, status == null ? ChunkStatus.EMPTY : status, ticketType));
 			});
 			this.updatesInLastTick.get(world).addAll(chunkDataSet);
 		});
@@ -172,25 +162,30 @@ public class ChunkServerNetworkHandler {
 		this.serverWorldChunks.forEach((world, chunks) -> {
 			if (this.validPlayersEnabled.containsValue(world)) {
 				ServerChunkManager chunkManager = world.getChunkManager();
-				ChunkTicketManager manager = ((ThreadedAnvilChunkStorageAccessor) chunkManager.threadedAnvilChunkStorage).getTicketManager();
+				ThreadedAnvilChunkStorageAccessor storageAccessor = (ThreadedAnvilChunkStorageAccessor) chunkManager.threadedAnvilChunkStorage;
+				ChunkTicketManager manager = storageAccessor.getTicketManager();
+				Long2ObjectLinkedOpenHashMap<ChunkHolder> holders = storageAccessor.getChunkHolderMap();
 				List<ChunkData> updatedChunks = new LinkedList<>();
 				for (ChunkData chunkData : chunks) {
 					long longPos = chunkData.getLongPos();
-					boolean dirty = false;
+					boolean dirty;
+					ChunkHolder holder = holders.get(longPos);
 					//#if MC >= 11800
 					boolean entityTicking = manager.shouldTickEntities(longPos);
-					ChunkHolder.LevelType newType;
+					ChunkHolder.LevelType type;
 					if (chunkData.isLevelType(ChunkHolder.LevelType.TICKING) && entityTicking) {
-						newType = ChunkHolder.LevelType.ENTITY_TICKING;
+						type = ChunkHolder.LevelType.ENTITY_TICKING;
 						dirty = true;
 					} else if (chunkData.isLevelType(ChunkHolder.LevelType.ENTITY_TICKING) && !entityTicking) {
-						newType = ChunkHolder.LevelType.TICKING;
+						type = ChunkHolder.LevelType.TICKING;
 						dirty = true;
 					} else {
-						newType = chunkData.getLevelType();
+						type = holder.getLevelType();
+						dirty = chunkData.getLevelType() == type;
 					}
 					//#else
-					//$$ChunkHolder.LevelType newType = chunkData.getLevelType();
+					//$$ChunkHolder.LevelType type = holder.getLevelType();
+					//$$dirty = chunkData.getLevelType() == type;
 					//#endif
 
 					byte ticket = ChunkData.getTicketCode(((IChunkTicketManager) manager).getTicketType(longPos));
@@ -198,15 +193,14 @@ public class ChunkServerNetworkHandler {
 						dirty = true;
 					}
 
-					ChunkPos chunkPos = chunkData.getChunkPos();
-					Chunk chunk = chunkManager.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.EMPTY, false);
-					byte status = (byte) (chunk == null ? ChunkStatus.EMPTY : chunk.getStatus()).getIndex();
-					if (chunkData.getStatusByte() != status) {
+					ChunkStatus status = holder.getCurrentStatus();
+					byte statusByte = (byte) (status == null ? ChunkStatus.EMPTY : status).getIndex();
+					if (chunkData.getStatusByte() != statusByte) {
 						dirty = true;
 					}
 
 					if (dirty) {
-						updatedChunks.add(new ChunkData(chunkData.getChunkPos(), newType, status, ticket));
+						updatedChunks.add(new ChunkData(chunkData.getChunkPos(), type, statusByte, ticket));
 					}
 				}
 				for (ChunkData updatedChunk : updatedChunks) {
