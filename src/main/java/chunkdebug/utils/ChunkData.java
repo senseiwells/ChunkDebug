@@ -1,28 +1,28 @@
 package chunkdebug.utils;
 
-import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ChunkLevelType;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ChunkStatus;
 
 public class ChunkData {
 	private final ChunkPos chunkPos;
-	private final ChunkHolder.LevelType levelType;
+	private final ChunkLevelType levelType;
 	private final byte statusCode;
 	private final byte ticketCode;
 
-	public ChunkData(ChunkPos chunkPos, ChunkHolder.LevelType levelType, byte status, byte ticketCode) {
+	public ChunkData(ChunkPos chunkPos, ChunkLevelType levelType, byte status, byte ticketCode) {
 		this.chunkPos = chunkPos;
 		this.levelType = levelType;
 		this.statusCode = status;
 		this.ticketCode = ticketCode;
 	}
 
-	public ChunkData(ChunkPos chunkPos, ChunkHolder.LevelType levelType, ChunkStatus status, ChunkTicketType<?> ticketType) {
+	public ChunkData(ChunkPos chunkPos, ChunkLevelType levelType, ChunkStatus status, ChunkTicketType<?> ticketType) {
 		this(chunkPos, levelType, (byte) status.getIndex(), getTicketCode(ticketType));
 	}
 
-	public boolean isLevelType(ChunkHolder.LevelType other) {
+	public boolean isLevelType(ChunkLevelType other) {
 		return this.levelType == other;
 	}
 
@@ -34,7 +34,7 @@ public class ChunkData {
 		return this.chunkPos.toLong();
 	}
 
-	public ChunkHolder.LevelType getLevelType() {
+	public ChunkLevelType getLevelType() {
 		return this.levelType;
 	}
 

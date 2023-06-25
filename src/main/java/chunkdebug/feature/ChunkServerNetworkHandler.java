@@ -24,6 +24,10 @@ import net.minecraft.registry.RegistryKeys;
 //$$import net.minecraft.util.registry.RegistryKey;
 //#endif
 
+//#if MC < 12000
+//$$import net.minecraft.server.world.ChunkHolder.LevelType;
+//#endif
+
 import java.util.*;
 
 public class ChunkServerNetworkHandler {
@@ -88,7 +92,7 @@ public class ChunkServerNetworkHandler {
 		Set<ChunkData> tickChunkDataSet = this.updatesInLastTick.get(world);
 		chunkDataSet.remove(chunkData);
 		tickChunkDataSet.remove(chunkData);
-		if (!chunkData.isLevelType(ChunkHolder.LevelType.INACCESSIBLE)) {
+		if (!chunkData.isLevelType(ChunkLevelType.INACCESSIBLE)) {
 			chunkDataSet.add(chunkData);
 		}
 		tickChunkDataSet.add(chunkData);
@@ -101,12 +105,16 @@ public class ChunkServerNetworkHandler {
 			ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) storage).getTicketManager();
 			((ThreadedAnvilChunkStorageAccessor) storage).getChunkHolderMap().values().forEach(chunkHolder -> {
 				ChunkPos pos = chunkHolder.getPos();
-				ChunkHolder.LevelType levelType = ChunkHolder.getLevelType(chunkHolder.getLevel());
+				//#if MC >= 12000
+				ChunkLevelType levelType = chunkHolder.getLevelType();
+				//#else
+				//$$LevelType levelType = ChunkHolder.getLevelType(chunkHolder.getLevel());
+				//#endif
 				long posLong = pos.toLong();
 				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
 				//#if MC >= 11800
-				if (levelType == ChunkHolder.LevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
-					levelType = ChunkHolder.LevelType.TICKING;
+				if (levelType == ChunkLevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
+					levelType = ChunkLevelType.BLOCK_TICKING;
 					ticketType = null;
 				}
 				//#endif
@@ -172,19 +180,19 @@ public class ChunkServerNetworkHandler {
 					ChunkHolder holder = holders.get(longPos);
 					//#if MC >= 11800
 					boolean entityTicking = manager.shouldTickEntities(longPos);
-					ChunkHolder.LevelType type;
-					if (chunkData.isLevelType(ChunkHolder.LevelType.TICKING) && entityTicking) {
-						type = ChunkHolder.LevelType.ENTITY_TICKING;
+					ChunkLevelType type;
+					if (chunkData.isLevelType(ChunkLevelType.BLOCK_TICKING) && entityTicking) {
+						type = ChunkLevelType.ENTITY_TICKING;
 						dirty = true;
-					} else if (chunkData.isLevelType(ChunkHolder.LevelType.ENTITY_TICKING) && !entityTicking) {
-						type = ChunkHolder.LevelType.TICKING;
+					} else if (chunkData.isLevelType(ChunkLevelType.ENTITY_TICKING) && !entityTicking) {
+						type = ChunkLevelType.BLOCK_TICKING;
 						dirty = true;
 					} else {
 						type = holder.getLevelType();
 						dirty = chunkData.getLevelType() == type;
 					}
 					//#else
-					//$$ChunkHolder.LevelType type = holder.getLevelType();
+					//$$LevelType type = holder.getLevelType();
 					//$$dirty = chunkData.getLevelType() == type;
 					//#endif
 

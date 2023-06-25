@@ -6,6 +6,10 @@ import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
+//#if MC >= 12000
+import net.minecraft.util.math.random.RandomSequencesState;
+//#endif
+
 //#if MC >= 11903
 import net.minecraft.registry.RegistryKey;
 //#else
@@ -62,6 +66,9 @@ public class ServerWorldMixin {
 		long seed,
 		List<Spawner> spawners,
 		boolean shouldTickTime,
+		//#if MC >= 12000
+		RandomSequencesState randomSequencesState,
+		//#endif
 		CallbackInfo ci
 	) {
 		ChunkDebugServer.chunkNetHandler.addWorld((ServerWorld) (Object) this);

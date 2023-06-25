@@ -3,10 +3,7 @@ package chunkdebug.mixins;
 import chunkdebug.ChunkDebugServer;
 import chunkdebug.utils.ChunkData;
 import chunkdebug.utils.IChunkTicketManager;
-import net.minecraft.server.world.ChunkHolder;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import net.minecraft.server.world.*;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -20,22 +17,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.concurrent.Executor;
 
+//#if MC < 12000
+//$$import net.minecraft.server.world.ChunkHolder.LevelType;
+//#endif
+
 @Mixin(ChunkHolder.class)
 public abstract class ChunkHolderMixin {
-	@Shadow
-	private int level;
-	@Shadow
-	@Final
+	@Shadow @Final
 	//#if MC >= 11700
 	ChunkPos pos;
 	//#else
 	//$$private ChunkPos pos;
 	//#endif
 
-	@Shadow
-	public static ChunkHolder.LevelType getLevelType(int distance) {
-		throw new AssertionError();
-	}
+	//#if MC >= 12000
+	@Shadow public abstract ChunkLevelType getLevelType();
+	//#else
+	//$$@Shadow private int level;
+	//#endif
 
 	@Shadow public abstract @Nullable Chunk getCurrentChunk();
 
@@ -45,14 +44,19 @@ public abstract class ChunkHolderMixin {
 		//#else
 		//$$private void onTick(ThreadedAnvilChunkStorage chunkStorage, CallbackInfo ci) {
 		//#endif
-		ChunkHolder.LevelType levelType = getLevelType(this.level);
+
+		//#if MC >= 12000
+		ChunkLevelType levelType = this.getLevelType();
+		//#else
+		//$$LevelType levelType = ChunkHolder.getLevelType(this.level);
+		//#endif
 		ServerWorld world = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getWorld();
 		ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getTicketManager();
 		long posLong = this.pos.toLong();
 		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
 		//#if MC >= 11800
-		if (levelType == ChunkHolder.LevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
-			levelType = ChunkHolder.LevelType.TICKING;
+		if (levelType == ChunkLevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
+			levelType = ChunkLevelType.BLOCK_TICKING;
 		}
 		//#endif
 		Chunk chunk = this.getCurrentChunk();
