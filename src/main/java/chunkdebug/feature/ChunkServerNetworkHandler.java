@@ -5,6 +5,7 @@ import chunkdebug.mixins.ThreadedAnvilChunkStorageAccessor;
 import chunkdebug.utils.ChunkData;
 import chunkdebug.utils.IChunkTicketManager;
 import com.google.common.collect.Iterables;
+
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import net.minecraft.network.PacketByteBuf;
@@ -16,6 +17,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ChunkStatus;
 
+//#if MC < 12000
+//$$import net.minecraft.server.world.ChunkHolder.LevelType;
+//#endif
+
 //#if MC >= 11903
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -24,8 +29,10 @@ import net.minecraft.registry.RegistryKeys;
 //$$import net.minecraft.util.registry.RegistryKey;
 //#endif
 
-//#if MC < 12000
-//$$import net.minecraft.server.world.ChunkHolder.LevelType;
+//#if MC < 11700
+//$$import com.mojang.datafixers.util.Either;
+//$$import net.minecraft.world.chunk.Chunk;
+//$$import java.util.concurrent.CompletableFuture;
 //#endif
 
 import java.util.*;
@@ -118,7 +125,7 @@ public class ChunkServerNetworkHandler {
 					ticketType = null;
 				}
 				//#endif
-				ChunkStatus status = chunkHolder.getCurrentStatus();
+				ChunkStatus status = this.getChunkStatus(chunkHolder);
 				chunkDataSet.add(new ChunkData(pos, levelType, status == null ? ChunkStatus.EMPTY : status, ticketType));
 			});
 			this.updatesInLastTick.get(world).addAll(chunkDataSet);
@@ -192,7 +199,7 @@ public class ChunkServerNetworkHandler {
 						dirty = chunkData.getLevelType() == type;
 					}
 					//#else
-					//$$LevelType type = holder.getLevelType();
+					//$$LevelType type = ChunkHolder.getLevelType(holder.getLevel());
 					//$$dirty = chunkData.getLevelType() == type;
 					//#endif
 
@@ -201,7 +208,7 @@ public class ChunkServerNetworkHandler {
 						dirty = true;
 					}
 
-					ChunkStatus status = holder.getCurrentStatus();
+					ChunkStatus status = this.getChunkStatus(holder);
 					byte statusByte = (byte) (status == null ? ChunkStatus.EMPTY : status).getIndex();
 					if (chunkData.getStatusByte() != statusByte) {
 						dirty = true;
@@ -225,4 +232,21 @@ public class ChunkServerNetworkHandler {
 		}
 		this.updatesInLastTick.values().forEach(Set::clear);
 	}
+
+	private ChunkStatus getChunkStatus(ChunkHolder holder) {
+		//#if MC >= 11700
+		return holder.getCurrentStatus();
+		//#else
+		//$$for (int i = ChunkHolder.CHUNK_STATUSES.size() - 1; i >= 0; --i) {
+		//$$	ChunkStatus chunkStatus = ChunkHolder.CHUNK_STATUSES.get(i);
+		//$$	CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> completableFuture = holder.getFutureFor(chunkStatus);
+		//$$	if ((completableFuture.getNow(ChunkHolder.UNLOADED_CHUNK)).left().isPresent()) {
+		//$$		return chunkStatus;
+		//$$	}
+		//$$}
+		//$$return null;
+		//#endif
+	}
 }
+
+
