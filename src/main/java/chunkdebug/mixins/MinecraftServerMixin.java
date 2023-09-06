@@ -15,9 +15,4 @@ public class MinecraftServerMixin {
 	private void onTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		ChunkDebugServer.chunkNetHandler.tickUpdate();
 	}
-
-	@Inject(method = "loadWorld", at = @At("HEAD"))
-	private void onLoadWorldPre(CallbackInfo ci) {
-		ChunkDebugServer.server = (MinecraftServer) (Object) this;
-	}
 }

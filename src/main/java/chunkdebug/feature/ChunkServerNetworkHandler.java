@@ -10,6 +10,7 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.*;
 import net.minecraft.text.Text;
@@ -45,7 +46,7 @@ public class ChunkServerNetworkHandler {
 		DATA = 16,
 		VERSION = 1_0_3;
 
-	private final Map<ServerPlayerEntity, ServerWorld> validPlayersEnabled = new HashMap<>();
+	private final Map<ServerPlayNetworkHandler, ServerWorld> validPlayersEnabled = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> serverWorldChunks = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> updatesInLastTick = new HashMap<>();
 
@@ -55,12 +56,12 @@ public class ChunkServerNetworkHandler {
 			player.sendMessage(Text.of("You cannot use ChunkDebug, client out of date"), false);
 			return;
 		}
-		this.validPlayersEnabled.put(player, null);
+		this.validPlayersEnabled.put(player.networkHandler, null);
 		ChunkDebugServer.LOGGER.info("%s has logged in with ChunkDebug. EssentialClient %s".formatted(player.getEntityName(), essentialVersion));
 	}
 
 	public void removePlayer(ServerPlayerEntity player) {
-		this.validPlayersEnabled.remove(player);
+		this.validPlayersEnabled.remove(player.networkHandler);
 	}
 
 	public void handlePacket(PacketByteBuf packetByteBuf, ServerPlayerEntity player) {
@@ -74,10 +75,10 @@ public class ChunkServerNetworkHandler {
 	}
 
 	private void processPacket(PacketByteBuf packetByteBuf, ServerPlayerEntity player) {
-		if (this.validPlayersEnabled.containsKey(player)) {
+		if (this.validPlayersEnabled.containsKey(player.networkHandler)) {
 			Identifier identifier = packetByteBuf.readIdentifier();
 
-			this.validPlayersEnabled.replace(player, ChunkDebugServer.server.getWorld(RegistryKey.of(
+			this.validPlayersEnabled.replace(player.networkHandler, player.server.getWorld(RegistryKey.of(
 				//#if MC >= 11903
 				RegistryKeys.WORLD,
 				//#else
@@ -85,7 +86,7 @@ public class ChunkServerNetworkHandler {
 				//#endif
 				identifier
 			)));
-			this.sendClientUpdate(player, true);
+			this.sendClientUpdate(player.networkHandler, true);
 		}
 	}
 
@@ -132,8 +133,8 @@ public class ChunkServerNetworkHandler {
 		});
 	}
 
-	private void sendClientUpdate(ServerPlayerEntity player, boolean force) {
-		ServerWorld world = this.validPlayersEnabled.get(player);
+	private void sendClientUpdate(ServerPlayNetworkHandler networkHandler, boolean force) {
+		ServerWorld world = this.validPlayersEnabled.get(networkHandler);
 		if (world == null) {
 			return;
 		}
@@ -143,14 +144,14 @@ public class ChunkServerNetworkHandler {
 		}
 		if (chunkDataSet.size() > 100000) {
 			for (List<ChunkData> subChunkDataSet : Iterables.partition(chunkDataSet, 100000)) {
-				this.sendClientChunkData(player, world, subChunkDataSet);
+				this.sendClientChunkData(networkHandler, world, subChunkDataSet);
 			}
 			return;
 		}
-		this.sendClientChunkData(player, world, chunkDataSet);
+		this.sendClientChunkData(networkHandler, world, chunkDataSet);
 	}
 
-	private void sendClientChunkData(ServerPlayerEntity player, ServerWorld world, Collection<ChunkData> chunkDataCollection) {
+	private void sendClientChunkData(ServerPlayNetworkHandler networkHandler, ServerWorld world, Collection<ChunkData> chunkDataCollection) {
 		int size = chunkDataCollection.size();
 		long[] chunkPositions = new long[size];
 		byte[] levelTypes = new byte[size];
@@ -164,7 +165,7 @@ public class ChunkServerNetworkHandler {
 			ticketTypes[i] = chunkData.getTicketByte();
 			i++;
 		}
-		player.networkHandler.sendPacket(new CustomPayloadS2CPacket(
+		networkHandler.sendPacket(new CustomPayloadS2CPacket(
 			ESSENTIAL_CHANNEL,
 			new PacketByteBuf(Unpooled.buffer()).writeVarInt(DATA)
 				.writeVarInt(size).writeLongArray(chunkPositions).writeByteArray(levelTypes)
@@ -227,8 +228,8 @@ public class ChunkServerNetworkHandler {
 
 	public void tickUpdate() {
 		this.forceUpdateChunkData();
-		for (ServerPlayerEntity players : this.validPlayersEnabled.keySet()) {
-			this.sendClientUpdate(players, false);
+		for (ServerPlayNetworkHandler networkHandler : this.validPlayersEnabled.keySet()) {
+			this.sendClientUpdate(networkHandler, false);
 		}
 		this.updatesInLastTick.values().forEach(Set::clear);
 	}

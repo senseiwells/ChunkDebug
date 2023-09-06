@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 public class ChunkDebugServer implements ModInitializer {
 	public static final Logger LOGGER = LogManager.getLogger("ChunkDebug");
 	public static final ChunkServerNetworkHandler chunkNetHandler = new ChunkServerNetworkHandler();
-	public static MinecraftServer server;
 
 	@Override
 	public void onInitialize() {
