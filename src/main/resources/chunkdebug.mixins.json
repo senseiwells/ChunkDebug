@@ -5,11 +5,6 @@
   "mixins": [
     "ChunkHolderMixin",
     "ChunkTicketManagerMixin",
-    "CustomPayloadC2SPacketAccessor",
-    "MinecraftServerMixin",
-    "PlayerManagerMixin",
-    "ServerPlayNetworkHandlerMixin",
-    "ServerWorldMixin",
     "ThreadedAnvilChunkStorageAccessor"
   ],
   "injectors": {

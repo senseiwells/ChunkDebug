@@ -17,48 +17,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.concurrent.Executor;
 
-//#if MC < 12000
-//$$import net.minecraft.server.world.ChunkHolder.LevelType;
-//#endif
-
 @Mixin(ChunkHolder.class)
 public abstract class ChunkHolderMixin {
-	@Shadow @Final
-	//#if MC >= 11700
-	ChunkPos pos;
-	//#else
-	//$$private ChunkPos pos;
-	//#endif
-
-	//#if MC >= 12000
+	@Shadow @Final ChunkPos pos;
 	@Shadow public abstract ChunkLevelType getLevelType();
-	//#else
-	//$$@Shadow private int level;
-	//#endif
 
 	@Shadow public abstract @Nullable Chunk getCurrentChunk();
 
-	@Inject(method = "tick", at = @At("RETURN"))
-	//#if MC >= 11700
+	@Inject(method = "updateFutures", at = @At("RETURN"))
 	private void onTick(ThreadedAnvilChunkStorage chunkStorage, Executor executor, CallbackInfo ci) {
-		//#else
-		//$$private void onTick(ThreadedAnvilChunkStorage chunkStorage, CallbackInfo ci) {
-		//#endif
-
-		//#if MC >= 12000
 		ChunkLevelType levelType = this.getLevelType();
-		//#else
-		//$$LevelType levelType = ChunkHolder.getLevelType(this.level);
-		//#endif
 		ServerWorld world = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getWorld();
 		ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) chunkStorage).getTicketManager();
 		long posLong = this.pos.toLong();
-		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
-		//#if MC >= 11800
+		ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).chunkdebug$getTicketType(posLong);
+
 		if (levelType == ChunkLevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
 			levelType = ChunkLevelType.BLOCK_TICKING;
 		}
-		//#endif
+
 		Chunk chunk = this.getCurrentChunk();
 		ChunkStatus status = chunk == null ? ChunkStatus.EMPTY : chunk.getStatus();
 		ChunkDebugServer.chunkNetHandler.updateChunkMap(world, new ChunkData(this.pos, levelType, status, ticketType));

@@ -20,6 +20,7 @@
   "accessWidener": "chunkdebug.accesswidener",
   "depends": {
     "minecraft": "${minecraft_dependency}",
-    "fabricloader": ">=0.10.0"
+    "fabricloader": ">=0.10.0",
+    "fabric": "*"
   }
 }

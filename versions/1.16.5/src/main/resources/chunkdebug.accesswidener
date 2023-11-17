@@ -1,5 +1,0 @@
-accessWidener v1 named
-accessible class net/minecraft/server/world/ThreadedAnvilChunkStorage$TicketManager
-
-
-accessible field net/minecraft/server/world/ChunkHolder CHUNK_STATUSES Ljava/util/List;

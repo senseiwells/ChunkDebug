@@ -1,2 +1,0 @@
-net.minecraft.server.world.ChunkLevelType net.minecraft.server.world.ChunkHolder.LevelType
-net.minecraft.server.world.ChunkLevelType BLOCK_TICKING TICKING

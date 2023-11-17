@@ -14,20 +14,15 @@ import org.spongepowered.asm.mixin.Shadow;
 public class ChunkTicketManagerMixin implements IChunkTicketManager {
 	@Shadow
 	@Final
-	//#if MC >= 11700
 	Long2ObjectOpenHashMap<SortedArraySet<ChunkTicket<?>>> ticketsByPosition;
-	//#else
-	//$$private Long2ObjectOpenHashMap<SortedArraySet<ChunkTicket<?>>> ticketsByPosition;
-	//#endif
 
 	@Override
-	public ChunkTicketType<?> getTicketType(long chunkPos) {
+	public ChunkTicketType<?> chunkdebug$getTicketType(long chunkPos) {
 		SortedArraySet<ChunkTicket<?>> chunkTicket = this.ticketsByPosition.get(chunkPos);
 		if (chunkTicket == null) {
 			return null;
 		}
 		SortedArraySet<ChunkTicket<?>> ticketTypeSet = this.ticketsByPosition.get(chunkPos);
-		// ChunkDebugServer.LOGGER.info(Arrays.toString(ticketTypeSet.toArray()));
 		return ticketTypeSet.first().getType();
 	}
 }

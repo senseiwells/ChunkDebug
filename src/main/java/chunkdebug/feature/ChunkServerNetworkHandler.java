@@ -8,33 +8,20 @@ import com.google.common.collect.Iterables;
 
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkStatus;
 
-//#if MC < 12000
-//$$import net.minecraft.server.world.ChunkHolder.LevelType;
-//#endif
-
-//#if MC >= 11903
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-//#else
-//$$import net.minecraft.util.registry.Registry;
-//$$import net.minecraft.util.registry.RegistryKey;
-//#endif
-
-//#if MC < 11700
-//$$import com.mojang.datafixers.util.Either;
-//$$import net.minecraft.world.chunk.Chunk;
-//$$import java.util.concurrent.CompletableFuture;
-//#endif
 
 import java.util.*;
 
@@ -42,13 +29,32 @@ public class ChunkServerNetworkHandler {
 	public static Identifier ESSENTIAL_CHANNEL = new Identifier("essentialclient", "chunkdebug");
 	public static final int
 		HELLO = 0,
+		STOP = 14,
 		RELOAD = 15,
 		DATA = 16,
-		VERSION = 1_0_3;
+		VERSION = 1_0_4;
 
 	private final Map<ServerPlayNetworkHandler, ServerWorld> validPlayersEnabled = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> serverWorldChunks = new HashMap<>();
 	private final Map<ServerWorld, Set<ChunkData>> updatesInLastTick = new HashMap<>();
+
+	public void tick() {
+		this.forceUpdateChunkData();
+		for (ServerPlayNetworkHandler networkHandler : this.validPlayersEnabled.keySet()) {
+			this.sendClientUpdate(networkHandler, false);
+		}
+		this.updatesInLastTick.values().forEach(Set::clear);
+	}
+
+	public void sayHello(ServerPlayerEntity player) {
+		ServerPlayNetworking.send(
+			player,
+			ChunkServerNetworkHandler.ESSENTIAL_CHANNEL,
+			new PacketByteBuf(Unpooled.buffer())
+				.writeVarInt(ChunkServerNetworkHandler.HELLO)
+				.writeVarInt(ChunkServerNetworkHandler.VERSION)
+		);
+	}
 
 	public void onHello(ServerPlayerEntity player, PacketByteBuf packetByteBuf) {
 		String essentialVersion = packetByteBuf.readString(32767);
@@ -60,8 +66,8 @@ public class ChunkServerNetworkHandler {
 		ChunkDebugServer.LOGGER.info("%s has logged in with ChunkDebug. EssentialClient %s".formatted(player.getEntityName(), essentialVersion));
 	}
 
-	public void removePlayer(ServerPlayerEntity player) {
-		this.validPlayersEnabled.remove(player.networkHandler);
+	public void removeHandler(ServerPlayNetworkHandler handler) {
+		this.validPlayersEnabled.remove(handler);
 	}
 
 	public void handlePacket(PacketByteBuf packetByteBuf, ServerPlayerEntity player) {
@@ -70,23 +76,25 @@ public class ChunkServerNetworkHandler {
 				case HELLO -> this.onHello(player, packetByteBuf);
 				case DATA -> this.processPacket(packetByteBuf, player);
 				case RELOAD -> this.forceReloadChunks();
+				case STOP -> this.stopSendingToPlayer(player);
 			}
 		}
 	}
 
 	private void processPacket(PacketByteBuf packetByteBuf, ServerPlayerEntity player) {
 		if (this.validPlayersEnabled.containsKey(player.networkHandler)) {
-			Identifier identifier = packetByteBuf.readIdentifier();
-
-			this.validPlayersEnabled.replace(player.networkHandler, player.server.getWorld(RegistryKey.of(
-				//#if MC >= 11903
-				RegistryKeys.WORLD,
-				//#else
-				//$$Registry.WORLD_KEY,
-				//#endif
-				identifier
-			)));
+			RegistryKey<World> world = packetByteBuf.readRegistryKey(RegistryKeys.WORLD);
+			this.validPlayersEnabled.replace(
+				player.networkHandler,
+				player.server.getWorld(world)
+			);
 			this.sendClientUpdate(player.networkHandler, true);
+		}
+	}
+
+	private void stopSendingToPlayer(ServerPlayerEntity player) {
+		if (this.validPlayersEnabled.containsKey(player.networkHandler)) {
+			this.validPlayersEnabled.replace(player.networkHandler, null);
 		}
 	}
 
@@ -113,19 +121,13 @@ public class ChunkServerNetworkHandler {
 			ThreadedAnvilChunkStorage.TicketManager ticketManager = ((ThreadedAnvilChunkStorageAccessor) storage).getTicketManager();
 			((ThreadedAnvilChunkStorageAccessor) storage).getChunkHolderMap().values().forEach(chunkHolder -> {
 				ChunkPos pos = chunkHolder.getPos();
-				//#if MC >= 12000
 				ChunkLevelType levelType = chunkHolder.getLevelType();
-				//#else
-				//$$LevelType levelType = ChunkHolder.getLevelType(chunkHolder.getLevel());
-				//#endif
 				long posLong = pos.toLong();
-				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).getTicketType(posLong);
-				//#if MC >= 11800
+				ChunkTicketType<?> ticketType = ((IChunkTicketManager) ticketManager).chunkdebug$getTicketType(posLong);
 				if (levelType == ChunkLevelType.ENTITY_TICKING && !ticketManager.shouldTickEntities(posLong)) {
 					levelType = ChunkLevelType.BLOCK_TICKING;
 					ticketType = null;
 				}
-				//#endif
 				ChunkStatus status = this.getChunkStatus(chunkHolder);
 				chunkDataSet.add(new ChunkData(pos, levelType, status == null ? ChunkStatus.EMPTY : status, ticketType));
 			});
@@ -165,88 +167,64 @@ public class ChunkServerNetworkHandler {
 			ticketTypes[i] = chunkData.getTicketByte();
 			i++;
 		}
-		networkHandler.sendPacket(new CustomPayloadS2CPacket(
-			ESSENTIAL_CHANNEL,
-			new PacketByteBuf(Unpooled.buffer()).writeVarInt(DATA)
-				.writeVarInt(size).writeLongArray(chunkPositions).writeByteArray(levelTypes)
-				.writeByteArray(statusTypes).writeByteArray(ticketTypes)
-				.writeString(world.getRegistryKey().getValue().getPath())
-		));
+		PacketByteBuf buf = PacketByteBufs.create();
+		buf.writeVarInt(DATA)
+			.writeVarInt(size).writeLongArray(chunkPositions).writeByteArray(levelTypes)
+			.writeByteArray(statusTypes).writeByteArray(ticketTypes)
+			.writeRegistryKey(world.getRegistryKey());
+		ServerPlayNetworking.send(networkHandler.player, ESSENTIAL_CHANNEL, buf);
 	}
 
 	private void forceUpdateChunkData() {
 		this.serverWorldChunks.forEach((world, chunks) -> {
-			if (this.validPlayersEnabled.containsValue(world)) {
-				ServerChunkManager chunkManager = world.getChunkManager();
-				ThreadedAnvilChunkStorageAccessor storageAccessor = (ThreadedAnvilChunkStorageAccessor) chunkManager.threadedAnvilChunkStorage;
-				ChunkTicketManager manager = storageAccessor.getTicketManager();
-				Long2ObjectLinkedOpenHashMap<ChunkHolder> holders = storageAccessor.getChunkHolderMap();
-				List<ChunkData> updatedChunks = new LinkedList<>();
-				for (ChunkData chunkData : chunks) {
-					long longPos = chunkData.getLongPos();
-					boolean dirty;
-					ChunkHolder holder = holders.get(longPos);
-					//#if MC >= 11800
-					boolean entityTicking = manager.shouldTickEntities(longPos);
-					ChunkLevelType type;
-					if (chunkData.isLevelType(ChunkLevelType.BLOCK_TICKING) && entityTicking) {
-						type = ChunkLevelType.ENTITY_TICKING;
-						dirty = true;
-					} else if (chunkData.isLevelType(ChunkLevelType.ENTITY_TICKING) && !entityTicking) {
-						type = ChunkLevelType.BLOCK_TICKING;
-						dirty = true;
-					} else {
-						type = holder.getLevelType();
-						dirty = chunkData.getLevelType() == type;
-					}
-					//#else
-					//$$LevelType type = ChunkHolder.getLevelType(holder.getLevel());
-					//$$dirty = chunkData.getLevelType() == type;
-					//#endif
-
-					byte ticket = ChunkData.getTicketCode(((IChunkTicketManager) manager).getTicketType(longPos));
-					if (chunkData.getTicketByte() != ticket) {
-						dirty = true;
-					}
-
-					ChunkStatus status = this.getChunkStatus(holder);
-					byte statusByte = (byte) (status == null ? ChunkStatus.EMPTY : status).getIndex();
-					if (chunkData.getStatusByte() != statusByte) {
-						dirty = true;
-					}
-
-					if (dirty) {
-						updatedChunks.add(new ChunkData(chunkData.getChunkPos(), type, statusByte, ticket));
-					}
+			if (!this.validPlayersEnabled.containsValue(world)) {
+				return;
+			}
+			ServerChunkManager chunkManager = world.getChunkManager();
+			ThreadedAnvilChunkStorageAccessor storageAccessor = (ThreadedAnvilChunkStorageAccessor) chunkManager.threadedAnvilChunkStorage;
+			ChunkTicketManager manager = storageAccessor.getTicketManager();
+			Long2ObjectLinkedOpenHashMap<ChunkHolder> holders = storageAccessor.getChunkHolderMap();
+			List<ChunkData> updatedChunks = new LinkedList<>();
+			for (ChunkData chunkData : chunks) {
+				long longPos = chunkData.getLongPos();
+				boolean dirty;
+				ChunkHolder holder = holders.get(longPos);
+				boolean entityTicking = manager.shouldTickEntities(longPos);
+				ChunkLevelType type;
+				if (chunkData.isLevelType(ChunkLevelType.BLOCK_TICKING) && entityTicking) {
+					type = ChunkLevelType.ENTITY_TICKING;
+					dirty = true;
+				} else if (chunkData.isLevelType(ChunkLevelType.ENTITY_TICKING) && !entityTicking) {
+					type = ChunkLevelType.BLOCK_TICKING;
+					dirty = true;
+				} else {
+					type = holder.getLevelType();
+					dirty = chunkData.getLevelType() == type;
 				}
-				for (ChunkData updatedChunk : updatedChunks) {
-					this.updateChunkMap(world, updatedChunk);
+
+				byte ticket = ChunkData.getTicketCode(((IChunkTicketManager) manager).chunkdebug$getTicketType(longPos));
+				if (chunkData.getTicketByte() != ticket) {
+					dirty = true;
 				}
+
+				ChunkStatus status = this.getChunkStatus(holder);
+				byte statusByte = (byte) (status == null ? ChunkStatus.EMPTY : status).getIndex();
+				if (chunkData.getStatusByte() != statusByte) {
+					dirty = true;
+				}
+
+				if (dirty) {
+					updatedChunks.add(new ChunkData(chunkData.getChunkPos(), type, statusByte, ticket));
+				}
+			}
+			for (ChunkData updatedChunk : updatedChunks) {
+				this.updateChunkMap(world, updatedChunk);
 			}
 		});
 	}
 
-	public void tickUpdate() {
-		this.forceUpdateChunkData();
-		for (ServerPlayNetworkHandler networkHandler : this.validPlayersEnabled.keySet()) {
-			this.sendClientUpdate(networkHandler, false);
-		}
-		this.updatesInLastTick.values().forEach(Set::clear);
-	}
-
 	private ChunkStatus getChunkStatus(ChunkHolder holder) {
-		//#if MC >= 11700
 		return holder.getCurrentStatus();
-		//#else
-		//$$for (int i = ChunkHolder.CHUNK_STATUSES.size() - 1; i >= 0; --i) {
-		//$$	ChunkStatus chunkStatus = ChunkHolder.CHUNK_STATUSES.get(i);
-		//$$	CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> completableFuture = holder.getFutureFor(chunkStatus);
-		//$$	if ((completableFuture.getNow(ChunkHolder.UNLOADED_CHUNK)).left().isPresent()) {
-		//$$		return chunkStatus;
-		//$$	}
-		//$$}
-		//$$return null;
-		//#endif
 	}
 }
 
