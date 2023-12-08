@@ -63,7 +63,7 @@ public class ChunkServerNetworkHandler {
 			return;
 		}
 		this.validPlayersEnabled.put(player.networkHandler, null);
-		ChunkDebugServer.LOGGER.info("%s has logged in with ChunkDebug. EssentialClient %s".formatted(player.getEntityName(), essentialVersion));
+		ChunkDebugServer.LOGGER.info("%s has logged in with ChunkDebug. EssentialClient %s".formatted(player.getNameForScoreboard(), essentialVersion));
 	}
 
 	public void removeHandler(ServerPlayNetworkHandler handler) {
