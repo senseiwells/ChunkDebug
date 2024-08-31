@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "chunkdebug",
+  "id": "chunk-debug",
   "version": "${version}",
-  "name": "Chunk Debug",
+  "name": "ChunkDebug",
   "description": "Chunk Debug server side support",
   "authors": [
 	"Sensei"
@@ -11,16 +11,21 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "chunkdebug.ChunkDebugServer"
+      "me.senseiwells.chunkdebug.ChunkDebug",
+      "me.senseiwells.chunkdebug.server.ChunkDebugServer"
+    ],
+    "client": [
+      "me.senseiwells.chunkdebug.client.ChunkDebugClient"
     ]
   },
   "mixins": [
-    "chunkdebug.mixins.json"
+    "chunk-debug.server.mixins.json",
+    "chunk-debug.client.mixins.json"
   ],
-  "accessWidener": "chunkdebug.accesswidener",
+  "accessWidener": "chunk-debug.accesswidener",
   "depends": {
     "minecraft": "${minecraft_dependency}",
-    "fabricloader": ">=0.10.0",
-    "fabric": "*"
+    "fabricloader": ">=${fabric_loader_dependency}",
+    "fabric": ">=${fabric_api_dependency}"
   }
 }

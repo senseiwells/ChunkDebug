@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "me.senseiwells.chunkdebug.server.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ChunkHolderMixin",
+    "ChunkMapAccessor",
+    "DistanceManagerMixin",
+    "DistanceManagerAccessor",
+    "ServerLevelMixin",
+    "TicketAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
