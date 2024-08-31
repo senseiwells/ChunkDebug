@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.senseiwells.chunkdebug.client.ChunkDebugClient;
+import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,14 +18,18 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-
-import static me.senseiwells.chunkdebug.client.utils.RenderUtils.renderOutline;
 
 public class ChunkDebugScreen extends Screen {
 	private static final int SELECTING_OUTLINE_COLOR = 0xAAAA0000;
 	private static final int SELECTED_OUTLINE_COLOR = 0xAAFF0000;
+	private static final int PLAYER_COLOR = 0xAAFFFF00;
+
+	private static final int BG_LIGHT = 0xC8353B48;
+	private static final int BG_DARK = 0xC82D3436;
 
 	private static final float MINIMAP_SCALE = 0.5F;
 
@@ -82,6 +87,10 @@ public class ChunkDebugScreen extends Screen {
 		}
 
 		graphics.pose().popPose();
+
+		if (state.selection != null) {
+			this.renderChunkSelectionInfo(graphics, state.selection);
+		}
 	}
 
 	@Override
@@ -131,7 +140,7 @@ public class ChunkDebugScreen extends Screen {
 		double currentX = (mouseX - state.offsetX) / state.scale;
 		double currentY = (mouseY - state.offsetY) / state.scale;
 
-		state.scale = Mth.clamp(state.scale + (float) scrollY, 1.0F, 64.0F);
+		state.scale = Mth.clamp(state.scale + (float) scrollY * 0.5F, 1.0F, 64.0F);
 		state.offsetX = mouseX - currentX * state.scale;
 		state.offsetY = mouseY - currentY * state.scale;
 		return true;
@@ -177,6 +186,10 @@ public class ChunkDebugScreen extends Screen {
 		int maxY = size + padding;
 
 		graphics.pose().pushPose();
+
+		graphics.fill(minX - 3, minY - 3, maxX + 3, maxY + 3, BG_LIGHT);
+		graphics.fill(minX, minY, maxX, maxY, BG_DARK);
+
 		graphics.enableScissor(minX, minY, maxX, maxY);
 		graphics.pose().translate(minX + size / 2.0, minY + size / 2.0, 0.0F);
 
@@ -212,10 +225,68 @@ public class ChunkDebugScreen extends Screen {
 		if (state.selection != null) {
 			this.renderChunkSelection(graphics, state.selection, SELECTED_OUTLINE_COLOR);
 		}
+
+		if (this.minecraft != null && this.minecraft.player != null) {
+			if (this.minecraft.player.level().dimension() == state.dimension) {
+				this.renderPlayer(graphics, this.minecraft.player.chunkPosition());
+			}
+		}
+	}
+
+	private void renderChunkSelectionInfo(GuiGraphics graphics, ChunkSelection selection) {
+		graphics.pose().pushPose();
+
+		DimensionState state = this.state();
+		ChunkSelectionInfo info = ChunkSelectionInfo.create(selection, state.chunks);
+
+		int padding = 3;
+		int width = Math.max(this.width / 4, info.getMaxWidth(this.font) + 4 * padding);
+		int minX = this.width - width - padding;
+		int minY = padding + 1 - 1;
+		int maxX = this.width - padding;
+		int maxY = this.height - padding;
+		graphics.fill(minX, minY, maxX, maxY, BG_LIGHT);
+
+		graphics.drawString(this.font, info.title(), minX + padding, minY + padding, 0xFFFFFFFF);
+
+		minX += padding;
+		maxX -= padding;
+		int offsetY = minY + padding * 2;
+		for (List<Component> section : info.sections()) {
+			offsetY = this.renderInnerChunkSelectionInfo(graphics, section, padding, minX, maxX, offsetY);
+		}
+
+		graphics.pose().popPose();
+	}
+
+	private int renderInnerChunkSelectionInfo(
+		GuiGraphics graphics,
+		List<Component> lines,
+		int padding,
+		int minX,
+		int maxX,
+		int offsetY
+	) {
+		if (lines.isEmpty()) {
+			return offsetY;
+		}
+
+		int increment = this.font.lineHeight + padding;
+		int maxY = offsetY + increment * (lines.size() + 1);
+		graphics.fill(minX, offsetY + increment - padding, maxX, maxY, BG_DARK & 0x55000000);
+		for (Component line : lines) {
+			offsetY += this.font.lineHeight + padding;
+			graphics.drawString(this.font, line, minX + padding, offsetY, 0xFFFFFFFF);
+		}
+		return maxY - padding;
 	}
 
 	private void renderChunkSelection(GuiGraphics graphics, ChunkSelection selection, int color) {
-		renderOutline(graphics, selection.minX, selection.minZ, selection.sizeX(), selection.sizeZ(), 0.3F, color);
+		RenderUtils.renderOutline(graphics, selection.minX, selection.minZ, selection.sizeX(), selection.sizeZ(), 0.3F, color);
+	}
+
+	private void renderPlayer(GuiGraphics graphics, ChunkPos pos) {
+		RenderUtils.renderOutline(graphics, pos.x, pos.z, 1, 1, 0.3F, PLAYER_COLOR);
 	}
 
 	private void initializeDimension(ResourceKey<Level> dimension) {
@@ -259,7 +330,7 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private DimensionState state(ResourceKey<Level> dimension) {
-		return this.states.computeIfAbsent(dimension, d -> new DimensionState());
+		return this.states.computeIfAbsent(dimension, DimensionState::new);
 	}
 
 	private enum Minimap {
@@ -268,6 +339,7 @@ public class ChunkDebugScreen extends Screen {
 
 	private static class DimensionState {
 		private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
+		private final ResourceKey<Level> dimension;
 
 		private ChunkSelection selection;
 		private ChunkPos first;
@@ -278,5 +350,9 @@ public class ChunkDebugScreen extends Screen {
 		private double offsetY = 0.0;
 
 		boolean centered = false;
+
+		private DimensionState(ResourceKey<Level> dimension) {
+			this.dimension = dimension;
+		}
 	}
 }

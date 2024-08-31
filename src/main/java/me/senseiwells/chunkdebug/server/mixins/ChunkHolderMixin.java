@@ -26,7 +26,7 @@ public abstract class ChunkHolderMixin extends GenerationChunkHolder {
 	@Inject(method = "updateFutures", at = @At("RETURN"))
 	private void onTick(ChunkMap chunkMap, Executor executor, CallbackInfo ci) {
 		ServerLevel level = ((ChunkMapAccessor) chunkMap).getLevel();
-		DistanceManager manager = ((ChunkMapAccessor) chunkMap).getDistanceManager();
+		DistanceManager manager = chunkMap.getDistanceManager();
 		long posLong = this.pos.toLong();
 
 		SortedArraySet<Ticket<?>> tickets = ((DistanceManagerAccessor) manager).getTicketsFor(posLong);

@@ -12,9 +12,6 @@ public interface ChunkMapAccessor {
 	@Accessor("level")
 	ServerLevel getLevel();
 
-	@Accessor("distanceManager")
-	ChunkMap.DistanceManager getDistanceManager();
-
 	@Accessor("visibleChunkMap")
 	Long2ObjectLinkedOpenHashMap<ChunkHolder> getChunkHolderMap();
 }

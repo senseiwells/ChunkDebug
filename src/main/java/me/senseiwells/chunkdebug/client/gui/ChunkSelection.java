@@ -25,6 +25,14 @@ public class ChunkSelection {
 		return this.maxZ - this.minZ + 1;
 	}
 
+	public boolean isSingleChunk() {
+		return this.minX == this.maxX && this.minZ == this.maxZ;
+	}
+
+	public ChunkPos getMinChunkPos() {
+		return new ChunkPos(this.minX, this.minZ);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {

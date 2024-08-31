@@ -3,10 +3,12 @@
   "package": "me.senseiwells.chunkdebug.server.mixins",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ChunkDistanceManagerAccessor",
+    "ChunkDistanceManagerMixin",
     "ChunkHolderMixin",
     "ChunkMapAccessor",
-    "DistanceManagerMixin",
     "DistanceManagerAccessor",
+    "DistanceManagerMixin",
     "ServerLevelMixin",
     "TicketAccessor"
   ],

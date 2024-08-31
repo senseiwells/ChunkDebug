@@ -14,16 +14,22 @@ public class RenderUtils {
 	}
 
 	public static void fill(GuiGraphics graphics, float minX, float minY, float maxX, float maxY, int color) {
-		fill(graphics, RenderType.gui(), minX, minY, maxX, maxY, color);
-	}
-
-	public static void fill(GuiGraphics graphics, RenderType type, float minX, float minY, float maxX, float maxY, int color) {
 		Matrix4f matrix4f = graphics.pose().last().pose();
-		VertexConsumer consumer = graphics.bufferSource().getBuffer(type);
+		VertexConsumer consumer = graphics.bufferSource().getBuffer(RenderType.gui());
 		consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
 		consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
 		consumer.addVertex(matrix4f, maxX, maxY, 0.0F).setColor(color);
 		consumer.addVertex(matrix4f, maxX, minY, 0.0F).setColor(color);
+		graphics.flush();
+	}
+
+	public static void renderCross(GuiGraphics graphics, float minX, float minY, float maxX, float maxY, float thickness, int color) {
+		Matrix4f matrix4f = graphics.pose().last().pose();
+		VertexConsumer consumer = graphics.bufferSource().getBuffer(RenderType.gui());
+		consumer.addVertex(matrix4f, minX, minY + thickness, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, maxX - thickness, maxY, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, maxX, maxY - thickness, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, minX + thickness, minY, 0.0F).setColor(color);
 		graphics.flush();
 	}
 }
