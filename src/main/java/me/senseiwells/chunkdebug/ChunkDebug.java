@@ -1,9 +1,6 @@
 package me.senseiwells.chunkdebug;
 
-import me.senseiwells.chunkdebug.common.network.ChunkDataPayload;
-import me.senseiwells.chunkdebug.common.network.HelloPayload;
-import me.senseiwells.chunkdebug.common.network.StartWatchingPayload;
-import me.senseiwells.chunkdebug.common.network.StopWatchingPayload;
+import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +17,7 @@ public class ChunkDebug implements ModInitializer {
 	public void onInitialize() {
 		PayloadTypeRegistry.configurationS2C().register(HelloPayload.TYPE, HelloPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playS2C().register(ChunkDataPayload.TYPE, ChunkDataPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(ChunkUnloadPayload.TYPE, ChunkUnloadPayload.STREAM_CODEC);
 
 		PayloadTypeRegistry.playC2S().register(StartWatchingPayload.TYPE, StartWatchingPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(StopWatchingPayload.TYPE, StopWatchingPayload.STREAM_CODEC);

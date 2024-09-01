@@ -9,6 +9,7 @@ import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,65 +31,58 @@ public record ChunkSelectionInfo(
 		List<Component> location = new ArrayList<>();
 		List<Component> status = new ArrayList<>();
 		List<Component> tickets = new ArrayList<>();
+		List<Component> stages = new ArrayList<>();
+		List<Component> unloading = new ArrayList<>();
 		if (selection.isSingleChunk()) {
 			ChunkPos pos = selection.getMinChunkPos();
-			title = Component.literal("Selected Chunk Breakdown");
-			location.add(Component.literal("Location: " + pos));
+			title = Component.translatable("chunk-debug.info.breakdown.chunk");
+			location.add(Component.translatable("chunk-debug.info.location", pos));
 
 			ChunkData data = chunks.get(pos.toLong());
 			if (data != null) {
-				status.add(Component.literal("Status: ").append(prettify(data.status())));
-				status.add(Component.literal("Status Level: " + data.statusLevel()));
-				status.add(Component.literal("Ticking Status Level: " + data.tickingStatusLevel()));
+				status.add(Component.translatable("chunk-debug.info.status", prettify(data.status())));
+				status.add(Component.translatable("chunk-debug.info.status.level", data.statusLevel()));
+				status.add(Component.translatable("chunk-debug.info.status.level.ticking", data.tickingStatusLevel()));
 
 				if (!data.tickets().isEmpty()) {
-					tickets.add(Component.literal("Tickets:"));
+					tickets.add(Component.translatable("chunk-debug.info.tickets"));
 					for (Ticket<?> ticket : data.tickets()) {
-						tickets.add(
-							Component.literal(" Type: ")
-								.append(prettify(ticket.getType()))
-								.append(", Level: " + ticket.getTicketLevel())
-						);
+						Component type = prettify(ticket.getType());
+						int level = ticket.getTicketLevel();
+						tickets.add(Component.translatable("chunk-debug.info.tickets.details", type, level));
 					}
 				}
+
+				ChunkStatus stage = data.stage();
+				if (stage != null) {
+					stages.add(Component.translatable("chunk-debug.info.stage", prettify(stage)));
+				}
+
+				unloading.add(Component.translatable("chunk-debug.info.unloading", prettify(data.unloading())));
 			} else {
-				status.add(Component.literal("Status: Unloaded"));
+				Component unloaded = Component.translatable("chunk-debug.status.unloaded");
+				status.add(Component.translatable("chunk-debug.info.status", unloaded));
 			}
 		} else {
-			title = Component.literal("Selected Chunks Breakdown");
+			title = Component.translatable("chunk-debug.info.breakdown.chunks");
 		}
 
-		return new ChunkSelectionInfo(title, List.of(location, status, tickets));
+		return new ChunkSelectionInfo(title, List.of(location, status, tickets, stages, unloading));
 	}
 
 	private static Component prettify(FullChunkStatus status) {
-		return switch (status) {
-			case INACCESSIBLE -> Component.literal("Unloaded");
-			case FULL -> Component.literal("Border");
-			case BLOCK_TICKING -> Component.literal("Lazy");
-			case ENTITY_TICKING -> Component.literal("Entity Ticking");
-		};
+		return Component.translatable("chunk-debug.status." + status.name().toLowerCase());
 	}
 
-	private static Component prettify(TicketType<?> status) {
-		if (status == TicketType.START) {
-			return Component.literal("Start");
-		}
-		if (status == TicketType.DRAGON) {
-			return Component.literal("Dragon");
-		}
-		if (status == TicketType.PLAYER) {
-			return Component.literal("Player");
-		}
-		if (status == TicketType.PORTAL) {
-			return Component.literal("Portal");
-		}
-		if (status == TicketType.POST_TELEPORT) {
-			return Component.literal("Post Teleport");
-		}
-		if (status == TicketType.FORCED) {
-			return Component.literal("Forced");
-		}
-		return Component.literal("Unknown");
+	private static Component prettify(TicketType<?> type) {
+		return Component.translatable("chunk-debug.ticket.type." + type);
+	}
+
+	private static Component prettify(ChunkStatus stage) {
+		return Component.translatable("chunk-debug.stage." + stage.getName());
+	}
+
+	private static Component prettify(boolean bool) {
+		return Component.translatable("chunk-debug.boolean." + bool);
 	}
 }

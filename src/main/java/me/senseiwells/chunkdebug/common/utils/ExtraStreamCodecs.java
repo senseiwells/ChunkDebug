@@ -15,11 +15,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ExtraStreamCodecs {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ResourceKey<Level>> DIMENSION = StreamCodec.of(ExtraStreamCodecs::encodeDimension, ExtraStreamCodecs::decodeDimension);
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<ResourceKey<Level>>> DIMENSIONS = ByteBufCodecs.<RegistryFriendlyByteBuf, ResourceKey<Level>>list().apply(DIMENSION);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<ChunkStatus>> CHUNK_STATUS = ByteBufCodecs.holderRegistry(Registries.CHUNK_STATUS);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Holder<ChunkStatus>>> OPTIONAL_CHUNK_STATUS = ByteBufCodecs.optional(CHUNK_STATUS);
 	public static final StreamCodec<FriendlyByteBuf, Ticket<?>> TICKET = StreamCodec.of(ExtraStreamCodecs::encodeTicket, ExtraStreamCodecs::decodeTicket);
 	public static final StreamCodec<FriendlyByteBuf, List<Ticket<?>>> TICKETS = ByteBufCodecs.<FriendlyByteBuf, Ticket<?>>list().apply(TICKET);
 

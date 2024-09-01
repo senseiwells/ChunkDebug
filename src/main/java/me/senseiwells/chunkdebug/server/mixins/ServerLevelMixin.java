@@ -13,8 +13,7 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
 public class ServerLevelMixin implements ChunkDebugTrackerHolder {
-	@Unique
-	private final ChunkDebugTracker chunkdebug$tracker = new ChunkDebugTracker((ServerLevel) (Object) this);
+	@Unique private final ChunkDebugTracker chunkdebug$tracker = new ChunkDebugTracker((ServerLevel) (Object) this);
 
 	@Inject(
 		method = "tick",

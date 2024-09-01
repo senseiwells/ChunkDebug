@@ -1,5 +1,46 @@
 {
   "chunk-debug.screen.title": "ChunkDebug Map",
 
-  "chunk-debug.key": "ChunkDebug Hotkey"
+  "chunk-debug.key": "ChunkDebug Hotkey",
+
+  "chunk-debug.boolean.true": "True",
+  "chunk-debug.boolean.false": "False",
+
+  "chunk-debug.info.breakdown.chunk": "Selected Chunk Breakdown",
+  "chunk-debug.info.breakdown.chunks": "Selected Chunks Breakdown",
+  "chunk-debug.info.location": "Location: %s",
+  "chunk-debug.info.status": "Status: %s",
+  "chunk-debug.info.status.level": "Status Level: %s",
+  "chunk-debug.info.status.level.ticking": "Ticking Status Level: %s",
+  "chunk-debug.info.tickets": "Tickets:",
+  "chunk-debug.info.tickets.details": "Type: %s, Level: %s",
+  "chunk-debug.info.stage": "Generation Stage: %s",
+  "chunk-debug.info.unloading": "Unloading: %s",
+
+  "chunk-debug.status.unloaded": "Unloaded",
+  "chunk-debug.status.inaccessible": "Inaccessible",
+  "chunk-debug.status.full": "Border",
+  "chunk-debug.status.block_ticking": "Lazy",
+  "chunk-debug.status.entity_ticking": "Entity Ticking",
+
+  "chunk-debug.ticket.type.start": "Spawn Chunks",
+  "chunk-debug.ticket.type.dragon": "Ender Dragon",
+  "chunk-debug.ticket.type.player": "Player",
+  "chunk-debug.ticket.type.portal": "Portal",
+  "chunk-debug.ticket.type.post_teleport": "Post Teleport",
+  "chunk-debug.ticket.type.forced": "Forced",
+  "chunk-debug.ticket.type.unknown": "Unknown",
+
+  "chunk-debug.stage.minecraft:empty": "Empty",
+  "chunk-debug.stage.minecraft:structure_starts": "Structure Starts",
+  "chunk-debug.stage.minecraft:structure_references": "Structure References",
+  "chunk-debug.stage.minecraft:biomes": "Biomes",
+  "chunk-debug.stage.minecraft:noise": "Noise",
+  "chunk-debug.stage.minecraft:surface": "Surface",
+  "chunk-debug.stage.minecraft:carvers": "Carvers",
+  "chunk-debug.stage.minecraft:features": "Features",
+  "chunk-debug.stage.minecraft:initialize_light": "Initialize Light",
+  "chunk-debug.stage.minecraft:light": "Light",
+  "chunk-debug.stage.minecraft:spawn": "Spawn",
+  "chunk-debug.stage.minecraft:full": "Complete"
 }

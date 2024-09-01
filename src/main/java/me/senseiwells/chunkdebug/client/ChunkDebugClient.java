@@ -3,10 +3,7 @@ package me.senseiwells.chunkdebug.client;
 import com.mojang.brigadier.Command;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugScreen;
-import me.senseiwells.chunkdebug.common.network.ChunkDataPayload;
-import me.senseiwells.chunkdebug.common.network.HelloPayload;
-import me.senseiwells.chunkdebug.common.network.StartWatchingPayload;
-import me.senseiwells.chunkdebug.common.network.StopWatchingPayload;
+import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -51,6 +48,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 		ClientConfigurationNetworking.registerGlobalReceiver(HelloPayload.TYPE, this::handleHello);
 		ClientPlayNetworking.registerGlobalReceiver(ChunkDataPayload.TYPE, this::handleChunkData);
+		ClientPlayNetworking.registerGlobalReceiver(ChunkUnloadPayload.TYPE, this::handleChunkUnload);
 	}
 
 	public void startWatching(ResourceKey<Level> dimension) {
@@ -82,6 +80,12 @@ public class ChunkDebugClient implements ClientModInitializer {
 	private void handleChunkData(ChunkDataPayload payload, ClientPlayNetworking.Context context) {
 		if (this.screen != null) {
 			this.screen.updateChunks(payload.dimension(), payload.chunks());
+		}
+	}
+
+	private void handleChunkUnload(ChunkUnloadPayload payload, ClientPlayNetworking.Context context) {
+		if (this.screen != null) {
+			this.screen.unloadChunks(payload.dimension(), payload.positions());
 		}
 	}
 

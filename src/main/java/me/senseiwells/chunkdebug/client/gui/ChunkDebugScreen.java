@@ -18,7 +18,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,13 @@ public class ChunkDebugScreen extends Screen {
 		DimensionState state = this.state(dimension);
 		for (ChunkData chunk : chunks) {
 			state.chunks.put(chunk.position().toLong(), chunk);
+		}
+	}
+
+	public void unloadChunks(ResourceKey<Level> dimension, long[] positions) {
+		DimensionState state = this.state(dimension);
+		for (long position : positions) {
+			state.chunks.remove(position);
 		}
 	}
 

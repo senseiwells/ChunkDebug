@@ -33,10 +33,7 @@ public abstract class ChunkHolderMixin extends GenerationChunkHolder {
 		int statusLevel = ((DistanceManagerAccessor) manager).getTickingTracker().getLevel(this.pos);
 
 		ChunkStatus stage = this.getPersistedStatus();
-		if (stage == null) {
-			stage = ChunkStatus.EMPTY;
-		}
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
-		tracker.update(new ChunkData(this.pos, this.ticketLevel, statusLevel, stage, tickets));
+		tracker.set(new ChunkData(this.pos, stage, tickets, this.ticketLevel, statusLevel, false));
 	}
 }

@@ -4,10 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import me.senseiwells.chunkdebug.ChunkDebug;
-import me.senseiwells.chunkdebug.common.network.ChunkDataPayload;
-import me.senseiwells.chunkdebug.common.network.HelloPayload;
-import me.senseiwells.chunkdebug.common.network.StartWatchingPayload;
-import me.senseiwells.chunkdebug.common.network.StopWatchingPayload;
+import me.senseiwells.chunkdebug.common.network.*;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
@@ -66,13 +63,21 @@ public class ChunkDebugServer implements ModInitializer {
 			}
 
 			ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
-			Collection<ChunkData> data = tracker.getChunkUpdates();
-			this.partitionIntoPayloads(dimension, data, server.getTickCount(), false, payload -> {
+			ChunkDebugTracker.DirtyChunks dirty = tracker.getDirtyChunks();
+			this.partitionInto(dirty.updated(), partition -> {
+				ChunkDataPayload payload = new ChunkDataPayload(dimension, partition, server.getTickCount(), false);
 				ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(payload);
 				for (ServerPlayer player : players) {
 					player.connection.send(packet);
 				}
 			});
+			if (!dirty.removed().isEmpty()) {
+				ChunkUnloadPayload payload = new ChunkUnloadPayload(dimension, dirty.removed().toLongArray());
+				ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(payload);
+				for (ServerPlayer player : players) {
+					player.connection.send(packet);
+				}
+			}
 		}
 	}
 
@@ -89,7 +94,9 @@ public class ChunkDebugServer implements ModInitializer {
 
 			if (this.watching.put(dimension, player.getUUID())) {
 				Collection<ChunkData> data = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker().getChunks();
-				this.partitionIntoPayloads(dimension, data, tickCount, true, context.responseSender()::sendPacket);
+				this.partitionInto(data, partition -> {
+					context.responseSender().sendPacket(new ChunkDataPayload(dimension, partition, tickCount, true));
+				});
 			}
 		}
 	}
@@ -107,22 +114,19 @@ public class ChunkDebugServer implements ModInitializer {
 		}
 	}
 
-	private void partitionIntoPayloads(
-		ResourceKey<Level> dimension,
-		Collection<ChunkData> data,
-		int tick,
-		boolean initial,
-		Consumer<ChunkDataPayload> consumer
+	private <T> void partitionInto(
+		Collection<T> data,
+		Consumer<Collection<T>> consumer
 	) {
 		if (data.isEmpty()) {
 			return;
 		}
 		if (data.size() < PACKET_PARTITION_SIZE) {
-			consumer.accept(new ChunkDataPayload(dimension, data, tick, initial));
+			consumer.accept(data);
 			return;
 		}
-		for (Collection<ChunkData> partition : Iterables.partition(data, PACKET_PARTITION_SIZE)) {
-			consumer.accept(new ChunkDataPayload(dimension, partition, tick, initial));
+		for (Collection<T> partition : Iterables.partition(data, PACKET_PARTITION_SIZE)) {
+			consumer.accept(partition);
 		}
 	}
 }
