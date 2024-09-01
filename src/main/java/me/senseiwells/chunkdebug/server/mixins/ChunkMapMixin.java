@@ -44,9 +44,9 @@ public class ChunkMapMixin {
 			target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;remove(JLjava/lang/Object;)Z"
 		)
 	)
-	private void onUnloadHolder(ChunkHolder chunkHolder, long l, CallbackInfo ci) {
+	private void onUnloadHolder(ChunkHolder chunkHolder, long pos, CallbackInfo ci) {
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) this.level).chunkdebug$getTracker();
-		tracker.unload(l);
+		tracker.unload(pos);
 	}
 
 	@Inject(

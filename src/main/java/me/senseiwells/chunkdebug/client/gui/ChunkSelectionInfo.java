@@ -18,6 +18,9 @@ public record ChunkSelectionInfo(
 	Component title,
 	List<List<Component>> sections
 ) {
+	private static final int BLUE = 0x6CB4EE;
+	private static final int YELLOW = 0xFFFD8D;
+
 	public int getMaxWidth(Font font) {
 		int width = 0;
 		for (Component component : Iterables.concat(this.sections)) {
@@ -35,20 +38,20 @@ public record ChunkSelectionInfo(
 		List<Component> unloading = new ArrayList<>();
 		if (selection.isSingleChunk()) {
 			ChunkPos pos = selection.getMinChunkPos();
-			title = Component.translatable("chunk-debug.info.breakdown.chunk");
-			location.add(Component.translatable("chunk-debug.info.location", pos));
+			title = Component.translatable("chunk-debug.info.breakdown.chunk").withColor(YELLOW);
+			location.add(Component.translatable("chunk-debug.info.location", prettify(pos)));
 
 			ChunkData data = chunks.get(pos.toLong());
 			if (data != null) {
 				status.add(Component.translatable("chunk-debug.info.status", prettify(data.status())));
-				status.add(Component.translatable("chunk-debug.info.status.level", data.statusLevel()));
-				status.add(Component.translatable("chunk-debug.info.status.level.ticking", data.tickingStatusLevel()));
+				status.add(Component.translatable("chunk-debug.info.status.level", prettify(data.statusLevel())));
+				status.add(Component.translatable("chunk-debug.info.status.level.ticking", prettify(data.tickingStatusLevel())));
 
 				if (!data.tickets().isEmpty()) {
 					tickets.add(Component.translatable("chunk-debug.info.tickets"));
 					for (Ticket<?> ticket : data.tickets()) {
 						Component type = prettify(ticket.getType());
-						int level = ticket.getTicketLevel();
+						Component level = prettify(ticket.getTicketLevel());
 						tickets.add(Component.translatable("chunk-debug.info.tickets.details", type, level));
 					}
 				}
@@ -70,19 +73,27 @@ public record ChunkSelectionInfo(
 		return new ChunkSelectionInfo(title, List.of(location, status, tickets, stages, unloading));
 	}
 
+	private static Component prettify(ChunkPos pos) {
+		return Component.literal(pos.toString()).withColor(BLUE);
+	}
+
+	private static Component prettify(int statusLevel) {
+		return Component.literal(Integer.toString(statusLevel)).withColor(BLUE);
+	}
+
 	private static Component prettify(FullChunkStatus status) {
-		return Component.translatable("chunk-debug.status." + status.name().toLowerCase());
+		return Component.translatable("chunk-debug.status." + status.name().toLowerCase()).withColor(BLUE);
 	}
 
 	private static Component prettify(TicketType<?> type) {
-		return Component.translatable("chunk-debug.ticket.type." + type);
+		return Component.translatable("chunk-debug.ticket.type." + type).withColor(BLUE);
 	}
 
 	private static Component prettify(ChunkStatus stage) {
-		return Component.translatable("chunk-debug.stage." + stage.getName());
+		return Component.translatable("chunk-debug.stage." + stage.getName()).withColor(BLUE);
 	}
 
 	private static Component prettify(boolean bool) {
-		return Component.translatable("chunk-debug.boolean." + bool);
+		return Component.translatable("chunk-debug.boolean." + bool).withColor(BLUE);
 	}
 }
