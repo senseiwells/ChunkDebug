@@ -15,6 +15,8 @@ public class ChunkDebugTracker {
 	private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
 	private final LongSet dirty = new LongOpenHashSet();
 
+	private final Long2ObjectMap<ChunkStatus> stages = new Long2ObjectOpenHashMap<>();
+
 	private final ServerLevel level;
 
 	public ChunkDebugTracker(ServerLevel level) {
@@ -43,7 +45,18 @@ public class ChunkDebugTracker {
 	}
 
 	public void tick() {
+		synchronized (this.stages) {
+			for (Long2ObjectMap.Entry<ChunkStatus> entry : this.stages.long2ObjectEntrySet()) {
+				long pos = entry.getLongKey();
+				ChunkData data = this.chunks.get(pos);
+				if (data != null) {
+					data.updateStage(entry.getValue());
+					this.markDirty(pos);
+				}
+			}
 
+			this.stages.clear();
+		}
 	}
 
 	public void set(ChunkData data) {
@@ -58,10 +71,8 @@ public class ChunkDebugTracker {
 	}
 
 	public void updateStage(long pos, ChunkStatus stage) {
-		ChunkData data = this.chunks.get(pos);
-		if (data != null) {
-			data.updateStage(stage);
-			this.markDirty(pos);
+		synchronized (this.stages) {
+			this.stages.put(pos, stage);
 		}
 	}
 

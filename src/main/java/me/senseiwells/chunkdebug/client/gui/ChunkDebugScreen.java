@@ -16,6 +16,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Collection;
@@ -225,7 +226,7 @@ public class ChunkDebugScreen extends Screen {
 	private void renderChunkDebugMap(GuiGraphics graphics, DimensionState state) {
 		for (ChunkData data : state.chunks.values()) {
 			ChunkPos pos = data.position();
-			graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, this.approximateChunkColor(data));
+			graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, this.calculateChunkColor(data));
 		}
 
 		if (state.selection != null) {
@@ -318,17 +319,13 @@ public class ChunkDebugScreen extends Screen {
 		return new ChunkPos(Mth.floor(scaledX), Mth.floor(scaledY));
 	}
 
-	private int approximateChunkColor(ChunkData data) {
-		int color = switch (data.status()) {
-			case INACCESSIBLE -> 0xFF404040;
-			case FULL -> 0xFF4FC3F7;
-			case BLOCK_TICKING -> 0xFFFFA219;
-			case ENTITY_TICKING -> 0xFF198C19;
-		};
-		if ((data.position().x + data.position().z) % 2 == 0) {
-			return FastColor.ARGB32.lerp(0.12F, color, 0xFFFFFFFF);
+	private int calculateChunkColor(ChunkData data) {
+		ChunkPos pos = data.position();
+		int color = ChunkColors.calculateChunkColor(data.status(), data.stage(), data.tickets(), data.unloading());
+		if ((pos.x + pos.z) % 2 == 0) {
+			color = FastColor.ARGB32.lerp(0.12F, color, 0xFFFFFF);
 		}
-		return color;
+		return color | 0xFF000000;
 	}
 
 	private DimensionState state() {

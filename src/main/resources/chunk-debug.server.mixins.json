@@ -9,7 +9,6 @@
     "ChunkMapMixin",
     "DistanceManagerAccessor",
     "DistanceManagerMixin",
-    "ProtoChunkMixin",
     "ServerLevelMixin",
     "TicketAccessor",
     "TickingTrackerMixin"

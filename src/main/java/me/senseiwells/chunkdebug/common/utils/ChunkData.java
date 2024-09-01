@@ -106,7 +106,7 @@ public class ChunkData {
 	}
 
 	public FullChunkStatus status() {
-		if (this.tickingStatusLevel < 33 || this.tickingStatusLevel > this.statusLevel) {
+		if (this.tickingStatusLevel > this.statusLevel) {
 			return ChunkLevel.fullStatus(this.tickingStatusLevel);
 		}
 		return ChunkLevel.fullStatus(this.statusLevel);
