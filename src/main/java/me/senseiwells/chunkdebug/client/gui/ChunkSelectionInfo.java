@@ -14,13 +14,12 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import java.util.ArrayList;
 import java.util.List;
 
+import static me.senseiwells.chunkdebug.client.utils.RenderUtils.HL;
+
 public record ChunkSelectionInfo(
 	Component title,
 	List<List<Component>> sections
 ) {
-	private static final int BLUE = 0x6CB4EE;
-	private static final int YELLOW = 0xFFFD8D;
-
 	public int getMaxWidth(Font font) {
 		int width = 0;
 		for (Component component : Iterables.concat(this.sections)) {
@@ -38,7 +37,7 @@ public record ChunkSelectionInfo(
 		List<Component> unloading = new ArrayList<>();
 		if (selection.isSingleChunk()) {
 			ChunkPos pos = selection.getMinChunkPos();
-			title = Component.translatable("chunk-debug.info.breakdown.chunk").withColor(YELLOW);
+			title = Component.translatable("chunk-debug.info.breakdown.chunk").withColor(HL);
 			location.add(Component.translatable("chunk-debug.info.location", prettify(pos)));
 
 			ChunkData data = chunks.get(pos.toLong());
@@ -74,26 +73,26 @@ public record ChunkSelectionInfo(
 	}
 
 	private static Component prettify(ChunkPos pos) {
-		return Component.literal(pos.toString()).withColor(BLUE);
+		return Component.literal(pos.toString()).withColor(HL);
 	}
 
 	private static Component prettify(int statusLevel) {
-		return Component.literal(Integer.toString(statusLevel)).withColor(BLUE);
+		return Component.literal(Integer.toString(statusLevel)).withColor(HL);
 	}
 
 	private static Component prettify(FullChunkStatus status) {
-		return Component.translatable("chunk-debug.status." + status.name().toLowerCase()).withColor(BLUE);
+		return Component.translatable("chunk-debug.status." + status.name().toLowerCase()).withColor(HL);
 	}
 
 	private static Component prettify(TicketType<?> type) {
-		return Component.translatable("chunk-debug.ticket.type." + type).withColor(BLUE);
+		return Component.translatable("chunk-debug.ticket.type." + type).withColor(HL);
 	}
 
 	private static Component prettify(ChunkStatus stage) {
-		return Component.translatable("chunk-debug.stage." + stage.getName()).withColor(BLUE);
+		return Component.translatable("chunk-debug.stage." + stage.getName()).withColor(HL);
 	}
 
 	private static Component prettify(boolean bool) {
-		return Component.translatable("chunk-debug.boolean." + bool).withColor(BLUE);
+		return Component.translatable("chunk-debug.boolean." + bool).withColor(HL);
 	}
 }

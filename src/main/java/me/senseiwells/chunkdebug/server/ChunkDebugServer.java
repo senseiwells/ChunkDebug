@@ -43,6 +43,7 @@ public class ChunkDebugServer implements ModInitializer {
 
 	private void sendUpdatesToWatching(MinecraftServer server) {
 		Iterator<ResourceKey<Level>> dimensions = this.watching.keySet().iterator();
+		List<Runnable> tasks = new LinkedList<>();
 		while (dimensions.hasNext()) {
 			ResourceKey<Level> dimension = dimensions.next();
 			ServerLevel level = server.getLevel(dimension);
@@ -52,11 +53,10 @@ public class ChunkDebugServer implements ModInitializer {
 			}
 
 			List<ServerPlayer> players = new ArrayList<>();
-			Iterator<UUID> uuids = this.watching.get(dimension).iterator();
-			while (uuids.hasNext()) {
-				ServerPlayer player = server.getPlayerList().getPlayer(uuids.next());
+			for (UUID next : this.watching.get(dimension)) {
+				ServerPlayer player = server.getPlayerList().getPlayer(next);
 				if (player == null) {
-					uuids.remove();
+					tasks.add(() -> this.watching.remove(dimension, next));
 				} else {
 					players.add(player);
 				}
@@ -79,6 +79,7 @@ public class ChunkDebugServer implements ModInitializer {
 				}
 			}
 		}
+		tasks.forEach(Runnable::run);
 	}
 
 	private void handleStartWatching(StartWatchingPayload payload, ServerPlayNetworking.Context context) {

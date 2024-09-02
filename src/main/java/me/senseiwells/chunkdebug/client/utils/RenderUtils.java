@@ -1,12 +1,25 @@
 package me.senseiwells.chunkdebug.client.utils;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
+import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 
 public class RenderUtils {
-	public static void renderOutline(GuiGraphics graphics, float x, float y, float width, float height, float thickness, int color) {
+	public static final int HL_BG_LIGHT = 0xC8353B48;
+	public static final int HL_BG_DARK = 0xC82D3436;
+
+	public static final int BG_LIGHT = 0x55000000;
+	public static final int BG_DARK = 0x55000000;
+
+	public static final int HL = 0xC86CB4EE;
+
+	public static void outline(GuiGraphics graphics, float x, float y, float width, float height, float thickness, int color) {
 		fill(graphics, x, y, x + width, y + thickness, color);
 		fill(graphics, x, y + thickness, x + thickness, y + height - thickness, color);
 		fill(graphics, x + width - thickness, y + thickness, x + width, y + height - thickness, color);
@@ -23,13 +36,54 @@ public class RenderUtils {
 		graphics.flush();
 	}
 
-	public static void renderCross(GuiGraphics graphics, float minX, float minY, float maxX, float maxY, float thickness, int color) {
+	public static void triangle(
+		GuiGraphics graphics,
+		float minX,
+		float minY,
+		float maxX,
+		float maxY,
+		float angle,
+		int color
+	) {
+		graphics.pose().pushPose();
+		graphics.pose().rotateAround(Axis.ZP.rotationDegrees(angle), (minX + maxX) / 2, (minY + maxY) / 2, 0);
 		Matrix4f matrix4f = graphics.pose().last().pose();
 		VertexConsumer consumer = graphics.bufferSource().getBuffer(RenderType.gui());
-		consumer.addVertex(matrix4f, minX, minY + thickness, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, maxX - thickness, maxY, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, maxX, maxY - thickness, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, minX + thickness, minY, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, maxX, maxY - (maxY - minY) / 2, 0.0F).setColor(color);
+		consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
 		graphics.flush();
+		graphics.pose().popPose();
+	}
+
+	public static void options(
+		GuiGraphics graphics,
+		Font font,
+		int minX,
+		int maxX,
+		int offsetY,
+		int padding,
+		Component name,
+		ArrowButton left,
+		ArrowButton right
+	) {
+		if (left.getWidth() != right.getWidth() || left.getHeight() != right.getHeight()) {
+			throw new IllegalArgumentException("Expected buttons to be of the same size");
+		}
+		int buttonWidth = left.getWidth();
+		int buttonHeight = left.getHeight();
+
+		int offsetX = minX + padding;
+		int offsetMaxX = maxX - padding - buttonWidth;
+		int offsetMaxY = offsetY + buttonHeight;
+
+		left.setPosition(offsetX, offsetY);
+		right.setPosition(offsetMaxX, offsetY);
+
+		offsetX += padding + buttonWidth;
+		offsetMaxX -= padding;
+		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
+		NamedButton.renderScrollingString(graphics, font, name, offsetX, offsetY, offsetMaxX, offsetMaxY);
 	}
 }

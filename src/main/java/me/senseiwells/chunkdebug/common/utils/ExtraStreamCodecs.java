@@ -1,5 +1,6 @@
 package me.senseiwells.chunkdebug.common.utils;
 
+import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.StopWatchingPayload;
 import me.senseiwells.chunkdebug.server.mixins.TicketAccessor;
 import net.minecraft.core.Holder;
@@ -36,7 +37,13 @@ public class ExtraStreamCodecs {
 	}
 
 	private static void encodeTicket(FriendlyByteBuf buf, Ticket<?> ticket) {
-		buf.writeByte(TICKET_TYPES.indexOf(ticket.getType()));
+		int index = TICKET_TYPES.indexOf(ticket.getType());
+		if (index == -1) {
+			ChunkDebug.LOGGER.warn("Tried to encode unknown ticket type: {}", ticket.getType());
+			index = TICKET_TYPES.size() - 1;
+		}
+
+		buf.writeByte(index);
 		buf.writeInt((int) ((TicketAccessor) (Object) ticket).getTickCreated());
 		buf.writeInt(ticket.getTicketLevel());
 	}
@@ -56,6 +63,7 @@ public class ExtraStreamCodecs {
 			TicketType.DRAGON,
 			TicketType.PLAYER,
 			TicketType.FORCED,
+			TicketType.PORTAL,
 			TicketType.POST_TELEPORT,
 			TicketType.UNKNOWN
 		);

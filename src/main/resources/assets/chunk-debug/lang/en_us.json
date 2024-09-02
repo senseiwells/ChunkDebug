@@ -6,8 +6,17 @@
   "chunk-debug.boolean.true": "True",
   "chunk-debug.boolean.false": "False",
 
+  "chunk-debug.settings": "Chunk Debug Settings",
+  "chunk-debug.settings.toggle": "Toggle Chunk Debug Settings",
+  "chunk-debug.settings.return": "Return To Player",
+  "chunk-debug.settings.clusters": "Clusters",
+  "chunk-debug.settings.minimap.none": "No Minimap",
+  "chunk-debug.settings.minimap.static": "Static Minimap",
+  "chunk-debug.settings.minimap.follow": "Following Minimap",
+
   "chunk-debug.info.breakdown.chunk": "Selected Chunk Breakdown",
   "chunk-debug.info.breakdown.chunks": "Selected Chunks Breakdown",
+  "chunk-debug.info.breakdown.toggle": "Toggle Chunk Breakdown",
   "chunk-debug.info.location": "Location: %s",
   "chunk-debug.info.status": "Status: %s",
   "chunk-debug.info.status.level": "Status Level: %s",
