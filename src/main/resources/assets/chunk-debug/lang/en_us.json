@@ -1,7 +1,7 @@
 {
   "chunk-debug.screen.title": "ChunkDebug Map",
 
-  "chunk-debug.key": "ChunkDebug Hotkey",
+  "chunk-debug.key": "Open ChunkDebug",
 
   "chunk-debug.boolean.true": "True",
   "chunk-debug.boolean.false": "False",

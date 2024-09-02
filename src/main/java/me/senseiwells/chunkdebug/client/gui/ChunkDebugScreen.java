@@ -54,10 +54,6 @@ public class ChunkDebugScreen extends Screen {
 
 	private NamedButton returnToPlayer;
 
-	private ToggleButton minimapOnTop;
-	private ToggleButton showStages;
-	private ToggleButton showTickets;
-
 	private boolean initialized = false;
 
 	public ChunkDebugScreen() {
@@ -180,6 +176,10 @@ public class ChunkDebugScreen extends Screen {
 			boolean visible = this.settings.isToggled() || this.breakdown.isToggled();
 			this.settings.setToggled(!visible);
 			this.breakdown.setToggled(!visible);
+			return true;
+		}
+		if (this.minecraft != null && ChunkDebugClient.getInstance().keybind.matches(keyCode, scanCode)) {
+			this.onClose();
 			return true;
 		}
 		return false;
@@ -525,10 +525,6 @@ public class ChunkDebugScreen extends Screen {
 		return this.states.containsKey(dimension);
 	}
 
-	private static void bound(int minX, int minY, int maxX, int maxY, BoundsConsumer carrier) {
-		carrier.apply(minX, minY, maxX, maxY);
-	}
-
 	private enum Minimap {
 		NONE, STATIC, FOLLOW;
 
@@ -570,9 +566,5 @@ public class ChunkDebugScreen extends Screen {
 		private DimensionState(ResourceKey<Level> dimension) {
 			this.dimension = dimension;
 		}
-	}
-
-	private interface BoundsConsumer {
-		 void apply(int minX, int minY, int maxX, int maxY);
 	}
 }
