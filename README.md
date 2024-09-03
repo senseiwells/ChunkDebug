@@ -1,4 +1,4 @@
-# ChunkDebug
+# <img src="./src/main/resources/assets/chunk-debug/icon.png" align="center" width="64px"/> ChunkDebug
 
 ## What is ChunkDebug?
 
@@ -10,6 +10,8 @@ the chunk world generation stage.
 ChunkDebug was originally made for [CarpetClient 1.12.2](https://github.com/X-com/CarpetClient).
 I have completely re-written the mod to support modern versions of Minecraft.
 I only plan on maintaining the mod for the **latest** version of Minecraft.
+
+![chunk_generation.gif](images/chunk_generation.gif)
 
 ## How to use ChunkDebug
 
@@ -43,11 +45,12 @@ The menu on the left contains all the options for ChunkDebug.
 This can be hidden by pressing `F1` or by toggling the button
 in the bottom left corner.
 
-
 At the top, you can change your minimap mode. 
 This can be configured to `No Minimap`, `Static Minimap`, where the 
 minimap will reflect what is currently rendering at the centre of the
 chunk map, and `Following Minimap`, where the minimap will follow your player. 
+
+![Chunk Minimap](images/chunk_minimap.png)
 
 Below this are your navigation controls, you can navigate to different
 dimensions. 
@@ -68,12 +71,29 @@ This is useful for debugging chunks that unload rapidly.
 
 ### Selection Menu
 
-You can make a selection on the chunk map by right-clicking, this will
+You can select chunks on the chunk map by right-clicking, this will
 highlight the chunk with a red outline, it will also bring up a menu
 on the right displaying all the relevant information for that chunk.
+This menu can be closed much like the settings menu with `F1` or the button in the bottom right.
 
 ![Chunk Selection Menu](images/chunk_selection_menu.png)
 
-The menu displays the location of the chunks, as well as the chunk status
+The menu displays the location of the chunks, as well as the chunk 
+status; 
+you can read more about what this means on the [Minecraft Wiki Page](https://minecraft.wiki/w/Chunk#Level_and_load_type).
+The separation of the `Status Level` and `Ticking Status Level` is due to the split of Simulation Distance and Render Distance.
+Below, all the tickets for the selected chunk are listed, including 
+the type of the ticket and the level. 
+Below that is the `Generation Stage` which is how far the chunk has generated.
+And finally, whether the chunk has been scheduled for unloading.
+
+You are also able to select multiple chunks by dragging right-click,
+this will highlight a region of chunks with a red outline.
 
 ![Chunk Selections Menu](images/chunk_selections_menu.png)
+
+The menu will now display less specific information but displays
+data for all the selected chunks.
+It shows the location and area of your selection. 
+The status level range of the chunks, as well as the status distributions of all the chunks.
+And finally a count of all the ticket types within the selection.
