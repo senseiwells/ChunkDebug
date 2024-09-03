@@ -15,7 +15,8 @@ public class ChunkDebug implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		PayloadTypeRegistry.configurationS2C().register(HelloPayload.TYPE, HelloPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(HelloPayload.TYPE, HelloPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(ByePayload.TYPE, ByePayload.STREAM_CODEC);
 		PayloadTypeRegistry.playS2C().register(ChunkDataPayload.TYPE, ChunkDataPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playS2C().register(ChunkUnloadPayload.TYPE, ChunkUnloadPayload.STREAM_CODEC);
 

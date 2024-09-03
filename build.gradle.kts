@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.0.0-beta.2"
+val modVersion = "2.0.0"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -24,6 +24,10 @@ dependencies {
 	})
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
+
+	includeModImplementation(libs.permissions) {
+		exclude(libs.fabric.api.get().group)
+	}
 }
 
 loom {
@@ -42,7 +46,6 @@ tasks {
 				"version" to project.version,
 				"minecraft_dependency" to libs.versions.minecraft.get().replaceAfterLast('.', "x"),
 				"fabric_loader_dependency" to libs.versions.fabric.loader.get(),
-				"fabric_api_dependency" to libs.versions.fabric.api.get()
 			))
 		}
 	}
@@ -82,4 +85,9 @@ tasks {
 			}
 		}
 	}
+}
+
+private fun DependencyHandler.includeModImplementation(provider: Provider<*>, action: Action<ExternalModuleDependency>) {
+	this.include(provider, action)
+	this.modImplementation(provider, action)
 }

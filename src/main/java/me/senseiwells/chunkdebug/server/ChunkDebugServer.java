@@ -3,6 +3,8 @@ package me.senseiwells.chunkdebug.server;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
@@ -10,15 +12,15 @@ import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,19 +28,43 @@ import java.util.function.Consumer;
 public class ChunkDebugServer implements ModInitializer {
 	private static final int PACKET_PARTITION_SIZE = 20_000;
 
+	private static ChunkDebugServer instance;
+
 	private final Multimap<ResourceKey<Level>, UUID> watching = HashMultimap.create();
+
+	public static ChunkDebugServer getInstance() {
+		return instance;
+	}
 
 	@Override
 	public void onInitialize() {
+		instance = this;
+
 		ServerTickEvents.END_SERVER_TICK.register(this::sendUpdatesToWatching);
-		ServerConfigurationConnectionEvents.CONFIGURE.register(this::sendHelloPayload);
+		ServerPlayConnectionEvents.JOIN.register(this::sendHelloPayload);
 
 		ServerPlayNetworking.registerGlobalReceiver(StartWatchingPayload.TYPE, this::handleStartWatching);
 		ServerPlayNetworking.registerGlobalReceiver(StopWatchingPayload.TYPE, this::handleStopWatching);
 	}
 
-	private void sendHelloPayload(ServerConfigurationPacketListenerImpl handler, MinecraftServer server) {
-		handler.send(new ClientboundCustomPayloadPacket(new HelloPayload(ChunkDebug.PROTOCOL_VERSION)));
+	public boolean isPermitted(ServerPlayer player) {
+		return Permissions.check(player, "chunk-debug", 2);
+	}
+
+	@ApiStatus.Internal
+	public void onOpPlayer(ServerPlayer player) {
+		player.connection.send(new ClientboundCustomPayloadPacket(HelloPayload.INSTANCE));
+	}
+
+	@ApiStatus.Internal
+	public void onDeOpPlayer(ServerPlayer player) {
+		player.connection.send(new ClientboundCustomPayloadPacket(ByePayload.INSTANCE));
+	}
+
+	private void sendHelloPayload(ServerGamePacketListenerImpl connection, PacketSender sender, MinecraftServer server) {
+		if (this.isPermitted(connection.player)) {
+			sender.sendPacket(HelloPayload.INSTANCE);
+		}
 	}
 
 	private void sendUpdatesToWatching(MinecraftServer server) {
@@ -84,6 +110,11 @@ public class ChunkDebugServer implements ModInitializer {
 
 	private void handleStartWatching(StartWatchingPayload payload, ServerPlayNetworking.Context context) {
 		ServerPlayer player = context.player();
+		if (!this.isPermitted(player)) {
+			ChunkDebug.LOGGER.warn("Player {} tried to use chunk-debug without permission!", player.getScoreboardName());
+			return;
+		}
+
 		MinecraftServer server = context.server();
 		int tickCount = server.getTickCount();
 		for (ResourceKey<Level> dimension : payload.dimensions()) {

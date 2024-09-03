@@ -13,8 +13,8 @@ public record ChunkUnloadPayload(
 	ResourceKey<Level> dimension,
 	long[] positions
 ) implements CustomPacketPayload {
-	public static Type<ChunkUnloadPayload> TYPE = new Type<>(ChunkDebug.id("chunk_unload"));
-	public static StreamCodec<RegistryFriendlyByteBuf, ChunkUnloadPayload> STREAM_CODEC = CustomPacketPayload.codec(
+	public static final Type<ChunkUnloadPayload> TYPE = new Type<>(ChunkDebug.id("chunk_unload"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, ChunkUnloadPayload> STREAM_CODEC = CustomPacketPayload.codec(
 		ChunkUnloadPayload::encode, ChunkUnloadPayload::decode
 	);
 

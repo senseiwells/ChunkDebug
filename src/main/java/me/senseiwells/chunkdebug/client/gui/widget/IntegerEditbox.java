@@ -72,8 +72,9 @@ public class IntegerEditbox extends EditBox {
 
 	@Override
 	public void setFocused(boolean focused) {
+		boolean unfocused = this.isFocused() && !focused;
 		super.setFocused(focused);
-		if (!this.isFocused()) {
+		if (!this.isFocused() && unfocused) {
 			this.setIntValue(this.lastValidValue);
 			this.action.accept(this.lastValidValue);
 		}

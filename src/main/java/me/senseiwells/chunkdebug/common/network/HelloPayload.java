@@ -8,8 +8,10 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.NotNull;
 
 public record HelloPayload(int version) implements CustomPacketPayload {
-	public static Type<HelloPayload> TYPE = new Type<>(ChunkDebug.id("hello"));
-	public static StreamCodec<ByteBuf, HelloPayload> STREAM_CODEC = ByteBufCodecs.INT.map(HelloPayload::new, HelloPayload::version);
+	public static final Type<HelloPayload> TYPE = new Type<>(ChunkDebug.id("hello"));
+	public static final StreamCodec<ByteBuf, HelloPayload> STREAM_CODEC = ByteBufCodecs.INT.map(HelloPayload::new, HelloPayload::version);
+
+	public static final HelloPayload INSTANCE = new HelloPayload(ChunkDebug.PROTOCOL_VERSION);
 
 	@NotNull
 	@Override

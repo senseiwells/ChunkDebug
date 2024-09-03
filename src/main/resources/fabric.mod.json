@@ -25,6 +25,7 @@
   "accessWidener": "chunk-debug.accesswidener",
   "depends": {
     "minecraft": "${minecraft_dependency}",
-    "fabricloader": ">=${fabric_loader_dependency}"
+    "fabricloader": ">=${fabric_loader_dependency}",
+    "fabric-api": "*"
   }
 }

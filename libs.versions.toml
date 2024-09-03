@@ -3,6 +3,7 @@ minecraft     = "1.21.1"
 fabric-loom   = "1.7-SNAPSHOT"
 fabric-loader = "0.16.3"
 fabric-api    = "0.103.0+1.21.1"
+permissions   = "0.3.1"
 mod-publish   = "0.7.0"
 parchment     = "1.21:2024.07.28"
 
@@ -10,6 +11,7 @@ parchment     = "1.21:2024.07.28"
 minecraft     = { module = "com.mojang:minecraft"              , version.ref = "minecraft" }
 fabric-loader = { module = "net.fabricmc:fabric-loader"        , version.ref = "fabric-loader" }
 fabric-api    = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+permissions   = { module = "me.lucko:fabric-permissions-api"   , version.ref = "permissions" }
 
 [plugins]
 mod-publish   = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }

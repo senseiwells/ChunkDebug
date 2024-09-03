@@ -18,8 +18,8 @@ public record ChunkDataPayload(
 	int tick,
 	boolean initial
 ) implements CustomPacketPayload {
-	public static Type<ChunkDataPayload> TYPE = new Type<>(ChunkDebug.id("chunk_data"));
-	public static StreamCodec<RegistryFriendlyByteBuf, ChunkDataPayload> STREAM_CODEC = CustomPacketPayload.codec(
+	public static final Type<ChunkDataPayload> TYPE = new Type<>(ChunkDebug.id("chunk_data"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, ChunkDataPayload> STREAM_CODEC = CustomPacketPayload.codec(
 		ChunkDataPayload::encode, ChunkDataPayload::decode
 	);
 

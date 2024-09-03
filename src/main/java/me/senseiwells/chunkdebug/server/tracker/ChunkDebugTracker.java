@@ -108,9 +108,5 @@ public class ChunkDebugTracker {
 		}
 	}
 
-	public void reload() {
-
-	}
-
 	public record DirtyChunks(List<ChunkData> updated, LongList removed) { }
 }

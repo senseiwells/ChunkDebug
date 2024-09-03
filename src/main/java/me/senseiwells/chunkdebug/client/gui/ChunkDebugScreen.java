@@ -97,7 +97,7 @@ public class ChunkDebugScreen extends Screen {
 	public void unloadChunks(ResourceKey<Level> dimension, long[] positions) {
 		DimensionState state = this.state(dimension);
 		for (long position : positions) {
-			state.remove(position, this.ticks + 20);
+			state.remove(position, this.ticks + this.chunkRetention.getIntValue());
 		}
 	}
 
@@ -180,8 +180,9 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	public void clientTick() {
+		int tick = ++this.ticks;
 		for (DimensionState state : this.states.values()) {
-			state.unloaded.removeAll(++this.ticks);
+			state.unloaded.removeAll(tick);
 		}
 	}
 

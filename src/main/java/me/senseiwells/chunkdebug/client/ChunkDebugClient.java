@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -43,7 +44,8 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
 
-		ClientConfigurationNetworking.registerGlobalReceiver(HelloPayload.TYPE, this::handleHello);
+		ClientPlayNetworking.registerGlobalReceiver(HelloPayload.TYPE, this::handleHello);
+		ClientPlayNetworking.registerGlobalReceiver(ByePayload.TYPE, this::handleBye);
 		ClientPlayNetworking.registerGlobalReceiver(ChunkDataPayload.TYPE, this::handleChunkData);
 		ClientPlayNetworking.registerGlobalReceiver(ChunkUnloadPayload.TYPE, this::handleChunkUnload);
 	}
@@ -56,13 +58,14 @@ public class ChunkDebugClient implements ClientModInitializer {
 		this.trySendPayload(StopWatchingPayload::new);
 	}
 
-
+	@ApiStatus.Internal
 	public void onGuiRender(GuiGraphics graphics, @SuppressWarnings("unused") DeltaTracker tracker) {
 		if (this.screen != null) {
 			this.screen.renderMinimap(graphics);
 		}
 	}
 
+	@ApiStatus.Internal
 	public void onGuiResize(Minecraft minecraft, int width, int height) {
 		if (this.screen != null) {
 			this.screen.resize(minecraft, width, height);
@@ -78,10 +81,23 @@ public class ChunkDebugClient implements ClientModInitializer {
 		}
 	}
 
-	private void handleHello(HelloPayload payload, ClientConfigurationNetworking.Context context) {
+	private void handleHello(HelloPayload payload, ClientPlayNetworking.Context context) {
 		if (payload.version() == ChunkDebug.PROTOCOL_VERSION) {
 			this.screen = new ChunkDebugScreen();
+			ChunkDebug.LOGGER.info("ChunkDebug connection successful");
+		} else if (payload.version() < ChunkDebug.PROTOCOL_VERSION) {
+			ChunkDebug.LOGGER.info("ChunkDebug failed to connect, server is out of date!");
+		} else {
+			ChunkDebug.LOGGER.info("ChunkDebug failed to connect, client is out of date!");
 		}
+	}
+
+	private void handleBye(ByePayload payload, ClientPlayNetworking.Context context) {
+		Minecraft minecraft = context.client();
+		if (minecraft.screen == this.screen) {
+			minecraft.setScreen(null);
+		}
+		this.screen = null;
 	}
 
 	private void handleChunkData(ChunkDataPayload payload, ClientPlayNetworking.Context context) {

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public record StartWatchingPayload(List<ResourceKey<Level>> dimensions) implements CustomPacketPayload {
-	public static Type<StartWatchingPayload> TYPE = new Type<>(ChunkDebug.id("start_watching"));
+	public static final Type<StartWatchingPayload> TYPE = new Type<>(ChunkDebug.id("start_watching"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, StartWatchingPayload> STREAM_CODEC = ExtraStreamCodecs.DIMENSIONS.map(StartWatchingPayload::new, StartWatchingPayload::dimensions);
 
 	@NotNull
