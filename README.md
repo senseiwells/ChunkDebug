@@ -2,15 +2,78 @@
 
 ## What is ChunkDebug?
 
-Chunk debug is a tool that was originaly made for [CarpetClient 1.12.2](https://github.com/X-com/CarpetClient). I have ported it to modern versions of Minecraft, ChunkDebug supports all versions past Minecraft 1.16.5.
+ChunkDebug is an extremely useful tool for debugging chunk loading. 
+It provides you with a live display of all the loaded chunks in any given dimension.
+It is able to display the chunk's current status, any chunk tickets, as well as 
+the chunk world generation stage.
 
-This tool allows you to have a live view of currently loaded chunks in your worlds with a GUI and minimap, it provides you with information such as why the chunk is currently loaded and what type of loaded chunk it is.
-
-![2021-12-28_00 16 50](https://user-images.githubusercontent.com/66843746/147515139-4c2d4bbb-d8e4-416c-9933-eecc2a957a91.png)
-![2021-12-28_00 17 04](https://user-images.githubusercontent.com/66843746/147515143-7b08b16f-e5de-412e-a31f-b2c7f60af582.png)
+ChunkDebug was originally made for [CarpetClient 1.12.2](https://github.com/X-com/CarpetClient).
+I have completely re-written the mod to support modern versions of Minecraft.
+I only plan on maintaining the mod for the **latest** version of Minecraft.
 
 ## How to use ChunkDebug
 
-The [ChunkDebug](https://github.com/senseiwells/ChunkDebug) mod is for server side, the mod sends chunk data to the client where it is displayed by [EssentialClient](https://github.com/senseiwells/EssentialClient). You must have EssentialClient installed on the Client and ChunkDebug installed on the server (or on the client in the case of singleplayer), they must be compatible versions so just make sure you have the most up to date versions of the mods!
+ChunkDebug is required on both the client and the server. 
+If you are playing in single player, then you only need to install this mod on the client.
 
-Installing ChunkDebug on the server is easy, just install ChunkDebug from the [releases page](https://github.com/senseiwells/ChunkDebug/releases/tag/v1.0.1), once you have downloaded it put it in your server's mod folder, or client mod folder. To be able to view the ChunkDebug map you must install EssentialClient from it's [releases page](https://github.com/senseiwells/EssentialClient/releases), after installing this on your client you can join a server with ChunkDebug installed, press ESC, then EssentialClient menu, then Chunk Debug Map. This will open the ChunkDebug map ready for you to use!
+You can download the mod from Modrinth:
+
+[![Modrinth download](https://img.shields.io/modrinth/dt/chunkdebug?label=Download%20on%20Modrinth&style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEuNSIgY2xpcC1ydWxlPSJldmVub2RkIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZmlsbD0ibm9uZSIgZD0iTTAgMGgxMDB2MTAwSDB6Ii8+PGNsaXBQYXRoIGlkPSJhIj48cGF0aCBkPSJNMTAwIDBIMHYxMDBoMTAwVjBaTTQ2LjAwMiA0OS4yOTVsLjA3NiAxLjc1NyA4LjgzIDMyLjk2MyA3Ljg0My0yLjEwMi04LjU5Ni0zMi4wOTQgNS44MDQtMzIuOTMyLTcuOTk3LTEuNDEtNS45NiAzMy44MThaIi8+PC9jbGlwUGF0aD48ZyBjbGlwLXBhdGg9InVybCgjYSkiPjxwYXRoIGZpbGw9IiMwMGQ4NDUiIGQ9Ik01MCAxN2MxOC4yMDcgMCAzMi45ODggMTQuNzg3IDMyLjk4OCAzM1M2OC4yMDcgODMgNTAgODMgMTcuMDEyIDY4LjIxMyAxNy4wMTIgNTAgMzEuNzkzIDE3IDUwIDE3Wm0wIDljMTMuMjQgMCAyMy45ODggMTAuNzU1IDIzLjk4OCAyNFM2My4yNCA3NCA1MCA3NCAyNi4wMTIgNjMuMjQ1IDI2LjAxMiA1MCAzNi43NiAyNiA1MCAyNloiLz48L2c+PGNsaXBQYXRoIGlkPSJiIj48cGF0aCBkPSJNMCAwdjQ2aDUwbDEuMzY4LjI0MUw5OSA2My41NzhsLTIuNzM2IDcuNTE3TDQ5LjI5NSA1NEgwdjQ2aDEwMFYwSDBaIi8+PC9jbGlwUGF0aD48ZyBjbGlwLXBhdGg9InVybCgjYikiPjxwYXRoIGZpbGw9IiMwMGQ4NDUiIGQ9Ik01MCAwYzI3LjU5NiAwIDUwIDIyLjQwNCA1MCA1MHMtMjIuNDA0IDUwLTUwIDUwUzAgNzcuNTk2IDAgNTAgMjIuNDA0IDAgNTAgMFptMCA5YzIyLjYyOSAwIDQxIDE4LjM3MSA0MSA0MVM3Mi42MjkgOTEgNTAgOTEgOSA3Mi42MjkgOSA1MCAyNy4zNzEgOSA1MCA5WiIvPjwvZz48Y2xpcFBhdGggaWQ9ImMiPjxwYXRoIGQ9Ik01MCAwYzI3LjU5NiAwIDUwIDIyLjQwNCA1MCA1MHMtMjIuNDA0IDUwLTUwIDUwUzAgNzcuNTk2IDAgNTAgMjIuNDA0IDAgNTAgMFptMCAzOS41NDljNS43NjggMCAxMC40NTEgNC42ODMgMTAuNDUxIDEwLjQ1MSAwIDUuNzY4LTQuNjgzIDEwLjQ1MS0xMC40NTEgMTAuNDUxLTUuNzY4IDAtMTAuNDUxLTQuNjgzLTEwLjQ1MS0xMC40NTEgMC01Ljc2OCA0LjY4My0xMC40NTEgMTAuNDUxLTEwLjQ1MVoiLz48L2NsaXBQYXRoPjxnIGNsaXAtcGF0aD0idXJsKCNjKSI+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBkODQ1IiBzdHJva2Utd2lkdGg9IjkiIGQ9Ik01MCA1MCA1LjE3MSA3NS44ODIiLz48L2c+PGNsaXBQYXRoIGlkPSJkIj48cGF0aCBkPSJNNTAgMGMyNy41OTYgMCA1MCAyMi40MDQgNTAgNTBzLTIyLjQwNCA1MC01MCA1MFMwIDc3LjU5NiAwIDUwIDIyLjQwNCAwIDUwIDBabTAgMjUuMzZjMTMuNTk5IDAgMjQuNjQgMTEuMDQxIDI0LjY0IDI0LjY0UzYzLjU5OSA3NC42NCA1MCA3NC42NCAyNS4zNiA2My41OTkgMjUuMzYgNTAgMzYuNDAxIDI1LjM2IDUwIDI1LjM2WiIvPjwvY2xpcFBhdGg+PGcgY2xpcC1wYXRoPSJ1cmwoI2QpIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMGQ4NDUiIHN0cm9rZS13aWR0aD0iOSIgZD0ibTUwIDUwIDUwLTEzLjM5NyIvPjwvZz48cGF0aCBmaWxsPSIjMDBkODQ1IiBkPSJNMzcuMjQzIDUyLjc0NiAzNSA0NWw4LTkgMTEtMyA0IDQtNiA2LTQgMS0zIDQgMS4xMiA0LjI0IDMuMTEyIDMuMDkgNC45NjQtLjU5OCAyLjg2Ni0yLjk2NCA4LjE5Ni0yLjE5NiAxLjQ2NCA1LjQ2NC04LjA5OCA4LjAyNkw0Ni44MyA2NS40OWwtNS41ODctNS44MTUtNC02LjkyOVoiLz48L3N2Zz4=)](https://modrinth.com/mod/chunkdebug)
+
+If you are playing on a server, then you will need the correct permissions to use ChunkDebug.
+You must be opped, or alternatively you must have the `"chunk-debug"` permission from a 
+permissions mod, for example [Luck Perms](https://modrinth.com/mod/luckperms).
+
+Once you are in-game, you can hit the ChunkDebug keybind (`F6` by default) which will
+open the ChunkDebug map. 
+You can change this key in the Minecraft controls menu.
+
+
+### Chunk Map
+
+In the centre is the ChunkDebug map, this is where the live chunk
+map is displayed, you can pan and zoom around the map.
+
+![ChunkDebug Menu](images/settings_menu.png)
+
+
+### Settings Menu
+
+The menu on the left contains all the options for ChunkDebug.
+This can be hidden by pressing `F1` or by toggling the button
+in the bottom left corner.
+
+
+At the top, you can change your minimap mode. 
+This can be configured to `No Minimap`, `Static Minimap`, where the 
+minimap will reflect what is currently rendering at the centre of the
+chunk map, and `Following Minimap`, where the minimap will follow your player. 
+
+Below this are your navigation controls, you can navigate to different
+dimensions. 
+As well as chunk clusters, this will cycle through any loaded groups 
+of chunks that are neighbouring each other. 
+This is a great tool for finding loaded chunks in your world.
+You can also manually input your coordinates or return to the player's position.
+
+Finally, there are some additional rendering options. 
+`Render Generation Stages` will colour chunks based on their world
+generation stage, this can get quite messy so an option to disable it is provided.
+`Render Ticket Types` will colour chunks based on their ticket types.
+`Render Minimap` will render the minimap *on top* of the chunk map, this is useful for lining up your minimap view. 
+And finally `Chunk Retention` is the number of ticks you'd like to
+retain unloaded chunks, after a chunk unloads it will fade out for the
+number of ticks specified. 
+This is useful for debugging chunks that unload rapidly.
+
+### Selection Menu
+
+You can make a selection on the chunk map by right-clicking, this will
+highlight the chunk with a red outline, it will also bring up a menu
+on the right displaying all the relevant information for that chunk.
+
+![Chunk Selection Menu](images/chunk_selection_menu.png)
+
+The menu displays the location of the chunks, as well as the chunk status
+
+![Chunk Selections Menu](images/chunk_selections_menu.png)

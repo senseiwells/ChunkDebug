@@ -466,18 +466,14 @@ public class ChunkDebugScreen extends Screen {
 		graphics.drawString(this.font, title, minX + padding, minY + padding, 0xFFFFFFFF);
 
 		int offsetY = minY + padding * 2 + this.font.lineHeight;
-		Component dimension = Component.literal(this.dimension().location().toString());
-		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, dimension, this.dimensionLeft, this.dimensionRight);
-
 		int gap = 2 * padding + 15;
 
-		offsetY += gap;
-		this.returnToPlayer.setPosition(minX + padding, offsetY);
-		this.returnToPlayer.setWidth(maxX - minX - 2 * padding);
-
-		offsetY += gap;
 		Component mode = this.minimap.pretty();
 		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, mode, this.minimapLeft, this.minimapRight);
+
+		offsetY += gap + 3;
+		Component dimension = Component.literal(this.dimension().location().toString());
+		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, dimension, this.dimensionLeft, this.dimensionRight);
 
 		offsetY += gap;
 		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, clusters, this.clustersLeft, this.clustersRight);
@@ -491,8 +487,11 @@ public class ChunkDebugScreen extends Screen {
 		RenderUtils.optionRight(graphics, this.font, minX, centerX + padding / 2, offsetY, padding, x, this.chunkPosX);
 		RenderUtils.optionRight(graphics, this.font, centerX - padding / 2, maxX, offsetY, padding, z, this.chunkPosZ);
 
-		offsetY += 3;
 		offsetY += gap;
+		this.returnToPlayer.setPosition(minX + padding, offsetY);
+		this.returnToPlayer.setWidth(maxX - minX - 2 * padding);
+
+		offsetY += gap + 3;
 		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, stages, this.showStages);
 
 		offsetY += gap;

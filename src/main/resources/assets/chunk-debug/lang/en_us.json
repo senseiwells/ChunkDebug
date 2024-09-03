@@ -39,7 +39,7 @@
   "chunk-debug.status.unloaded": "Unloaded",
   "chunk-debug.status.inaccessible": "Inaccessible",
   "chunk-debug.status.full": "Border",
-  "chunk-debug.status.block_ticking": "Lazy",
+  "chunk-debug.status.block_ticking": "Block Ticking",
   "chunk-debug.status.entity_ticking": "Entity Ticking",
 
   "chunk-debug.ticket.type.start": "Spawn Chunks",
