@@ -3,7 +3,6 @@ package me.senseiwells.chunkdebug.server;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
