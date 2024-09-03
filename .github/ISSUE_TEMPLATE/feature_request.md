@@ -8,9 +8,7 @@ assignees: ''
 ---
 
 **Describe the feature**
-Rule Name: 
-Description: 
-Options: 
+A description of the feature and its purpose.
 
 **Expected behavior**
 A clear and concise description of what you expect to happen.
