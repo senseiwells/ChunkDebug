@@ -1,18 +1,13 @@
 package me.senseiwells.chunkdebug.client;
 
-import com.mojang.brigadier.Command;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugScreen;
 import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -61,7 +56,8 @@ public class ChunkDebugClient implements ClientModInitializer {
 		this.trySendPayload(StopWatchingPayload::new);
 	}
 
-	public void onGuiRender(GuiGraphics graphics, DeltaTracker tracker) {
+
+	public void onGuiRender(GuiGraphics graphics, @SuppressWarnings("unused") DeltaTracker tracker) {
 		if (this.screen != null) {
 			this.screen.renderMinimap(graphics);
 		}

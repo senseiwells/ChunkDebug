@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "1.2.0"
+val modVersion = "2.0.0-beta.1"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -40,7 +40,7 @@ tasks {
 		filesMatching("fabric.mod.json") {
 			expand(mutableMapOf(
 				"version" to project.version,
-				"minecraft_dependency" to libs.versions.minecraft.get(),
+				"minecraft_dependency" to libs.versions.minecraft.get().replaceAfterLast('.', "x"),
 				"fabric_loader_dependency" to libs.versions.fabric.loader.get(),
 				"fabric_api_dependency" to libs.versions.fabric.api.get()
 			))

@@ -93,6 +93,7 @@ public class ChunkData {
 		this.tickets = ImmutableList.copyOf(tickets);
 	}
 
+	@SuppressWarnings("unused")
 	public void updateStatusLevel(int statusLevel) {
 		this.statusLevel = statusLevel;
 	}

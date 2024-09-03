@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
 import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
+import me.senseiwells.chunkdebug.client.gui.widget.ToggleButton;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
@@ -85,5 +86,29 @@ public class RenderUtils {
 		offsetMaxX -= padding;
 		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
 		NamedButton.renderScrollingString(graphics, font, name, offsetX, offsetY, offsetMaxX, offsetMaxY);
+	}
+
+	public static void option(
+		GuiGraphics graphics,
+		Font font,
+		int minX,
+		int maxX,
+		int offsetY,
+		int padding,
+		Component name,
+		ToggleButton toggle
+	) {
+		int buttonWidth = toggle.getWidth();
+		int buttonHeight = toggle.getHeight();
+
+		int offsetX = minX + padding;
+		int offsetMaxX = maxX - padding;
+		int offsetMaxY = offsetY + buttonHeight;
+
+		toggle.setPosition(offsetX, offsetY);
+
+		offsetX += padding + buttonWidth;
+		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
+		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFF);
 	}
 }
