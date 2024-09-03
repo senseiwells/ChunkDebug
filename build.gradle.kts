@@ -58,13 +58,32 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-            
+			## ChunkDebug $modVersion
+			
+			ChunkDebug has been completely re-written from scratch.
+			
+			### Changes
+			- Complete network and rendering overhaul
+			  - No longer requires EssentialClient on the client, install ChunkDebug on the client instead
+              - Scheduled chunk unloading is now synchronized
+			  - Added support for permission mods to control who can use ChunkDebug
+			- New GUI
+			  - Updated the GUI to be more user friendly
+			  - You an now set a Chunk Retention to determine how long to keep unloaded chunks rendered for
+			  - You can now render the minimap on top of the chunk debug screen to allow you to line things up easier
+              - You can disable rendering of the chunk generation stages and/or ticket types
+              - You can hide both the chunk debug settings and/or the chunk breakdown by hitting F1 or by clicking the toggle buttons in the bottom corners
+              - You can now select regions of chunks by dragging right click
+              - General QOL, the gui now doesn't behave weirdly when zooming and correctly centers when jumping to clusters, and the gui isn't grid based any more, so panning is smoother
+            - Bug Fixes
+			  - Chunk Stages are now synchronized correctly with the client
+              - "Inaccessible" chunks are displayed correctly now
             """.trimIndent()
 		)
 		type = STABLE
 		modLoaders.add("fabric")
 
-		displayName = "ServerReplay $modVersion for ${libs.versions.minecraft.get()}"
+		displayName = "ChunkDebug $modVersion for ${libs.versions.minecraft.get()}"
 		version = releaseVersion
 
 		modrinth {
