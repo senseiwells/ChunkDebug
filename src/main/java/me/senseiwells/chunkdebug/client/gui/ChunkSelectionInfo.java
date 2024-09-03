@@ -74,12 +74,17 @@ public record ChunkSelectionInfo(
 		} else {
 			title = Component.translatable("chunk-debug.info.breakdown.chunks").withColor(HL);
 
-			Component area = Component.empty()
+			Component range = Component.empty()
 				.append(prettify(selection.getMinChunkPos()))
 				.append(" -> ")
 				.append(prettify(selection.getMaxChunkPos()));
-			location.add(Component.translatable("chunk-debug.info.location", area));
+			location.add(Component.translatable("chunk-debug.info.location", range));
 
+			Component area = Component.empty()
+				.append(prettify(selection.sizeX()))
+				.append("x")
+				.append(prettify(selection.sizeZ()));
+			location.add(Component.translatable("chunk-debug.info.area", area));
 
 			int lowestLevel = Integer.MAX_VALUE;
 			int highestLevel = Integer.MIN_VALUE;

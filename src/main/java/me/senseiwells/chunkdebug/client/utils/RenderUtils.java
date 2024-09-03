@@ -4,9 +4,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
 import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
-import me.senseiwells.chunkdebug.client.gui.widget.ToggleButton;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
@@ -88,7 +88,7 @@ public class RenderUtils {
 		NamedButton.renderScrollingString(graphics, font, name, offsetX, offsetY, offsetMaxX, offsetMaxY);
 	}
 
-	public static void option(
+	public static void optionLeft(
 		GuiGraphics graphics,
 		Font font,
 		int minX,
@@ -96,7 +96,7 @@ public class RenderUtils {
 		int offsetY,
 		int padding,
 		Component name,
-		ToggleButton toggle
+		AbstractWidget toggle
 	) {
 		int buttonWidth = toggle.getWidth();
 		int buttonHeight = toggle.getHeight();
@@ -110,5 +110,42 @@ public class RenderUtils {
 		offsetX += padding + buttonWidth;
 		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
 		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFF);
+	}
+
+	public static void optionRight(
+		GuiGraphics graphics,
+		Font font,
+		int minX,
+		int maxX,
+		int offsetY,
+		int padding,
+		Component name,
+		AbstractWidget toggle
+	) {
+		int buttonWidth = toggle.getWidth();
+		int buttonHeight = toggle.getHeight();
+
+		int offsetX = minX + padding;
+		int offsetMaxX = maxX - buttonWidth - 2 * padding;
+		int offsetMaxY = offsetY + buttonHeight;
+
+		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
+		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFF);
+
+		toggle.setPosition(maxX - buttonWidth - padding, offsetY);
+	}
+
+	public static int maxWidth(Font font, Component first, Component... others) {
+		int width = font.width(first);
+		for (Component component : others) {
+			width = Math.max(width, font.width(component));
+		}
+		return width;
+	}
+
+	public static void setVisible(boolean visible, AbstractWidget... widgets) {
+		for (AbstractWidget widget : widgets) {
+			widget.visible = visible;
+		}
 	}
 }

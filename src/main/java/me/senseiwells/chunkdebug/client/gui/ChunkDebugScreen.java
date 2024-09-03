@@ -1,5 +1,7 @@
 package me.senseiwells.chunkdebug.client.gui;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -8,6 +10,7 @@ import me.senseiwells.chunkdebug.client.ChunkDebugClient;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton.Direction;
 import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
+import me.senseiwells.chunkdebug.client.gui.widget.IntegerEditbox;
 import me.senseiwells.chunkdebug.client.gui.widget.ToggleButton;
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
@@ -49,7 +52,9 @@ public class ChunkDebugScreen extends Screen {
 	private int clusterTicks = 0;
 	private int clusterIndex = 0;
 
-	private Minimap minimap = Minimap.FOLLOW;
+	private ChunkPos center = ChunkPos.ZERO;
+
+	private Minimap minimap = Minimap.NONE;
 
 	private ToggleButton breakdown;
 	private ToggleButton settings;
@@ -65,11 +70,18 @@ public class ChunkDebugScreen extends Screen {
 	private ArrowButton clustersLeft;
 	private ArrowButton clustersRight;
 
+	private IntegerEditbox chunkPosX;
+	private IntegerEditbox chunkPosZ;
+
 	private ToggleButton showStages;
 	private ToggleButton showTickets;
 	private ToggleButton showMinimap;
 
+	private IntegerEditbox chunkRetention;
+
 	private boolean initialized = false;
+
+	private int ticks = 0;
 
 	public ChunkDebugScreen() {
 		super(Component.translatable("chunk-debug.screen.title"));
@@ -85,7 +97,7 @@ public class ChunkDebugScreen extends Screen {
 	public void unloadChunks(ResourceKey<Level> dimension, long[] positions) {
 		DimensionState state = this.state(dimension);
 		for (long position : positions) {
-			state.remove(position);
+			state.remove(position, this.ticks + 20);
 		}
 	}
 
@@ -130,9 +142,10 @@ public class ChunkDebugScreen extends Screen {
 		this.clustersRight = new ArrowButton(Direction.RIGHT, 0, 0, 15, () -> this.jumpToCluster(1));
 		this.addRenderableWidget(this.clustersRight);
 
-		// Chunk positions X:[ ] Z:[ ]
-
-		// Tick jump [<] [7832] [>]
+		this.chunkPosX = new IntegerEditbox(this.font, 40, 15, x -> this.setMapCenter(x, this.center.z));
+		this.addRenderableWidget(this.chunkPosX);
+		this.chunkPosZ = new IntegerEditbox(this.font, 40, 15, z -> this.setMapCenter(this.center.x, z));
+		this.addRenderableWidget(this.chunkPosZ);
 
 		this.showStages = new ToggleButton(0, 0, 15);
 		this.showStages.setToggled(true);
@@ -143,7 +156,18 @@ public class ChunkDebugScreen extends Screen {
 		this.addRenderableWidget(this.showTickets);
 
 		this.showMinimap = new ToggleButton(0, 0, 15);
+		this.showMinimap.setTooltip(
+			Tooltip.create(Component.translatable("chunk-debug.settings.visibility.minimap.tooltip"))
+		);
 		this.addRenderableWidget(this.showMinimap);
+
+		this.chunkRetention = new IntegerEditbox(this.font, 30, 15, i -> {});
+		this.chunkRetention.setTooltip(
+			Tooltip.create(Component.translatable("chunk-debug.settings.visibility.unload.tooltip"))
+		);
+		this.addRenderableWidget(this.chunkRetention);
+
+		// Tick jump [<] [7832] [>]
 	}
 
 	@Override
@@ -152,6 +176,12 @@ public class ChunkDebugScreen extends Screen {
 			this.clusterTicks--;
 		} else {
 			this.clusterSelection = null;
+		}
+	}
+
+	public void clientTick() {
+		for (DimensionState state : this.states.values()) {
+			state.unloaded.removeAll(++this.ticks);
 		}
 	}
 
@@ -203,6 +233,15 @@ public class ChunkDebugScreen extends Screen {
 		this.renderChunkSelectionMenu(graphics, state);
 		this.renderSettingsMenu(graphics);
 
+
+		this.center = this.convertScreenToChunkPos(this.width / 2.0, this.height / 2.0);
+		if (!this.chunkPosX.isFocused()) {
+			this.chunkPosX.setIntValue(this.center.x);
+		}
+		if (!this.chunkPosZ.isFocused()) {
+			this.chunkPosZ.setIntValue(this.center.z);
+		}
+
 		super.render(graphics, mouseX, mouseY, partial);
 	}
 
@@ -235,6 +274,9 @@ public class ChunkDebugScreen extends Screen {
 			return true;
 		}
 
+		this.chunkPosX.setFocused(false);
+		this.chunkPosZ.setFocused(false);
+		this.chunkRetention.setFocused(false);
 		if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
 			DimensionState state = this.state();
 			state.first = this.convertScreenToChunkPos(mouseX, mouseY);
@@ -359,7 +401,20 @@ public class ChunkDebugScreen extends Screen {
 		graphics.drawManaged(() -> {
 			for (ChunkData data : state.chunks.values()) {
 				ChunkPos pos = data.position();
-				graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, this.calculateChunkColor(data));
+				int color = this.calculateChunkColor(data);
+				graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
+			}
+
+			int ticks = this.chunkRetention.getIntValue();
+			if (ticks > 0) {
+				for (Map.Entry<Integer, ChunkData> entry : state.unloaded.entries()) {
+					float delta = (float) (entry.getKey() - this.ticks) / ticks;
+					int alpha = ((byte) (delta * 255)) << 24 | 0xFFFFFF;
+					ChunkData data = entry.getValue();
+					ChunkPos pos = data.position();
+					int color = this.calculateChunkColor(data) & alpha;
+					graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
+				}
 			}
 		});
 
@@ -375,11 +430,15 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private void renderSettingsMenu(GuiGraphics graphics) {
-		this.dimensionLeft.visible = this.dimensionRight.visible = this.settings.isToggled();
-		this.minimapLeft.visible = this.minimapRight.visible = this.settings.isToggled();
-		this.clustersLeft.visible = this.clustersRight.visible = this.settings.isToggled();
-		this.returnToPlayer.visible = this.showMinimap.visible = this.settings.isToggled();
-		this.showStages.visible = this.showTickets.visible = this.settings.isToggled();
+		RenderUtils.setVisible(
+			this.settings.isToggled(),
+			this.dimensionLeft, this.dimensionRight,
+			this.minimapLeft, this.minimapRight,
+			this.clustersLeft, this.clustersRight,
+			this.returnToPlayer, this.showMinimap,
+			this.showStages, this.showTickets,
+			this.chunkRetention
+		);
 		if (!this.settings.isToggled()) {
 			return;
 		}
@@ -391,19 +450,18 @@ public class ChunkDebugScreen extends Screen {
 		Component stages = Component.translatable("chunk-debug.settings.visibility.stages");
 		Component tickets = Component.translatable("chunk-debug.settings.visibility.tickets");
 		Component minimap = Component.translatable("chunk-debug.settings.visibility.minimap");
+		Component fade = Component.translatable("chunk-debug.settings.visibility.unload");
 
 		int padding = MENU_PADDING;
-		int width = Math.max(this.font.width(title), this.font.width(player));
-		width = Math.max(width, this.font.width(clusters) + 2 * padding + 30);
-		width = Math.max(width, this.font.width(stages) + padding + 15);
-		width = Math.max(width, this.font.width(tickets) + padding + 15);
-		width = Math.max(width, this.font.width(minimap) + padding + 15);
-		width = Math.max(width, this.dimensionWidth + 2 * padding + 30);
+		int width = Math.max(this.dimensionWidth, RenderUtils.maxWidth(this.font, clusters, minimap)) + 2 * padding + 30;
+		width = Math.max(width,  RenderUtils.maxWidth(this.font, title, player));
+		width = Math.max(width, RenderUtils.maxWidth(this.font, stages, tickets, fade) + padding + 15);
 		width += 4 * padding;
 		int minX = padding + 1 - 1;
 		int minY = padding + 1 - 1;
 		int maxX = padding + width;
 		int maxY = this.height - padding;
+		int centerX = (maxX + minX) / 2;
 
 		graphics.fill(minX, minY, maxX, maxY, HL_BG_LIGHT);
 		graphics.drawString(this.font, title, minX + padding, minY + padding, 0xFFFFFFFF);
@@ -412,26 +470,40 @@ public class ChunkDebugScreen extends Screen {
 		Component dimension = Component.literal(this.dimension().location().toString());
 		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, dimension, this.dimensionLeft, this.dimensionRight);
 
-		offsetY += 2 * padding + 15;
+		int gap = 2 * padding + 15;
+
+		offsetY += gap;
 		this.returnToPlayer.setPosition(minX + padding, offsetY);
 		this.returnToPlayer.setWidth(maxX - minX - 2 * padding);
 
-		offsetY += 2 * padding + 15;
+		offsetY += gap;
 		Component mode = this.minimap.pretty();
 		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, mode, this.minimapLeft, this.minimapRight);
 
-		offsetY += 2 * padding + 15;
+		offsetY += gap;
 		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, clusters, this.clustersLeft, this.clustersRight);
 
-		offsetY += 10;
-		offsetY += 2 * padding + 15;
-		RenderUtils.option(graphics, this.font, minX, maxX, offsetY, padding, stages, this.showStages);
+		offsetY += gap;
 
-		offsetY += 2 * padding + 15;
-		RenderUtils.option(graphics, this.font, minX, maxX, offsetY, padding, tickets, this.showTickets);
+		Component x = Component.literal("X");
+		Component z = Component.literal("Z");
+		this.chunkPosX.setWidth(centerX - minX - 5 * padding - this.font.width(x) + 2);
+		this.chunkPosZ.setWidth(maxX - centerX - 5 * padding - this.font.width(z) + 2);
+		RenderUtils.optionRight(graphics, this.font, minX, centerX + padding / 2, offsetY, padding, x, this.chunkPosX);
+		RenderUtils.optionRight(graphics, this.font, centerX - padding / 2, maxX, offsetY, padding, z, this.chunkPosZ);
 
-		offsetY += 2 * padding + 15;
-		RenderUtils.option(graphics, this.font, minX, maxX, offsetY, padding, minimap, this.showMinimap);
+		offsetY += 3;
+		offsetY += gap;
+		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, stages, this.showStages);
+
+		offsetY += gap;
+		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, tickets, this.showTickets);
+
+		offsetY += gap;
+		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, minimap, this.showMinimap);
+
+		offsetY += gap;
+		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, fade, this.chunkRetention);
 
 		graphics.pose().popPose();
 	}
@@ -571,9 +643,13 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private void setMapCenter(ChunkPos pos) {
+		this.setMapCenter(pos.x, pos.z);
+	}
+
+	private void setMapCenter(int x, int z) {
 		DimensionState state = this.state();
-		state.offsetX = (this.width / 2.0) - pos.x * state.scale;
-		state.offsetY = (this.height / 2.0) - pos.z * state.scale;
+		state.offsetX = (this.width / 2.0) - x * state.scale;
+		state.offsetY = (this.height / 2.0) - z * state.scale;
 	}
 
 	private ChunkPos convertScreenToChunkPos(double x, double y) {
@@ -635,6 +711,8 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private static class DimensionState {
+		private final Multimap<Integer, ChunkData> unloaded = HashMultimap.create();
+
 		private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
 		private final ChunkClusters clusters = new ChunkClusters();
 		private final ResourceKey<Level> dimension;
@@ -658,9 +736,13 @@ public class ChunkDebugScreen extends Screen {
 			this.clusters.add(pos);
 		}
 
-		void remove(long pos) {
-			this.chunks.remove(pos);
+		void remove(long pos, int tick) {
 			this.clusters.remove(pos);
+			ChunkData data = this.chunks.remove(pos);
+			if (data != null) {
+				this.unloaded.put(tick, data);
+				data.updateUnloading(false);
+			}
 		}
 	}
 }

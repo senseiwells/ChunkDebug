@@ -41,7 +41,8 @@ public class ChunkMapMixin {
 		method = "method_60440",
 		at = @At(
 			value = "INVOKE",
-			target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;remove(JLjava/lang/Object;)Z"
+			target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;remove(JLjava/lang/Object;)Z",
+			remap = false
 		)
 	)
 	private void onUnloadHolder(ChunkHolder chunkHolder, long pos, CallbackInfo ci) {

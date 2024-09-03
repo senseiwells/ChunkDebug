@@ -70,6 +70,9 @@ public class ChunkDebugClient implements ClientModInitializer {
 	}
 
 	private void onClientTick(Minecraft minecraft) {
+		if (this.screen != null) {
+			this.screen.clientTick();
+		}
 		if (this.keybind.consumeClick() && minecraft.screen == null) {
 			minecraft.setScreen(this.screen);
 		}
