@@ -106,8 +106,6 @@ public class ChunkDebugScreen extends Screen {
 		super.init();
 		this.initialized = true;
 
-		this.initializeDimension(this.dimension());
-
 		this.breakdown = new ToggleButton(this.width - 20, this.height - 20, 15);
 		this.breakdown.setTooltip(Tooltip.create(Component.translatable("chunk-debug.info.breakdown.toggle")));
 		this.breakdown.setToggled(true);
@@ -383,7 +381,6 @@ public class ChunkDebugScreen extends Screen {
 		} else {
 			LocalPlayer player = this.minecraft.player;
 			ResourceKey<Level> dimension = player.level().dimension();
-			this.initializeDimension(dimension);
 			state = this.state(dimension);
 			ChunkPos pos = player.chunkPosition();
 
@@ -438,6 +435,7 @@ public class ChunkDebugScreen extends Screen {
 			this.clustersLeft, this.clustersRight,
 			this.returnToPlayer, this.showMinimap,
 			this.showStages, this.showTickets,
+			this.chunkPosX, this.chunkPosZ,
 			this.chunkRetention
 		);
 		if (!this.settings.isToggled()) {
@@ -578,7 +576,11 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private DimensionState state(ResourceKey<Level> dimension) {
-		return this.states.computeIfAbsent(dimension, DimensionState::new);
+		return this.states.computeIfAbsent(dimension, dim -> {
+			DimensionState state = new DimensionState(dim);
+			this.initializeState(state);
+			return state;
+		});
 	}
 
 	private void jumpToCluster(int offset) {
@@ -624,21 +626,20 @@ public class ChunkDebugScreen extends Screen {
 		}
 	}
 
-	private void initializeDimension(ResourceKey<Level> dimension) {
-		if (!this.isWatching(dimension)) {
-			ChunkDebugClient.getInstance().startWatching(dimension);
+	private void initializeState(DimensionState state) {
+		if (!this.isWatching(state.dimension)) {
+			ChunkDebugClient.getInstance().startWatching(state.dimension);
 		}
-		DimensionState state = this.state(dimension);
 		if (!state.initialized) {
 			ChunkPos center = ChunkPos.ZERO;
 			if (this.minecraft != null) {
 				LocalPlayer player = this.minecraft.player;
-				if (player != null && player.level().dimension() == dimension) {
+				if (player != null && player.level().dimension() == state.dimension) {
 					center = player.chunkPosition();
 				}
 			}
-			state.offsetX = this.width / 2.0 - center.x * state.scale;
-			state.offsetY = this.height / 2.0 - center.z * state.scale;
+			state.offsetX = (this.width / 2.0) - center.x * state.scale;
+			state.offsetY = (this.height / 2.0) - center.z * state.scale;
 			state.initialized = true;
 		}
 	}
@@ -662,7 +663,6 @@ public class ChunkDebugScreen extends Screen {
 
 	private void incrementDimension(int increment) {
 		this.dimensionIndex = (this.dimensionIndex + increment + this.dimensions.size()) % this.dimensions.size();
-		this.initializeDimension(this.dimension());
 	}
 
 	private ResourceKey<Level> dimension() {
