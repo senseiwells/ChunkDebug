@@ -47,7 +47,10 @@ public class ChunkDebugServer implements ModInitializer {
 	}
 
 	public boolean isPermitted(ServerPlayer player) {
-		return Permissions.check(player, "chunk-debug", 2);
+		if (player.server.isDedicatedServer()) {
+			return Permissions.check(player, "chunk-debug", 2);
+		}
+		return true;
 	}
 
 	@ApiStatus.Internal

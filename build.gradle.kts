@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.0.0"
+val modVersion = "2.0.1+beta.1"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"

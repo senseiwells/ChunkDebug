@@ -7,11 +7,13 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
@@ -76,7 +78,13 @@ public class ChunkDebugClient implements ClientModInitializer {
 			this.screen.clientTick();
 		}
 		if (this.keybind.consumeClick() && minecraft.screen == null) {
-			minecraft.setScreen(this.screen);
+			if (this.screen != null) {
+				minecraft.setScreen(this.screen);
+			} else {
+				minecraft.gui.getChat().addMessage(
+					Component.translatable("chunk-debug.screen.unavailable").withStyle(ChatFormatting.RED)
+				);
+			}
 		}
 	}
 
