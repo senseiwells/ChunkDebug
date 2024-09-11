@@ -29,12 +29,13 @@ public class RenderUtils {
 
 	public static void fill(GuiGraphics graphics, float minX, float minY, float maxX, float maxY, int color) {
 		Matrix4f matrix4f = graphics.pose().last().pose();
-		VertexConsumer consumer = graphics.bufferSource().getBuffer(RenderType.gui());
-		consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, maxX, maxY, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, maxX, minY, 0.0F).setColor(color);
-		graphics.flush();
+		graphics.drawSpecial(source -> {
+			VertexConsumer consumer = source.getBuffer(RenderType.gui());
+			consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
+			consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
+			consumer.addVertex(matrix4f, maxX, maxY, 0.0F).setColor(color);
+			consumer.addVertex(matrix4f, maxX, minY, 0.0F).setColor(color);
+		});
 	}
 
 	public static void triangle(
@@ -49,12 +50,13 @@ public class RenderUtils {
 		graphics.pose().pushPose();
 		graphics.pose().rotateAround(Axis.ZP.rotationDegrees(angle), (minX + maxX) / 2, (minY + maxY) / 2, 0);
 		Matrix4f matrix4f = graphics.pose().last().pose();
-		VertexConsumer consumer = graphics.bufferSource().getBuffer(RenderType.gui());
-		consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, maxX, maxY - (maxY - minY) / 2, 0.0F).setColor(color);
-		consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
-		graphics.flush();
+		graphics.drawSpecial(source -> {
+			VertexConsumer consumer = source.getBuffer(RenderType.gui());
+			consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
+			consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
+			consumer.addVertex(matrix4f, maxX, maxY - (maxY - minY) / 2, 0.0F).setColor(color);
+			consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
+		});
 		graphics.pose().popPose();
 	}
 

@@ -119,13 +119,12 @@ public class ChunkData {
 		buf.writeInt(data.tickingStatusLevel);
 		buf.writeBoolean(data.unloading);
 
-		Optional<Holder<ChunkStatus>> status = buf.registryAccess().registry(Registries.CHUNK_STATUS)
+		Optional<Holder<ChunkStatus>> status = buf.registryAccess().lookup(Registries.CHUNK_STATUS)
 			.orElse(BuiltInRegistries.CHUNK_STATUS)
 			.getResourceKey(data.stage)
-			.flatMap(BuiltInRegistries.CHUNK_STATUS::getHolder);
+			.flatMap(BuiltInRegistries.CHUNK_STATUS::get);
 		ExtraStreamCodecs.OPTIONAL_CHUNK_STATUS.encode(buf, status);
 		ExtraStreamCodecs.TICKETS.encode(buf, data.tickets);
-
 	}
 
 	private static ChunkData decode(RegistryFriendlyByteBuf buf) {

@@ -45,7 +45,7 @@ public class ChunkMapMixin {
 			remap = false
 		)
 	)
-	private void onUnloadHolder(ChunkHolder chunkHolder, long pos, CallbackInfo ci) {
+	private void onUnloadHolder(ChunkHolder chunkHolder, CompletableFuture<?> future, long pos, CallbackInfo ci) {
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) this.level).chunkdebug$getTracker();
 		tracker.unload(pos);
 	}

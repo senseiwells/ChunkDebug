@@ -1,7 +1,6 @@
 package me.senseiwells.chunkdebug.common.utils;
 
 import me.senseiwells.chunkdebug.ChunkDebug;
-import me.senseiwells.chunkdebug.common.network.StopWatchingPayload;
 import me.senseiwells.chunkdebug.server.mixins.TicketAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -64,6 +63,7 @@ public class ExtraStreamCodecs {
 			TicketType.PLAYER,
 			TicketType.FORCED,
 			TicketType.PORTAL,
+			TicketType.ENDER_PEARL,
 			TicketType.POST_TELEPORT,
 			TicketType.UNKNOWN
 		);

@@ -53,6 +53,9 @@ public class ChunkColors {
 		if (type == TicketType.POST_TELEPORT) {
 			return 0xFF6600;
 		}
+		if (type == TicketType.ENDER_PEARL) {
+			return 0x31D1B8;
+		}
 		return -1;
 	}
 }

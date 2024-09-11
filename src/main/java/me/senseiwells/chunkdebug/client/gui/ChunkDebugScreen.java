@@ -22,7 +22,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.Ticket;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -205,7 +205,7 @@ public class ChunkDebugScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
-		this.renderBlurredBackground(partial);
+		this.renderBlurredBackground();
 
 		DimensionState state = this.state();
 
@@ -394,27 +394,24 @@ public class ChunkDebugScreen extends Screen {
 		graphics.pose().popPose();
 	}
 
-	@SuppressWarnings("deprecation")
 	private void renderChunkDebugMap(GuiGraphics graphics, DimensionState state) {
-		graphics.drawManaged(() -> {
-			for (ChunkData data : state.chunks.values()) {
+		for (ChunkData data : state.chunks.values()) {
+			ChunkPos pos = data.position();
+			int color = this.calculateChunkColor(data);
+			graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
+		}
+
+		int ticks = this.chunkRetention.getIntValue();
+		if (ticks > 0) {
+			for (Map.Entry<Integer, ChunkData> entry : state.unloaded.entries()) {
+				float delta = (float) (entry.getKey() - this.ticks) / ticks;
+				int alpha = ((byte) (delta * 255)) << 24 | 0xFFFFFF;
+				ChunkData data = entry.getValue();
 				ChunkPos pos = data.position();
-				int color = this.calculateChunkColor(data);
+				int color = this.calculateChunkColor(data) & alpha;
 				graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
 			}
-
-			int ticks = this.chunkRetention.getIntValue();
-			if (ticks > 0) {
-				for (Map.Entry<Integer, ChunkData> entry : state.unloaded.entries()) {
-					float delta = (float) (entry.getKey() - this.ticks) / ticks;
-					int alpha = ((byte) (delta * 255)) << 24 | 0xFFFFFF;
-					ChunkData data = entry.getValue();
-					ChunkPos pos = data.position();
-					int color = this.calculateChunkColor(data) & alpha;
-					graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
-				}
-			}
-		});
+		}
 
 		if (state.selection != null) {
 			this.renderChunkSelection(graphics, state.selection, SELECTED_OUTLINE_COLOR);
@@ -681,7 +678,7 @@ public class ChunkDebugScreen extends Screen {
 		List<Ticket<?>> tickets = this.showTickets.isToggled() ? data.tickets() : List.of();
 		int color = ChunkColors.calculateChunkColor(data.status(), stage, tickets, data.unloading());
 		if ((pos.x + pos.z) % 2 == 0) {
-			color = FastColor.ARGB32.lerp(0.12F, color, 0xFFFFFF);
+			color = ARGB.lerp(0.12F, color, 0xFFFFFF);
 		}
 		return color | 0xFF000000;
 	}
