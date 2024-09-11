@@ -48,6 +48,7 @@
   "chunk-debug.ticket.type.player": "Player",
   "chunk-debug.ticket.type.portal": "Portal",
   "chunk-debug.ticket.type.post_teleport": "Post Teleport",
+  "chunk-debug.ticket.type.ender_pearl": "Ender Pearl",
   "chunk-debug.ticket.type.forced": "Forced",
   "chunk-debug.ticket.type.unknown": "Unknown",
 
