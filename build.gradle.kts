@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.0.1+beta.1"
+val modVersion = "2.0.1+beta.2"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -60,6 +60,7 @@ tasks {
 			"""
 			Updated to 24w37a
 			
+			- Added new Enderpearl tickets
 			- Fixed a bug where you couldn't open chunk debug in singleplayer without cheats
             """.trimIndent()
 		)
