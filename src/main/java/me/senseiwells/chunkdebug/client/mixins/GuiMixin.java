@@ -14,7 +14,7 @@ public class GuiMixin {
 	// We do this instead of adding a new layer for shader compatability reasons
 	@Inject(
 		method = "renderEffects",
-		at = @At("TAIL")
+		at = @At("RETURN")
 	)
 	private void renderChunkDebugMinimap(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
 		ChunkDebugClient.getInstance().onGuiRender(graphics, tracker);

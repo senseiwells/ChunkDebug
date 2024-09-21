@@ -7,6 +7,7 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.server.config.ChunkDebugServerConfig;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.fabricmc.api.ModInitializer;
@@ -30,6 +31,7 @@ public class ChunkDebugServer implements ModInitializer {
 	private static ChunkDebugServer instance;
 
 	private final Multimap<ResourceKey<Level>, UUID> watching = HashMultimap.create();
+	private final ChunkDebugServerConfig config = ChunkDebugServerConfig.read();
 
 	public static ChunkDebugServer getInstance() {
 		return instance;
@@ -47,7 +49,7 @@ public class ChunkDebugServer implements ModInitializer {
 	}
 
 	public boolean isPermitted(ServerPlayer player) {
-		if (player.server.isDedicatedServer()) {
+		if (player.server.isDedicatedServer() && this.config.requirePermissions()) {
 			return Permissions.check(player, "chunk-debug", 2);
 		}
 		return true;
