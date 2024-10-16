@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import me.senseiwells.chunkdebug.client.ChunkDebugClient;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton.Direction;
@@ -30,6 +31,10 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static me.senseiwells.chunkdebug.client.utils.RenderUtils.*;
 
@@ -42,6 +47,8 @@ public class ChunkDebugScreen extends Screen {
 	private static final float MINIMAP_SCALE = 0.5F;
 
 	private static final int MENU_PADDING = 3;
+
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private final Map<ResourceKey<Level>, DimensionState> states = new Object2ObjectOpenHashMap<>();
 	private final List<ResourceKey<Level>> dimensions = new ArrayList<>();
@@ -201,6 +208,10 @@ public class ChunkDebugScreen extends Screen {
 			ChunkDebugClient.getInstance().stopWatching();
 			this.states.clear();
 		}
+	}
+
+	public void shutdown() {
+		this.executor.shutdown();
 	}
 
 	@Override
@@ -576,7 +587,7 @@ public class ChunkDebugScreen extends Screen {
 
 	private DimensionState state(ResourceKey<Level> dimension) {
 		return this.states.computeIfAbsent(dimension, dim -> {
-			DimensionState state = new DimensionState(dim);
+			DimensionState state = new DimensionState(dim, this.executor);
 			this.initializeState(state);
 			return state;
 		});
@@ -584,13 +595,14 @@ public class ChunkDebugScreen extends Screen {
 
 	private void jumpToCluster(int offset) {
 		DimensionState state = this.state();
-		this.clusterIndex = (this.clusterIndex + offset + state.clusters.count()) % state.clusters.count();
-		LongSet cluster = state.clusters.getCluster(this.clusterIndex);
-		List<ChunkPos> positions = cluster.longStream().mapToObj(ChunkPos::new).toList();
-		ChunkSelection selection = ChunkSelection.fromPositions(positions);
-		this.setMapCenter(selection.getCenterChunkPos());
-		this.clusterSelection = selection;
-		this.clusterTicks = 20;
+		state.getCluster(this.clusterIndex + offset).thenApplyAsync(pair -> {
+			ChunkSelection selection = pair.first();
+			this.clusterIndex = pair.secondInt();
+			this.setMapCenter(selection.getCenterChunkPos());
+			this.clusterSelection = selection;
+			this.clusterTicks = 20;
+			return null;
+		}, this.minecraft);
 	}
 
 	private void loadDimensions() {
@@ -711,11 +723,14 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private static class DimensionState {
+
 		private final Multimap<Integer, ChunkData> unloaded = HashMultimap.create();
 
 		private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
 		private final ChunkClusters clusters = new ChunkClusters();
 		private final ResourceKey<Level> dimension;
+
+		private final Executor clusterWorker;
 
 		private ChunkSelection selection;
 		private ChunkPos first;
@@ -727,22 +742,36 @@ public class ChunkDebugScreen extends Screen {
 
 		boolean initialized = false;
 
-		private DimensionState(ResourceKey<Level> dimension) {
+		private DimensionState(ResourceKey<Level> dimension, Executor clusterWorker) {
 			this.dimension = dimension;
+			this.clusterWorker = clusterWorker;
 		}
 
 		void add(long pos, ChunkData data) {
 			this.chunks.put(pos, data);
-			this.clusters.add(pos);
+			this.clusterWorker.execute(() -> {
+				this.clusters.add(pos);
+			});
 		}
 
 		void remove(long pos, int tick) {
-			this.clusters.remove(pos);
+			this.clusterWorker.execute(() -> {
+				this.clusters.remove(pos);
+			});
 			ChunkData data = this.chunks.remove(pos);
 			if (data != null) {
 				this.unloaded.put(tick, data);
 				data.updateUnloading(false);
 			}
+		}
+
+		CompletableFuture<ObjectIntPair<ChunkSelection>> getCluster(int index) {
+			return CompletableFuture.supplyAsync(() -> {
+				int corrected = index + this.clusters.count() % this.clusters.count();
+				LongSet cluster = this.clusters.getCluster(corrected);
+				List<ChunkPos> positions = cluster.longStream().mapToObj(ChunkPos::new).toList();
+				return ObjectIntPair.of(ChunkSelection.fromPositions(positions), corrected);
+			}, this.clusterWorker);
 		}
 	}
 }
