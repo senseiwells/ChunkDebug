@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -66,9 +67,14 @@ public class ChunkDebugServer implements ModInitializer {
 	}
 
 	private void sendHelloPayload(ServerGamePacketListenerImpl connection, PacketSender sender, MinecraftServer server) {
-		if (this.isPermitted(connection.player)) {
-			sender.sendPacket(HelloPayload.INSTANCE);
-		}
+		// We have to do this later in the tick because luckperms uses the same
+		// event to load permissions, and we need that information to be loaded
+		// before we check whether the player is permitted or not.
+		server.tell(new TickTask(server.getTickCount(), () -> {
+			if (this.isPermitted(connection.player)) {
+				sender.sendPacket(HelloPayload.INSTANCE);
+			}
+		}));
 	}
 
 	private void sendUpdatesToWatching(MinecraftServer server) {

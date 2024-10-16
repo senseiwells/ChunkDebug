@@ -13,6 +13,7 @@ group = "me.senseiwells"
 repositories {
 	mavenCentral()
 	maven("https://maven.parchmentmc.org/")
+	maven("https://api.modrinth.com/maven")
 }
 
 dependencies {
@@ -25,6 +26,8 @@ dependencies {
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
 
+	runtimeOnly(libs.luckperms)
+
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
 	}
@@ -32,6 +35,16 @@ dependencies {
 
 loom {
 	accessWidenerPath.set(file("src/main/resources/chunk-debug.accesswidener"))
+
+	runs {
+		getByName("server") {
+			runDir = "run/server"
+		}
+
+		getByName("client") {
+			runDir = "run/client"
+		}
+	}
 }
 
 java {
