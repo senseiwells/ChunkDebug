@@ -1,6 +1,7 @@
 package me.senseiwells.chunkdebug.client;
 
 import me.senseiwells.chunkdebug.ChunkDebug;
+import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugScreen;
 import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ClientModInitializer;
@@ -30,6 +31,8 @@ public class ChunkDebugClient implements ClientModInitializer {
 	private static ChunkDebugClient instance;
 
 	public final KeyMapping keybind = new KeyMapping("chunk-debug.key", GLFW.GLFW_KEY_F6, "key.categories.misc");
+
+	private final ChunkDebugClientConfig config = ChunkDebugClientConfig.read();
 
 	@Nullable
 	private ChunkDebugScreen screen;
@@ -92,11 +95,12 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 	private void onClientStopping(Minecraft minecraft) {
 		this.setScreen(null);
+		ChunkDebugClientConfig.write(this.config);
 	}
 
 	private void handleHello(HelloPayload payload, ClientPlayNetworking.Context context) {
 		if (payload.version() == ChunkDebug.PROTOCOL_VERSION) {
-			this.setScreen(new ChunkDebugScreen());
+			this.setScreen(new ChunkDebugScreen(this.config));
 			ChunkDebug.LOGGER.info("ChunkDebug connection successful");
 		} else if (payload.version() < ChunkDebug.PROTOCOL_VERSION) {
 			ChunkDebug.LOGGER.info("ChunkDebug failed to connect, server is out of date!");

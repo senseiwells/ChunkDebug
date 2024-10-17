@@ -30,7 +30,7 @@ public record ChunkDebugServerConfig(
 
 	public static ChunkDebugServerConfig read() {
 		if (!Files.exists(PATH)) {
-			ChunkDebug.LOGGER.info("Generating default config");
+			ChunkDebug.LOGGER.info("Generating default server config");
 			return write(new ChunkDebugServerConfig(true));
 		}
 		try (BufferedReader reader = Files.newBufferedReader(PATH)) {

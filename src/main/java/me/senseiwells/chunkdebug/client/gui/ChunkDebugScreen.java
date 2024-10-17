@@ -8,11 +8,13 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import me.senseiwells.chunkdebug.client.ChunkDebugClient;
+import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton.Direction;
 import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
 import me.senseiwells.chunkdebug.client.gui.widget.IntegerEditbox;
 import me.senseiwells.chunkdebug.client.gui.widget.ToggleButton;
+import me.senseiwells.chunkdebug.client.utils.Bounds;
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import net.minecraft.client.Minecraft;
@@ -48,6 +50,8 @@ public class ChunkDebugScreen extends Screen {
 
 	private static final int MENU_PADDING = 3;
 
+	private final ChunkDebugClientConfig config;
+
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private final Map<ResourceKey<Level>, DimensionState> states = new Object2ObjectOpenHashMap<>();
@@ -62,6 +66,7 @@ public class ChunkDebugScreen extends Screen {
 	private ChunkPos center = ChunkPos.ZERO;
 
 	private Minimap minimap = Minimap.NONE;
+	private boolean draggingMinimap = false;
 
 	private ToggleButton breakdown;
 	private ToggleButton settings;
@@ -71,6 +76,9 @@ public class ChunkDebugScreen extends Screen {
 
 	private ArrowButton minimapLeft;
 	private ArrowButton minimapRight;
+
+	private ArrowButton minimapCornerLeft;
+	private ArrowButton minimapCornerRight;
 
 	private NamedButton returnToPlayer;
 
@@ -90,8 +98,9 @@ public class ChunkDebugScreen extends Screen {
 
 	private int ticks = 0;
 
-	public ChunkDebugScreen() {
+	public ChunkDebugScreen(ChunkDebugClientConfig config) {
 		super(Component.translatable("chunk-debug.screen.title"));
+		this.config = config;
 	}
 
 	public void updateChunks(ResourceKey<Level> dimension, Collection<ChunkData> chunks) {
@@ -133,6 +142,17 @@ public class ChunkDebugScreen extends Screen {
 		this.minimapRight = new ArrowButton(Direction.RIGHT, 0, 0, 15, () -> this.minimap = this.minimap.next());
 		this.addRenderableWidget(this.minimapRight);
 
+		this.minimapCornerLeft = new ArrowButton(Direction.LEFT, 0, 0, 15, () -> {
+			this.config.minimapCorner = this.config.minimapCorner.previous();
+			this.config.minimapOffsetX = this.config.minimapOffsetY = 0;
+		});
+		this.addRenderableWidget(this.minimapCornerLeft);
+		this.minimapCornerRight = new ArrowButton(Direction.RIGHT, 0, 0, 15, () -> {
+			this.config.minimapCorner = this.config.minimapCorner.next();
+			this.config.minimapOffsetX = this.config.minimapOffsetY = 0;
+		});
+		this.addRenderableWidget(this.minimapCornerRight);
+
 		Component player = Component.translatable("chunk-debug.settings.return");
 		this.returnToPlayer = new NamedButton(0, 0, 0, 15, player, () -> {
 			if (this.minecraft != null && this.minecraft.player != null) {
@@ -152,24 +172,22 @@ public class ChunkDebugScreen extends Screen {
 		this.chunkPosZ = new IntegerEditbox(this.font, 40, 15, z -> this.setMapCenter(this.center.x, z));
 		this.addRenderableWidget(this.chunkPosZ);
 
-		this.showStages = new ToggleButton(0, 0, 15);
-		this.showStages.setToggled(true);
+		this.showStages = new ToggleButton(0, 0, 15, b -> this.config.showStages = b);
+		this.showStages.setToggled(this.config.showStages);
 		this.addRenderableWidget(this.showStages);
 
-		this.showTickets = new ToggleButton(0, 0, 15);
-		this.showTickets.setToggled(true);
+		this.showTickets = new ToggleButton(0, 0, 15, b -> this.config.showTickets = b);
+		this.showTickets.setToggled(this.config.showTickets);
 		this.addRenderableWidget(this.showTickets);
 
-		this.showMinimap = new ToggleButton(0, 0, 15);
-		this.showMinimap.setTooltip(
-			Tooltip.create(Component.translatable("chunk-debug.settings.visibility.minimap.tooltip"))
-		);
+		this.showMinimap = new ToggleButton(0, 0, 15, b -> this.config.showMinimap = b);
+		this.showMinimap.setTooltip(Tooltip.create(Component.translatable("chunk-debug.settings.visibility.minimap.tooltip")));
+		this.showMinimap.setToggled(this.config.showMinimap);
 		this.addRenderableWidget(this.showMinimap);
 
-		this.chunkRetention = new IntegerEditbox(this.font, 30, 15, i -> {});
-		this.chunkRetention.setTooltip(
-			Tooltip.create(Component.translatable("chunk-debug.settings.visibility.unload.tooltip"))
-		);
+		this.chunkRetention = new IntegerEditbox(this.font, 30, 15, i -> this.config.chunkRetention = i);
+		this.chunkRetention.setTooltip(Tooltip.create(Component.translatable("chunk-debug.settings.visibility.unload.tooltip")));
+		this.chunkRetention.setIntValue(this.config.chunkRetention);
 		this.addRenderableWidget(this.chunkRetention);
 
 		// Tick jump [<] [7832] [>]
@@ -243,7 +261,6 @@ public class ChunkDebugScreen extends Screen {
 		this.renderChunkSelectionMenu(graphics, state);
 		this.renderSettingsMenu(graphics);
 
-
 		this.center = this.convertScreenToChunkPos(this.width / 2.0, this.height / 2.0);
 		if (!this.chunkPosX.isFocused()) {
 			this.chunkPosX.setIntValue(this.center.x);
@@ -292,6 +309,12 @@ public class ChunkDebugScreen extends Screen {
 			state.first = this.convertScreenToChunkPos(mouseX, mouseY);
 			return true;
 		}
+		if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+			if (this.showMinimap.isToggled() && this.getMinimapBounds().contains(mouseX, mouseY)) {
+				this.draggingMinimap = true;
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -308,6 +331,9 @@ public class ChunkDebugScreen extends Screen {
 			}
 			return true;
 		}
+		if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+			this.draggingMinimap = false;
+		}
 		return super.mouseReleased(mouseX, mouseY, button);
 	}
 
@@ -315,8 +341,13 @@ public class ChunkDebugScreen extends Screen {
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
 		DimensionState state = this.state();
 		if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-			state.offsetX += dragX;
-			state.offsetY += dragY;
+			if (this.draggingMinimap) {
+				this.config.minimapOffsetX += dragX;
+				this.config.minimapOffsetY += dragY;
+			} else {
+				state.offsetX += dragX;
+				state.offsetY += dragY;
+			}
 			return true;
 		}
 		return false;
@@ -324,6 +355,11 @@ public class ChunkDebugScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (this.getMinimapBounds().contains(mouseX, mouseY)) {
+			this.config.minimapSize = Mth.clamp(this.config.minimapSize + (int) scrollY, 20, 200);
+			return true;
+		}
+
 		DimensionState state = this.state();
 		double currentX = (mouseX - state.offsetX) / state.scale;
 		double currentY = (mouseY - state.offsetY) / state.scale;
@@ -365,13 +401,9 @@ public class ChunkDebugScreen extends Screen {
 		if (this.minimap == Minimap.NONE || this.minecraft == null || this.minecraft.player == null) {
 			return;
 		}
-		int size = 100;
-		int padding = 10;
 
-		int minX = this.width - size - padding;
-		int minY = padding + 1 - 1;
-		int maxX = this.width - padding;
-		int maxY = size + padding;
+		Bounds bounds = this.getMinimapBounds();
+		int minX = bounds.minX(), minY = bounds.minY(), maxX = bounds.maxX(), maxY = bounds.maxY();
 
 		graphics.pose().pushPose();
 
@@ -379,7 +411,7 @@ public class ChunkDebugScreen extends Screen {
 		graphics.fill(minX, minY, maxX, maxY, HL_BG_DARK);
 
 		graphics.enableScissor(minX, minY, maxX, maxY);
-		graphics.pose().translate(minX + size / 2.0, minY + size / 2.0, 0.0F);
+		graphics.pose().translate(minX + this.config.minimapSize / 2.0, minY + this.config.minimapSize / 2.0, 0.0F);
 
 		DimensionState state;
 		if (this.minimap == Minimap.STATIC) {
@@ -403,6 +435,16 @@ public class ChunkDebugScreen extends Screen {
 
 		graphics.disableScissor();
 		graphics.pose().popPose();
+	}
+
+	private Bounds getMinimapBounds() {
+		int padding = 10;
+
+		int minX = this.config.minimapCorner.isLeft() ? padding : this.width - this.config.minimapSize - padding;
+		int minY = this.config.minimapCorner.isTop() ? padding : this.height - this.config.minimapSize - padding;
+		int maxX = minX + this.config.minimapSize;
+		int maxY = minY + this.config.minimapSize;
+		return new Bounds(minX, minY, maxX, maxY).offset((int) this.config.minimapOffsetX, (int) this.config.minimapOffsetY);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -443,6 +485,7 @@ public class ChunkDebugScreen extends Screen {
 			this.settings.isToggled(),
 			this.dimensionLeft, this.dimensionRight,
 			this.minimapLeft, this.minimapRight,
+			this.minimapCornerLeft, this.minimapCornerRight,
 			this.clustersLeft, this.clustersRight,
 			this.returnToPlayer, this.showMinimap,
 			this.showStages, this.showTickets,
@@ -460,6 +503,7 @@ public class ChunkDebugScreen extends Screen {
 		Component stages = Component.translatable("chunk-debug.settings.visibility.stages");
 		Component tickets = Component.translatable("chunk-debug.settings.visibility.tickets");
 		Component minimap = Component.translatable("chunk-debug.settings.visibility.minimap");
+		Component corner = Component.translatable("chunk-debug.settings.minimap.corner");
 		Component fade = Component.translatable("chunk-debug.settings.visibility.unload");
 
 		int padding = MENU_PADDING;
@@ -477,7 +521,7 @@ public class ChunkDebugScreen extends Screen {
 		graphics.drawString(this.font, title, minX + padding, minY + padding, 0xFFFFFFFF);
 
 		int offsetY = minY + padding * 2 + this.font.lineHeight;
-		int gap = 2 * padding + 15;
+		int gap = padding + 15;
 
 		Component mode = this.minimap.pretty();
 		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, mode, this.minimapLeft, this.minimapRight);
@@ -510,6 +554,9 @@ public class ChunkDebugScreen extends Screen {
 
 		offsetY += gap;
 		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, minimap, this.showMinimap);
+
+		offsetY += gap;
+		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, corner, this.minimapCornerLeft, this.minimapCornerRight);
 
 		offsetY += gap;
 		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, fade, this.chunkRetention);
