@@ -70,7 +70,7 @@ public class ChunkDebugServer implements ModInitializer {
 		// We have to do this later in the tick because luckperms uses the same
 		// event to load permissions, and we need that information to be loaded
 		// before we check whether the player is permitted or not.
-		server.tell(new TickTask(server.getTickCount(), () -> {
+		server.schedule(new TickTask(server.getTickCount(), () -> {
 			if (this.isPermitted(connection.player)) {
 				sender.sendPacket(HelloPayload.INSTANCE);
 			}
