@@ -73,7 +73,13 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			Fixed a crash when thousands of chunks were loaded.
+			Added a client configuration file. Your settings will now be saved between uses.
+			
+			You can configure the position of the minimap; you first select the corner you want
+			the minimap to render relative to by changing the `Minimap Corner` configuration,
+			if you want to further fine-tune the position of the minimap you can enable `Render Minimap`
+			which will allow you to click and drag the minimap around. 
+			You can also scroll while hovering the minimap to resize it. 
             """.trimIndent()
 		)
 		type = STABLE
