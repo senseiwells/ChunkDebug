@@ -49,7 +49,7 @@ public class ChunkDebugClientConfig {
 
 	public ChunkDebugClientConfig() {
 		this(
-			Corner.TOP_RIGHT,
+			Corner.TOP_LEFT,
 			0.0,
 			0.0,
 			100,
