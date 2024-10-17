@@ -812,7 +812,7 @@ public class ChunkDebugScreen extends Screen {
 
 		CompletableFuture<ObjectIntPair<ChunkSelection>> getCluster(int index) {
 			return CompletableFuture.supplyAsync(() -> {
-				int corrected = index + this.clusters.count() % this.clusters.count();
+				int corrected = (index + this.clusters.count()) % this.clusters.count();
 				LongSet cluster = this.clusters.getCluster(corrected);
 				List<ChunkPos> positions = cluster.longStream().mapToObj(ChunkPos::new).toList();
 				return ObjectIntPair.of(ChunkSelection.fromPositions(positions), corrected);
