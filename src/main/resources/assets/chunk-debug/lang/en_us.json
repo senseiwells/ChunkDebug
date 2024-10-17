@@ -14,6 +14,7 @@
   "chunk-debug.settings.minimap.none": "No Minimap",
   "chunk-debug.settings.minimap.static": "Static Minimap",
   "chunk-debug.settings.minimap.follow": "Following Minimap",
+  "chunk-debug.settings.minimap.corner": "Minimap Corner",
   "chunk-debug.settings.visibility.stages": "Render Generation Stages",
   "chunk-debug.settings.visibility.tickets": "Render Ticket Types",
   "chunk-debug.settings.visibility.minimap": "Render Minimap",

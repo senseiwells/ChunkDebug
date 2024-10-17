@@ -1,9 +1,11 @@
 package me.senseiwells.chunkdebug.client;
 
 import me.senseiwells.chunkdebug.ChunkDebug;
+import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugScreen;
 import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -30,6 +32,8 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 	public final KeyMapping keybind = new KeyMapping("chunk-debug.key", GLFW.GLFW_KEY_F6, "key.categories.misc");
 
+	private final ChunkDebugClientConfig config = ChunkDebugClientConfig.read();
+
 	@Nullable
 	private ChunkDebugScreen screen;
 
@@ -44,6 +48,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 		KeyBindingHelper.registerKeyBinding(this.keybind);
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+		ClientLifecycleEvents.CLIENT_STOPPING.register(this::onClientStopping);
 
 		ClientPlayNetworking.registerGlobalReceiver(HelloPayload.TYPE, this::handleHello);
 		ClientPlayNetworking.registerGlobalReceiver(ByePayload.TYPE, this::handleBye);
@@ -88,9 +93,14 @@ public class ChunkDebugClient implements ClientModInitializer {
 		}
 	}
 
+	private void onClientStopping(Minecraft minecraft) {
+		this.setScreen(null);
+		ChunkDebugClientConfig.write(this.config);
+	}
+
 	private void handleHello(HelloPayload payload, ClientPlayNetworking.Context context) {
 		if (payload.version() == ChunkDebug.PROTOCOL_VERSION) {
-			this.screen = new ChunkDebugScreen();
+			this.setScreen(new ChunkDebugScreen(this.config));
 			ChunkDebug.LOGGER.info("ChunkDebug connection successful");
 		} else if (payload.version() < ChunkDebug.PROTOCOL_VERSION) {
 			ChunkDebug.LOGGER.info("ChunkDebug failed to connect, server is out of date!");
@@ -104,7 +114,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 		if (minecraft.screen == this.screen) {
 			minecraft.setScreen(null);
 		}
-		this.screen = null;
+		this.setScreen(null);
 	}
 
 	private void handleChunkData(ChunkDataPayload payload, ClientPlayNetworking.Context context) {
@@ -125,5 +135,12 @@ public class ChunkDebugClient implements ClientModInitializer {
 		if (listener != null) {
 			listener.send(new ServerboundCustomPayloadPacket(supplier.get()));
 		}
+	}
+
+	private void setScreen(@Nullable ChunkDebugScreen screen) {
+		if (this.screen != null) {
+			this.screen.shutdown();
+		}
+		this.screen = screen;
 	}
 }

@@ -1,7 +1,9 @@
 package me.senseiwells.chunkdebug.client.gui;
 
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.LongStack;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
@@ -119,12 +121,18 @@ public class ChunkClusters {
 	}
 
 	private static void searchFrom(long position, LongSet group, LongSet checked, LongSet found) {
-		long[] directions = getOffsets(position);
+		LongStack stack = new LongArrayList();
+		stack.push(position);
 
-		for (long direction : directions) {
-			if (checked.add(direction) && group.contains(direction)) {
-				found.add(direction);
-				searchFrom(direction, group, checked, found);
+		while (!stack.isEmpty()) {
+			long current = stack.popLong();
+			long[] directions = getOffsets(current);
+
+			for (long direction : directions) {
+				if (checked.add(direction) && group.contains(direction)) {
+					found.add(direction);
+					stack.push(direction);
+				}
 			}
 		}
 	}

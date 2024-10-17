@@ -7,6 +7,7 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.server.config.ChunkDebugServerConfig;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.fabricmc.api.ModInitializer;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -30,6 +32,7 @@ public class ChunkDebugServer implements ModInitializer {
 	private static ChunkDebugServer instance;
 
 	private final Multimap<ResourceKey<Level>, UUID> watching = HashMultimap.create();
+	private final ChunkDebugServerConfig config = ChunkDebugServerConfig.read();
 
 	public static ChunkDebugServer getInstance() {
 		return instance;
@@ -47,7 +50,7 @@ public class ChunkDebugServer implements ModInitializer {
 	}
 
 	public boolean isPermitted(ServerPlayer player) {
-		if (player.server.isDedicatedServer()) {
+		if (player.server.isDedicatedServer() && this.config.requirePermissions()) {
 			return Permissions.check(player, "chunk-debug", 2);
 		}
 		return true;
@@ -64,9 +67,14 @@ public class ChunkDebugServer implements ModInitializer {
 	}
 
 	private void sendHelloPayload(ServerGamePacketListenerImpl connection, PacketSender sender, MinecraftServer server) {
-		if (this.isPermitted(connection.player)) {
-			sender.sendPacket(HelloPayload.INSTANCE);
-		}
+		// We have to do this later in the tick because luckperms uses the same
+		// event to load permissions, and we need that information to be loaded
+		// before we check whether the player is permitted or not.
+		server.tell(new TickTask(server.getTickCount(), () -> {
+			if (this.isPermitted(connection.player)) {
+				sender.sendPacket(HelloPayload.INSTANCE);
+			}
+		}));
 	}
 
 	private void sendUpdatesToWatching(MinecraftServer server) {

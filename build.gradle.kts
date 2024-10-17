@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.0.1+beta.2"
+val modVersion = "2.1.0"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -13,6 +13,7 @@ group = "me.senseiwells"
 repositories {
 	mavenCentral()
 	maven("https://maven.parchmentmc.org/")
+	maven("https://api.modrinth.com/maven")
 }
 
 dependencies {
@@ -25,6 +26,8 @@ dependencies {
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
 
+	runtimeOnly(libs.luckperms)
+
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
 	}
@@ -32,6 +35,16 @@ dependencies {
 
 loom {
 	accessWidenerPath.set(file("src/main/resources/chunk-debug.accesswidener"))
+
+	runs {
+		getByName("server") {
+			runDir = "run/server"
+		}
+
+		getByName("client") {
+			runDir = "run/client"
+		}
+	}
 }
 
 java {
@@ -58,13 +71,18 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			Updated to 24w37a
+			## ChunkDebug $modVersion
 			
-			- Added new Enderpearl tickets
-			- Fixed a bug where you couldn't open chunk debug in singleplayer without cheats
+			Added a client configuration file. Your settings will now be saved between uses.
+			
+			You can configure the position of the minimap; you first select the corner you want
+			the minimap to render relative to by changing the `Minimap Corner` configuration,
+			if you want to further fine-tune the position of the minimap you can enable `Render Minimap`
+			which will allow you to click and drag the minimap around. 
+			You can also scroll while hovering the minimap to resize it. 
             """.trimIndent()
 		)
-		type = BETA
+		type = STABLE
 		modLoaders.add("fabric")
 
 		displayName = "ChunkDebug $modVersion for ${libs.versions.minecraft.get()}"

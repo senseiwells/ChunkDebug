@@ -1,5 +1,6 @@
 package me.senseiwells.chunkdebug.client.gui.widget;
 
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -9,10 +10,16 @@ import net.minecraft.network.chat.Component;
 import static me.senseiwells.chunkdebug.client.utils.RenderUtils.HL;
 
 public class ToggleButton extends AbstractButton {
+	private final BooleanConsumer action;
 	private boolean toggled;
 
-	public ToggleButton(int x, int y, int size) {
+	public ToggleButton(int x, int y, int size, BooleanConsumer action) {
 		super(x, y, size, size, Component.empty());
+		this.action = action;
+	}
+
+	public ToggleButton(int x, int y, int size) {
+		this(x, y, size, b -> {});
 	}
 
 	public void setToggled(boolean toggled) {
@@ -26,6 +33,7 @@ public class ToggleButton extends AbstractButton {
 	@Override
 	public void onPress() {
 		this.toggled = !this.toggled;
+		this.action.accept(this.toggled);
 	}
 
 	@Override
