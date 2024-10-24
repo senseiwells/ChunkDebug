@@ -26,8 +26,6 @@ dependencies {
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
 
-	runtimeOnly(libs.luckperms)
-
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
 	}
@@ -104,6 +102,23 @@ tasks {
 			create<MavenPublication>("mavenJava") {
 				from(project.components.getByName("java"))
 				artifactId = "chunk-debug"
+			}
+		}
+
+		repositories {
+			val mavenUrl = System.getenv("MAVEN_URL")
+			if (mavenUrl != null) {
+				maven {
+					url = uri(mavenUrl)
+					val mavenUsername = System.getenv("MAVEN_USERNAME")
+					val mavenPassword = System.getenv("MAVEN_PASSWORD")
+					if (mavenUsername != null && mavenPassword != null) {
+						credentials {
+							username = mavenUsername
+							password = mavenPassword
+						}
+					}
+				}
 			}
 		}
 	}
