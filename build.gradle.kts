@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.1.1"
+val modVersion = "2.1.2"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -71,13 +71,7 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			Added a client configuration file. Your settings will now be saved between uses.
-			
-			You can configure the position of the minimap; you first select the corner you want
-			the minimap to render relative to by changing the `Minimap Corner` configuration,
-			if you want to further fine-tune the position of the minimap you can enable `Render Minimap`
-			which will allow you to click and drag the minimap around. 
-			You can also scroll while hovering the minimap to resize it. 
+			Updated to 1.21.3
             """.trimIndent()
 		)
 		type = STABLE
