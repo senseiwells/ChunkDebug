@@ -17,7 +17,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.Ticket;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -165,26 +165,23 @@ public class ChunkDebugMap {
 		graphics.pose().popPose();
 	}
 
-	@SuppressWarnings("deprecation")
 	void renderMap(GuiGraphics graphics, DimensionState state) {
-		graphics.drawManaged(() -> {
-			for (ChunkData data : state.chunks.values()) {
+		for (ChunkData data : state.chunks.values()) {
+			ChunkPos pos = data.position();
+			int color = this.calculateChunkColor(data);
+			graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
+		}
+
+		if (this.config.chunkRetention > 0) {
+			for (Map.Entry<Integer, ChunkData> entry : state.unloaded.entries()) {
+				float delta = (float) (entry.getKey() - this.ticks) / this.config.chunkRetention;
+				int alpha = ((byte) (delta * 255)) << 24 | 0xFFFFFF;
+				ChunkData data = entry.getValue();
 				ChunkPos pos = data.position();
-				int color = this.calculateChunkColor(data);
+				int color = this.calculateChunkColor(data) & alpha;
 				graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
 			}
-
-			if (this.config.chunkRetention > 0) {
-				for (Map.Entry<Integer, ChunkData> entry : state.unloaded.entries()) {
-					float delta = (float) (entry.getKey() - this.ticks) / this.config.chunkRetention;
-					int alpha = ((byte) (delta * 255)) << 24 | 0xFFFFFF;
-					ChunkData data = entry.getValue();
-					ChunkPos pos = data.position();
-					int color = this.calculateChunkColor(data) & alpha;
-					graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
-				}
-			}
-		});
+		}
 
 		if (state.selection != null) {
 			this.renderChunkSelection(graphics, state.selection, SELECTED_OUTLINE_COLOR);
@@ -379,7 +376,7 @@ public class ChunkDebugMap {
 		List<Ticket<?>> tickets = this.client.config.showTickets ? data.tickets() : List.of();
 		int color = ChunkColors.calculateChunkColor(data.status(), stage, tickets, data.unloading());
 		if ((pos.x + pos.z) % 2 == 0) {
-			color = FastColor.ARGB32.lerp(0.12F, color, 0xFFFFFF);
+			color = ARGB.lerp(0.12F, color, 0xFFFFFF);
 		}
 		return color | 0xFF000000;
 	}
