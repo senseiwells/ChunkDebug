@@ -23,7 +23,6 @@ public abstract class MinecraftMixin {
 	)
 	private void onResizeDisplay(CallbackInfo ci) {
 		ChunkDebugClient.getInstance().onGuiResize(
-			(Minecraft) (Object) this,
 			this.window.getGuiScaledWidth(),
 			this.window.getGuiScaledHeight()
 		);

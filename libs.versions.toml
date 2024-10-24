@@ -6,14 +6,12 @@ fabric-api    = "0.106.0+1.21.2"
 permissions   = "0.3.1"
 mod-publish   = "0.7.0"
 parchment     = "1.21:2024.07.28"
-luckperms     = "v5.4.140-fabric"
 
 [libraries]
 minecraft     = { module = "com.mojang:minecraft"              , version.ref = "minecraft" }
 fabric-loader = { module = "net.fabricmc:fabric-loader"        , version.ref = "fabric-loader" }
 fabric-api    = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 permissions   = { module = "me.lucko:fabric-permissions-api"   , version.ref = "permissions" }
-luckperms     = { module = "maven.modrinth:luckperms"          , version.ref = "luckperms" }
 
 [plugins]
 mod-publish   = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }

@@ -2,6 +2,7 @@ package me.senseiwells.chunkdebug.client;
 
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
+import me.senseiwells.chunkdebug.client.gui.ChunkDebugMap;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugScreen;
 import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ClientModInitializer;
@@ -14,6 +15,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -31,11 +33,10 @@ public class ChunkDebugClient implements ClientModInitializer {
 	private static ChunkDebugClient instance;
 
 	public final KeyMapping keybind = new KeyMapping("chunk-debug.key", GLFW.GLFW_KEY_F6, "key.categories.misc");
-
-	private final ChunkDebugClientConfig config = ChunkDebugClientConfig.read();
+	public final ChunkDebugClientConfig config = ChunkDebugClientConfig.read();
 
 	@Nullable
-	private ChunkDebugScreen screen;
+	private ChunkDebugMap map;
 
 	public static ChunkDebugClient getInstance() {
 		return instance;
@@ -56,6 +57,14 @@ public class ChunkDebugClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(ChunkUnloadPayload.TYPE, this::handleChunkUnload);
 	}
 
+	@Nullable
+	public ChunkDebugScreen createChunkDebugScreen(@Nullable Screen parent) {
+		if (this.map == null) {
+			return null;
+		}
+		return new ChunkDebugScreen(this.map, parent);
+	}
+
 	public void startWatching(ResourceKey<Level> dimension) {
 		this.trySendPayload(() -> new StartWatchingPayload(List.of(dimension)));
 	}
@@ -66,41 +75,42 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 	@ApiStatus.Internal
 	public void onGuiRender(GuiGraphics graphics, @SuppressWarnings("unused") DeltaTracker tracker) {
-		if (this.screen != null) {
-			this.screen.renderMinimap(graphics);
+		if (this.map != null) {
+			this.map.renderMinimap(graphics);
 		}
 	}
 
 	@ApiStatus.Internal
-	public void onGuiResize(Minecraft minecraft, int width, int height) {
-		if (this.screen != null) {
-			this.screen.resize(minecraft, width, height);
+	public void onGuiResize(int width, int height) {
+		if (this.map != null) {
+			this.map.resize(width, height);
 		}
 	}
 
 	private void onClientTick(Minecraft minecraft) {
-		if (this.screen != null) {
-			this.screen.clientTick();
+		if (this.map != null) {
+			this.map.tick();
 		}
 		if (this.keybind.consumeClick() && minecraft.screen == null) {
-			if (this.screen != null) {
-				minecraft.setScreen(this.screen);
-			} else {
+			ChunkDebugScreen screen = this.createChunkDebugScreen(null);
+			if (screen == null) {
 				minecraft.gui.getChat().addMessage(
 					Component.translatable("chunk-debug.screen.unavailable").withStyle(ChatFormatting.RED)
 				);
+			} else {
+				minecraft.setScreen(screen);
 			}
 		}
 	}
 
 	private void onClientStopping(Minecraft minecraft) {
-		this.setScreen(null);
+		this.setChunkMap(null);
 		ChunkDebugClientConfig.write(this.config);
 	}
 
 	private void handleHello(HelloPayload payload, ClientPlayNetworking.Context context) {
 		if (payload.version() == ChunkDebug.PROTOCOL_VERSION) {
-			this.setScreen(new ChunkDebugScreen(this.config));
+			this.setChunkMap(new ChunkDebugMap(context.client(), this));
 			ChunkDebug.LOGGER.info("ChunkDebug connection successful");
 		} else if (payload.version() < ChunkDebug.PROTOCOL_VERSION) {
 			ChunkDebug.LOGGER.info("ChunkDebug failed to connect, server is out of date!");
@@ -111,21 +121,21 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 	private void handleBye(ByePayload payload, ClientPlayNetworking.Context context) {
 		Minecraft minecraft = context.client();
-		if (minecraft.screen == this.screen) {
-			minecraft.setScreen(null);
+		if (minecraft.screen instanceof ChunkDebugScreen screen) {
+			screen.onClose();
 		}
-		this.setScreen(null);
+		this.setChunkMap(null);
 	}
 
 	private void handleChunkData(ChunkDataPayload payload, ClientPlayNetworking.Context context) {
-		if (this.screen != null) {
-			this.screen.updateChunks(payload.dimension(), payload.chunks());
+		if (this.map != null) {
+			this.map.updateChunks(payload.dimension(), payload.chunks());
 		}
 	}
 
 	private void handleChunkUnload(ChunkUnloadPayload payload, ClientPlayNetworking.Context context) {
-		if (this.screen != null) {
-			this.screen.unloadChunks(payload.dimension(), payload.positions());
+		if (this.map != null) {
+			this.map.unloadChunks(payload.dimension(), payload.positions());
 		}
 	}
 
@@ -137,10 +147,10 @@ public class ChunkDebugClient implements ClientModInitializer {
 		}
 	}
 
-	private void setScreen(@Nullable ChunkDebugScreen screen) {
-		if (this.screen != null) {
-			this.screen.shutdown();
+	private void setChunkMap(@Nullable ChunkDebugMap map) {
+		if (this.map != null) {
+			this.map.close();
 		}
-		this.screen = screen;
+		this.map = map;
 	}
 }
