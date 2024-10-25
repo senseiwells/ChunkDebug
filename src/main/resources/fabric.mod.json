@@ -3,7 +3,7 @@
   "id": "chunk-debug",
   "version": "${version}",
   "name": "ChunkDebug",
-  "description": "Chunk Debug server side support",
+  "description": "ChunkDebug provides a live display of all the loaded chunks in any given dimension.",
   "authors": [
 	"Sensei"
   ],
