@@ -64,7 +64,6 @@ public class ExtraStreamCodecs {
 			TicketType.FORCED,
 			TicketType.PORTAL,
 			TicketType.ENDER_PEARL,
-			TicketType.POST_TELEPORT,
 			TicketType.UNKNOWN
 		);
 	}

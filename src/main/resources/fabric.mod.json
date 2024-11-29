@@ -8,6 +8,7 @@
 	"Sensei"
   ],
   "license": "MIT",
+  "icon": "assets/chunk-debug/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
