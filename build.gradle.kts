@@ -5,7 +5,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.1.2"
+val modVersion = "2.1.3"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -71,7 +71,7 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			Updated to 1.21.3
+			Updated to 1.21.4
             """.trimIndent()
 		)
 		type = STABLE
