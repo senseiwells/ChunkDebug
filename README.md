@@ -24,7 +24,11 @@ You can download the mod from Modrinth:
 
 If you are playing on a server, then you will need the correct permissions to use ChunkDebug.
 You must be opped, or alternatively you must have the `"chunk-debug"` permission from a 
-permissions mod, for example [Luck Perms](https://modrinth.com/mod/luckperms).
+permissions mod, for example [Luck Perms](https://modrinth.com/mod/luckperms). 
+Alternatively, if you wish to allow all players to use ChunkDebug you can set the 
+`"require_permissions"` config in the `chunk-debug-server.json` to `true`. 
+Be careful when
+enabling this as ChunkDebug is a powerful tool!
 
 Once you are in-game, you can hit the ChunkDebug keybind (`F6` by default) which will
 open the ChunkDebug map. 
