@@ -58,7 +58,7 @@ public class ExtraStreamCodecs {
 		TicketType<?> type;
 		if (isCustomType) {
 			String name = buf.readUtf();
-			type = CUSTOM_TICKET_TYPES.computeIfAbsent(name, n -> TicketType.create(n, (_, _) -> 0));
+			type = CUSTOM_TICKET_TYPES.computeIfAbsent(name, n -> TicketType.create(n, (a, b) -> 0));
 		} else {
 			int typeIndex = buf.readByte();
 			type = TICKET_TYPES.size() > typeIndex ? TICKET_TYPES.get(typeIndex) : TicketType.UNKNOWN;
