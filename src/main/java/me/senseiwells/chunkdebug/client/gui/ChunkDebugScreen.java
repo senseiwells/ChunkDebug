@@ -193,6 +193,11 @@ public class ChunkDebugScreen extends Screen {
 			this.breakdown.setToggled(!visible);
 			return true;
 		}
+		if (keyCode == InputConstants.KEY_R && Screen.hasControlDown()) {
+			ChunkDebugClient.getInstance().refresh();
+			this.map.resetData();
+			return true;
+		}
 		if (this.minecraft != null && ChunkDebugClient.getInstance().keybind.matches(keyCode, scanCode)) {
 			this.onClose();
 			return true;

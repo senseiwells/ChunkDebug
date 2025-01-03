@@ -1,6 +1,5 @@
 package me.senseiwells.chunkdebug.common.utils;
 
-import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.server.mixins.TicketAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -14,8 +13,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ExtraStreamCodecs {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ResourceKey<Level>> DIMENSION = StreamCodec.of(ExtraStreamCodecs::encodeDimension, ExtraStreamCodecs::decodeDimension);
@@ -27,6 +25,12 @@ public class ExtraStreamCodecs {
 
 	private static final List<TicketType<?>> TICKET_TYPES = getTicketTypes();
 
+	private static final Map<String, TicketType<?>> CUSTOM_TICKET_TYPES = new HashMap<>();
+
+	public static boolean isCustomTicketType(TicketType<?> type) {
+		return !TICKET_TYPES.contains(type);
+	}
+
 	private static void encodeDimension(RegistryFriendlyByteBuf buf, ResourceKey<Level> dimension) {
 		buf.writeResourceKey(dimension);
 	}
@@ -37,18 +41,29 @@ public class ExtraStreamCodecs {
 
 	private static void encodeTicket(FriendlyByteBuf buf, Ticket<?> ticket) {
 		int index = TICKET_TYPES.indexOf(ticket.getType());
-		if (index == -1) {
-			ChunkDebug.LOGGER.warn("Tried to encode unknown ticket type: {}", ticket.getType());
-			index = TICKET_TYPES.size() - 1;
+		if (index != -1) {
+			buf.writeBoolean(false);
+			buf.writeByte(index);
+		} else {
+			buf.writeBoolean(true);
+			buf.writeUtf(ticket.getType().toString());
 		}
 
-		buf.writeByte(index);
 		buf.writeInt((int) ((TicketAccessor) (Object) ticket).getTickCreated());
 		buf.writeInt(ticket.getTicketLevel());
 	}
 
 	private static Ticket<?> decodeTicket(FriendlyByteBuf buf) {
-		TicketType<?> type = TICKET_TYPES.get(buf.readByte());
+		boolean isCustomType = buf.readBoolean();
+		TicketType<?> type;
+		if (isCustomType) {
+			String name = buf.readUtf();
+			type = CUSTOM_TICKET_TYPES.computeIfAbsent(name, n -> TicketType.create(n, (_, _) -> 0));
+		} else {
+			int typeIndex = buf.readByte();
+			type = TICKET_TYPES.size() > typeIndex ? TICKET_TYPES.get(typeIndex) : TicketType.UNKNOWN;
+		}
+
 		int tickCreated = buf.readInt();
 		int ticketLevel = buf.readInt();
 		Ticket<?> ticket = TicketAccessor.construct(type, ticketLevel, null);

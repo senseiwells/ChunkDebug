@@ -1,6 +1,7 @@
 {
   "required": true,
   "package": "me.senseiwells.chunkdebug.server.mixins",
+  "plugin": "me.senseiwells.chunkdebug.server.compat.ChunkDebugMixinConfig",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "ChunkDistanceManagerMixin",
@@ -12,7 +13,14 @@
     "PlayerListMixin",
     "ServerLevelMixin",
     "TicketAccessor",
-    "TickingTrackerMixin"
+    "TickingTrackerMixin",
+    "compat.c2me.ChunkMapMixin",
+    "compat.c2me.LevelChunkMixin",
+    "compat.c2me.NewChunkHolderVanillaInterfaceMixin",
+    "compat.c2me.ProtoChunkMixin",
+    "compat.c2me.StatusAdvancingSchedulerAccessor",
+    "compat.c2me.TheChunkSystemMixin",
+    "compat.c2me.TickingTrackerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

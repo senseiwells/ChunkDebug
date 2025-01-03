@@ -47,6 +47,7 @@ public class ChunkDebugServer implements ModInitializer {
 
 		ServerPlayNetworking.registerGlobalReceiver(StartWatchingPayload.TYPE, this::handleStartWatching);
 		ServerPlayNetworking.registerGlobalReceiver(StopWatchingPayload.TYPE, this::handleStopWatching);
+		ServerPlayNetworking.registerGlobalReceiver(ChunkRefreshPayload.TYPE, this::handleRefresh);
 	}
 
 	public boolean isPermitted(ServerPlayer player) {
@@ -153,6 +154,13 @@ public class ChunkDebugServer implements ModInitializer {
 		}
 		for (ResourceKey<Level> dimension : payload.dimensions()) {
 			this.watching.remove(dimension, uuid);
+		}
+	}
+
+	private void handleRefresh(ChunkRefreshPayload payload, ServerPlayNetworking.Context context) {
+		for (ServerLevel level : context.server().getAllLevels()) {
+			ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
+			tracker.refresh();
 		}
 	}
 

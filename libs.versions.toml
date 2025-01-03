@@ -1,11 +1,17 @@
 [versions]
 minecraft     = "1.21.4"
-fabric-loom   = "1.9-SNAPSHOT"
-fabric-loader = "0.16.9"
-fabric-api    = "0.110.5+1.21.4"
-permissions   = "0.3.3"
-mod-publish   = "0.7.0"
 parchment     = "1.21:2024.07.28"
+fabric-loader = "0.16.9"
+fabric-api    = "0.114.0+1.21.4"
+permissions   = "0.3.3"
+
+# Compatability dependencies
+c2me          = "0.3.1+alpha.0.41+1.21.4-rc2"
+
+# Plugins
+fabric-loom   = "1.9-SNAPSHOT"
+mod-publish   = "0.7.0"
+explosion     = "0.3.1"
 
 [libraries]
 minecraft     = { module = "com.mojang:minecraft"              , version.ref = "minecraft" }
@@ -13,6 +19,10 @@ fabric-loader = { module = "net.fabricmc:fabric-loader"        , version.ref = "
 fabric-api    = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 permissions   = { module = "me.lucko:fabric-permissions-api"   , version.ref = "permissions" }
 
+# Compatability dependencies
+c2me          = { module = "maven.modrinth:c2me-fabric", version.ref = "c2me" }
+
 [plugins]
 mod-publish   = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }
-fabric-loom   = { id = "fabric-loom", version.ref = "fabric-loom" }
+fabric-loom   = { id = "fabric-loom"                    , version.ref = "fabric-loom" }
+explosion     = { id = "lol.bai.explosion"              , version.ref = "explosion" }

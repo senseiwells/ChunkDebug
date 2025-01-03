@@ -73,6 +73,10 @@ public class ChunkDebugClient implements ClientModInitializer {
 		this.trySendPayload(StopWatchingPayload::new);
 	}
 
+	public void refresh() {
+		this.trySendPayload(() -> ChunkRefreshPayload.INSTANCE);
+	}
+
 	@ApiStatus.Internal
 	public void onGuiRender(GuiGraphics graphics, @SuppressWarnings("unused") DeltaTracker tracker) {
 		if (this.map != null) {

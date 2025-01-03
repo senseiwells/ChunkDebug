@@ -93,6 +93,11 @@ public class ChunkClusters {
 		return this.groups.get(index);
 	}
 
+	public void clear() {
+		this.groups.clear();
+		this.chunks.clear();
+	}
+
 	// We search around a position splitting into groups
 	private static List<LongSet> search(long origin, LongSet originGroup) {
 		long[] directions = getOffsets(origin);

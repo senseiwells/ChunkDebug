@@ -3,6 +3,8 @@ package me.senseiwells.chunkdebug.server.tracker;
 import it.unimi.dsi.fastutil.longs.*;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
+import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
 import net.minecraft.server.level.*;
 import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -49,14 +51,28 @@ public class ChunkDebugTracker {
 			for (Long2ObjectMap.Entry<ChunkStatus> entry : this.stages.long2ObjectEntrySet()) {
 				long pos = entry.getLongKey();
 				ChunkData data = this.chunks.get(pos);
-				if (data != null) {
-					data.updateStage(entry.getValue());
+				ChunkStatus stage = entry.getValue();
+				if (data != null && data.stage() != stage) {
+					data.updateStage(stage);
 					this.markDirty(pos);
 				}
 			}
 
 			this.stages.clear();
 		}
+	}
+
+	public void refresh() {
+		this.chunks.clear();
+		this.dirty.clear();
+		synchronized (this.stages) {
+			this.stages.clear();
+		}
+
+		ChunkMap chunkMap = this.level.getChunkSource().chunkMap;
+		((ChunkHolderSupplier) chunkMap).chunkdebug$forEachChunkHolder(holder -> {
+			this.set(((ChunkDataSupplier) holder).chunkdebug$getChunkData(chunkMap));
+		});
 	}
 
 	public void set(ChunkData data) {
@@ -103,7 +119,7 @@ public class ChunkDebugTracker {
 	private void markDirty(long pos) {
 		if (this.level.getServer().isSameThread()) {
 			this.dirty.add(pos);
-		} else {
+		} else if (!this.level.getServer().isStopped()) {
 			ChunkDebug.LOGGER.warn("Tried marking dirty off-thread");
 		}
 	}

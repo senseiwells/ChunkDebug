@@ -1,6 +1,8 @@
 package me.senseiwells.chunkdebug.server.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.minecraft.server.level.ChunkHolder;
@@ -20,10 +22,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 @Mixin(ChunkMap.class)
-public class ChunkMapMixin {
+public class ChunkMapMixin implements ChunkHolderSupplier {
 	@Shadow @Final ServerLevel level;
+
+	@Shadow private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> visibleChunkMap;
 
 	@Inject(
 		method = "processUnloads",
@@ -65,5 +70,10 @@ public class ChunkMapMixin {
 	) {
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) this.level).chunkdebug$getTracker();
 		tracker.updateStage(chunk.getPos().toLong(), step.targetStatus());
+	}
+
+	@Override
+	public void chunkdebug$forEachChunkHolder(Consumer<ChunkHolder> consumer) {
+		this.visibleChunkMap.values().forEach(consumer);
 	}
 }

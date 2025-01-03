@@ -25,7 +25,7 @@ public class ChunkData {
 	public static final StreamCodec<RegistryFriendlyByteBuf, Collection<ChunkData>> LIST_STREAM_CODEC = ByteBufCodecs.collection(ArrayList::new, STREAM_CODEC);
 
 	private final ChunkPos position;
-	private ChunkStatus stage;
+	@Nullable private ChunkStatus stage;
 	private List<Ticket<?>> tickets;
 
 	private int statusLevel;
@@ -34,7 +34,7 @@ public class ChunkData {
 
 	public ChunkData(
 		ChunkPos position,
-		ChunkStatus stage,
+		@Nullable ChunkStatus stage,
 		SortedArraySet<Ticket<?>> tickets,
 		int statusLevel,
 		int tickingStatusLevel,
@@ -45,7 +45,7 @@ public class ChunkData {
 
 	public ChunkData(
 		ChunkPos position,
-		ChunkStatus stage,
+		@Nullable ChunkStatus stage,
 		List<Ticket<?>> tickets,
 		int statusLevel,
 		int tickingStatusLevel,

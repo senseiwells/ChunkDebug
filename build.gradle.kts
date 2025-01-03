@@ -1,11 +1,12 @@
 plugins {
 	alias(libs.plugins.mod.publish)
 	alias(libs.plugins.fabric.loom)
+	alias(libs.plugins.explosion)
 	`maven-publish`
 	java
 }
 
-val modVersion = "2.1.3"
+val modVersion = "2.2.0"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -14,6 +15,7 @@ repositories {
 	mavenCentral()
 	maven("https://maven.parchmentmc.org/")
 	maven("https://api.modrinth.com/maven")
+	maven("https://maven2.bai.lol")
 }
 
 dependencies {
@@ -25,6 +27,7 @@ dependencies {
 	})
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
+	modCompileOnly(explosion.fabric(libs.c2me))
 
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
@@ -71,7 +74,7 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			Updated to 1.21.4
+			Fixed a compatability issue with c2me, requires updates on both the client + server
             """.trimIndent()
 		)
 		type = STABLE
@@ -119,6 +122,6 @@ tasks {
 }
 
 private fun DependencyHandler.includeModImplementation(provider: Provider<*>, action: Action<ExternalModuleDependency>) {
-	this.include(provider, action)
-	this.modImplementation(provider, action)
+	include(provider, action)
+	modImplementation(provider, action)
 }

@@ -11,7 +11,7 @@ public class ChunkDebug implements ModInitializer {
 	public static final String MOD_ID = "chunk-debug";
 	public static final Logger LOGGER = LogManager.getLogger("ChunkDebug");
 
-	public static final int PROTOCOL_VERSION = 1;
+	public static final int PROTOCOL_VERSION = 2;
 
 	@Override
 	public void onInitialize() {
@@ -22,6 +22,7 @@ public class ChunkDebug implements ModInitializer {
 
 		PayloadTypeRegistry.playC2S().register(StartWatchingPayload.TYPE, StartWatchingPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(StopWatchingPayload.TYPE, StopWatchingPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playC2S().register(ChunkRefreshPayload.TYPE, ChunkRefreshPayload.STREAM_CODEC);
 	}
 
 	public static ResourceLocation id(String path) {

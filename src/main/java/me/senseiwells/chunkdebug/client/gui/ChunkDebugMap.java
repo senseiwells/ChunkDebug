@@ -263,6 +263,14 @@ public class ChunkDebugMap {
 		});
 	}
 
+	void resetData() {
+		for (DimensionState state : this.states.values()) {
+			state.chunks.clear();
+			state.unloaded.clear();
+			state.clusters.clear();
+		}
+	}
+
 	void resetStates() {
 		this.states.clear();
 	}

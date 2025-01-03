@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.ExtraStreamCodecs;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -145,6 +146,9 @@ public record ChunkSelectionInfo(
 	}
 
 	private static MutableComponent prettify(TicketType<?> type) {
+		if (ExtraStreamCodecs.isCustomTicketType(type)) {
+			return Component.literal(type.toString()).withColor(HL);
+		}
 		return Component.translatable("chunk-debug.ticket.type." + type).withColor(HL);
 	}
 
