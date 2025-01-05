@@ -16,13 +16,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = TheChunkSystem.class, remap = false)
+@Mixin(TheChunkSystem.class)
 public class TheChunkSystemMixin {
 	@Shadow @Final private ChunkMap tacs;
 
 	@Inject(
 		method = {"onItemUpgrade", "onItemDowngrade"},
-		at = @At("TAIL")
+		at = @At("TAIL"),
+		remap = false
 	)
 	private void onChunkUpgrade(
 		ItemHolder<ChunkPos, ChunkState, ChunkLoadingContext, NewChunkHolderVanillaInterface> holder,
@@ -42,7 +43,8 @@ public class TheChunkSystemMixin {
 
 	@Inject(
 		method = "onItemRemoval",
-		at = @At("TAIL")
+		at = @At("TAIL"),
+		remap = false
 	)
 	private void onChunkUnload(
 		ItemHolder<ChunkPos, ChunkState, ChunkLoadingContext, NewChunkHolderVanillaInterface> holder,

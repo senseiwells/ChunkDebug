@@ -24,11 +24,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.concurrent.Executor;
 
-@Mixin(value = NewChunkHolderVanillaInterface.class, remap = false)
+@Mixin(NewChunkHolderVanillaInterface.class)
 public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChunkHolder implements ChunkDataSupplier {
 	@Shadow public abstract int getTicketLevel();
 
-	@Shadow @Final private ItemHolder<ChunkPos, ChunkState, ChunkLoadingContext, NewChunkHolderVanillaInterface> newHolder;
+	@Shadow(remap = false) @Final private ItemHolder<ChunkPos, ChunkState, ChunkLoadingContext, NewChunkHolderVanillaInterface> newHolder;
 
 	public NewChunkHolderVanillaInterfaceMixin(ChunkPos pos) {
 		super(pos);
