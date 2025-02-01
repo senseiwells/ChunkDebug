@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.2.2"
+val modVersion = "2.2.3"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -74,7 +74,7 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			Fixed remapping issue with c2me
+			Fixed compatability issue with Worldthreader
             """.trimIndent()
 		)
 		type = STABLE

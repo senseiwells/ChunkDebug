@@ -5,6 +5,7 @@ import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
+import me.senseiwells.chunkdebug.server.utils.LevelUtils;
 import net.minecraft.server.level.*;
 import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -117,7 +118,7 @@ public class ChunkDebugTracker {
 	}
 
 	private void markDirty(long pos) {
-		if (this.level.getServer().isSameThread()) {
+		if (LevelUtils.isSameThread(this.level)) {
 			this.dirty.add(pos);
 		} else if (!this.level.getServer().isStopped()) {
 			ChunkDebug.LOGGER.warn("Tried marking dirty off-thread");

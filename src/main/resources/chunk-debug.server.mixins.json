@@ -10,6 +10,7 @@
     "ChunkMapMixin",
     "DistanceManagerAccessor",
     "DistanceManagerMixin",
+    "LevelAccessor",
     "PlayerListMixin",
     "ServerLevelMixin",
     "TicketAccessor",

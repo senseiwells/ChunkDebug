@@ -147,7 +147,7 @@ public class ChunkDebugServer implements ModInitializer {
 	private void handleStopWatching(StopWatchingPayload payload, ServerPlayNetworking.Context context) {
 		UUID uuid = context.player().getUUID();
 		if (payload.dimensions().isEmpty()) {
-			for (ResourceKey<Level> dimension : this.watching.keySet()) {
+			for (ResourceKey<Level> dimension : new ArrayList<>(this.watching.keySet())) {
 				this.watching.remove(dimension, uuid);
 			}
 			return;
