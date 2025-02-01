@@ -3,6 +3,7 @@ package me.senseiwells.chunkdebug.server;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
@@ -10,8 +11,10 @@ import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import me.senseiwells.chunkdebug.server.config.ChunkDebugServerConfig;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
+import me.senseiwells.chunkdebug.server.utils.LevelUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceKey;
@@ -31,7 +34,7 @@ public class ChunkDebugServer implements ModInitializer {
 
 	private static ChunkDebugServer instance;
 
-	private final Multimap<ResourceKey<Level>, UUID> watching = HashMultimap.create();
+	private final Multimap<ResourceKey<Level>, UUID> watching = Multimaps.synchronizedSetMultimap(HashMultimap.create());
 	private final ChunkDebugServerConfig config = ChunkDebugServerConfig.read();
 
 	public static ChunkDebugServer getInstance() {
@@ -42,7 +45,8 @@ public class ChunkDebugServer implements ModInitializer {
 	public void onInitialize() {
 		instance = this;
 
-		ServerTickEvents.END_SERVER_TICK.register(this::sendUpdatesToWatching);
+		ServerWorldEvents.UNLOAD.register(this::unloadLevel);
+		ServerTickEvents.END_WORLD_TICK.register(this::sendUpdatesToWatching);
 		ServerPlayConnectionEvents.JOIN.register(this::sendHelloPayload);
 
 		ServerPlayNetworking.registerGlobalReceiver(StartWatchingPayload.TYPE, this::handleStartWatching);
@@ -78,42 +82,39 @@ public class ChunkDebugServer implements ModInitializer {
 		}));
 	}
 
-	private void sendUpdatesToWatching(MinecraftServer server) {
-		Iterator<ResourceKey<Level>> dimensions = this.watching.keySet().iterator();
-		List<Runnable> tasks = new LinkedList<>();
-		while (dimensions.hasNext()) {
-			ResourceKey<Level> dimension = dimensions.next();
-			ServerLevel level = server.getLevel(dimension);
-			if (level == null) {
-				dimensions.remove();
-				continue;
-			}
+	private void unloadLevel(MinecraftServer server, ServerLevel level) {
+		 this.watching.removeAll(level.dimension());
+	}
 
-			List<ServerPlayer> players = new ArrayList<>();
+	private void sendUpdatesToWatching(ServerLevel level) {
+		ResourceKey<Level> dimension = level.dimension();
+		List<Runnable> tasks = new LinkedList<>();
+		List<ServerPlayer> players = new ArrayList<>();
+		synchronized (this.watching) {
 			for (UUID next : this.watching.get(dimension)) {
-				ServerPlayer player = server.getPlayerList().getPlayer(next);
+				ServerPlayer player = level.getServer().getPlayerList().getPlayer(next);
 				if (player == null) {
 					tasks.add(() -> this.watching.remove(dimension, next));
 				} else {
 					players.add(player);
 				}
 			}
+		}
 
-			ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
-			ChunkDebugTracker.DirtyChunks dirty = tracker.getDirtyChunks();
-			this.partitionInto(dirty.updated(), partition -> {
-				ChunkDataPayload payload = new ChunkDataPayload(dimension, partition, server.getTickCount(), false);
-				ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(payload);
-				for (ServerPlayer player : players) {
-					player.connection.send(packet);
-				}
-			});
-			if (!dirty.removed().isEmpty()) {
-				ChunkUnloadPayload payload = new ChunkUnloadPayload(dimension, dirty.removed().toLongArray());
-				ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(payload);
-				for (ServerPlayer player : players) {
-					player.connection.send(packet);
-				}
+		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
+		ChunkDebugTracker.DirtyChunks dirty = tracker.getDirtyChunks();
+		this.partitionInto(dirty.updated(), partition -> {
+			ChunkDataPayload payload = new ChunkDataPayload(dimension, partition, level.getServer().getTickCount(), false);
+			ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(payload);
+			for (ServerPlayer player : players) {
+				player.connection.send(packet);
+			}
+		});
+		if (!dirty.removed().isEmpty()) {
+			ChunkUnloadPayload payload = new ChunkUnloadPayload(dimension, dirty.removed().toLongArray());
+			ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(payload);
+			for (ServerPlayer player : players) {
+				player.connection.send(packet);
 			}
 		}
 		tasks.forEach(Runnable::run);
@@ -147,8 +148,10 @@ public class ChunkDebugServer implements ModInitializer {
 	private void handleStopWatching(StopWatchingPayload payload, ServerPlayNetworking.Context context) {
 		UUID uuid = context.player().getUUID();
 		if (payload.dimensions().isEmpty()) {
-			for (ResourceKey<Level> dimension : new ArrayList<>(this.watching.keySet())) {
-				this.watching.remove(dimension, uuid);
+			synchronized (this.watching) {
+				for (ResourceKey<Level> dimension : new ArrayList<>(this.watching.keySet())) {
+					this.watching.remove(dimension, uuid);
+				}
 			}
 			return;
 		}
@@ -159,8 +162,10 @@ public class ChunkDebugServer implements ModInitializer {
 
 	private void handleRefresh(ChunkRefreshPayload payload, ServerPlayNetworking.Context context) {
 		for (ServerLevel level : context.server().getAllLevels()) {
-			ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
-			tracker.refresh();
+			LevelUtils.execute(level, () -> {
+				ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
+				tracker.refresh();
+			});
 		}
 	}
 

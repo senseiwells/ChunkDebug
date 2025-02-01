@@ -1,7 +1,6 @@
 package me.senseiwells.chunkdebug.server.tracker;
 
 import it.unimi.dsi.fastutil.longs.*;
-import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
@@ -27,10 +26,12 @@ public class ChunkDebugTracker {
 	}
 
 	public Collection<ChunkData> getChunks() {
+		this.checkSameThread();
 		return this.chunks.values();
 	}
 
 	public DirtyChunks getDirtyChunks() {
+		this.checkSameThread();
 		List<ChunkData> updated = new ArrayList<>(this.dirty.size());
 		LongList removed = new LongArrayList();
 		LongIterator iter = this.dirty.iterator();
@@ -64,6 +65,8 @@ public class ChunkDebugTracker {
 	}
 
 	public void refresh() {
+		this.checkSameThread();
+
 		this.chunks.clear();
 		this.dirty.clear();
 		synchronized (this.stages) {
@@ -118,10 +121,15 @@ public class ChunkDebugTracker {
 	}
 
 	private void markDirty(long pos) {
-		if (LevelUtils.isSameThread(this.level)) {
-			this.dirty.add(pos);
-		} else if (!this.level.getServer().isStopped()) {
-			ChunkDebug.LOGGER.warn("Tried marking dirty off-thread");
+		this.checkSameThread();
+		this.dirty.add(pos);
+	}
+
+	private void checkSameThread() {
+		if (!LevelUtils.isSameThread(this.level)) {
+			// We just throw an exception, otherwise we risk a
+			// race condition at some random undetermined point
+			throw new IllegalStateException("Tried using ChunkDebugTracker off level thread");
 		}
 	}
 
