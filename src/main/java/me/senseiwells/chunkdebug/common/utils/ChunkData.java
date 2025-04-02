@@ -26,7 +26,7 @@ public class ChunkData {
 
 	private final ChunkPos position;
 	@Nullable private ChunkStatus stage;
-	private List<Ticket<?>> tickets;
+	private List<Ticket> tickets;
 
 	private int statusLevel;
 	private int tickingStatusLevel;
@@ -35,7 +35,7 @@ public class ChunkData {
 	public ChunkData(
 		ChunkPos position,
 		@Nullable ChunkStatus stage,
-		SortedArraySet<Ticket<?>> tickets,
+		SortedArraySet<Ticket> tickets,
 		int statusLevel,
 		int tickingStatusLevel,
 		boolean unloading
@@ -46,7 +46,7 @@ public class ChunkData {
 	public ChunkData(
 		ChunkPos position,
 		@Nullable ChunkStatus stage,
-		List<Ticket<?>> tickets,
+		List<Ticket> tickets,
 		int statusLevel,
 		int tickingStatusLevel,
 		boolean unloading
@@ -69,7 +69,7 @@ public class ChunkData {
 		return this.stage;
 	}
 
-	public List<Ticket<?>> tickets() {
+	public List<Ticket> tickets() {
 		return this.tickets;
 	}
 
@@ -89,7 +89,7 @@ public class ChunkData {
 		this.stage = stage;
 	}
 
-	public void updateTickets(SortedArraySet<Ticket<?>> tickets) {
+	public void updateTickets(List<Ticket> tickets) {
 		this.tickets = ImmutableList.copyOf(tickets);
 	}
 
@@ -134,7 +134,7 @@ public class ChunkData {
 		boolean unloading = buf.readBoolean();
 
 		ChunkStatus status = ExtraStreamCodecs.OPTIONAL_CHUNK_STATUS.decode(buf).map(Holder::value).orElse(null);
-		List<Ticket<?>> tickets = ExtraStreamCodecs.TICKETS.decode(buf);
+		List<Ticket> tickets = ExtraStreamCodecs.TICKETS.decode(buf);
 		return new ChunkData(pos, status, tickets, statusLevel, tickingStatusLevel, unloading);
 	}
 }

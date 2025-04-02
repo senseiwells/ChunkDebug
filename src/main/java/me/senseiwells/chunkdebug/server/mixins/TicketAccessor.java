@@ -8,14 +8,11 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Ticket.class)
 public interface TicketAccessor {
-	@Accessor("createdTick")
-	long getTickCreated();
-
-	@Accessor("createdTick")
-	void setTickCreated(long tick);
+	@Accessor("ticksLeft")
+	long getRemainingTicks();
 
 	@Invoker("<init>")
- 	static <T> Ticket<T> construct(TicketType<T> type, int ticketLevel, T key) {
+ 	static Ticket construct(TicketType type, int ticketLevel, long ticksRemaining) {
 		throw new AssertionError();
 	}
 }

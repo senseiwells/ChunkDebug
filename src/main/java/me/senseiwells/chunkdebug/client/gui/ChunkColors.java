@@ -13,7 +13,7 @@ public class ChunkColors {
 	public static int calculateChunkColor(
 		FullChunkStatus status,
 		@Nullable ChunkStatus stage,
-		List<Ticket<?>> tickets,
+		List<Ticket> tickets,
 		boolean unloading
 	) {
 		if (unloading) {
@@ -23,7 +23,7 @@ public class ChunkColors {
 			return LevelLoadingScreenAccessor.getStageColorMap().getInt(stage);
 		}
 
-		for (Ticket<?> ticket : tickets) {
+		for (Ticket ticket : tickets) {
 			int color = calculateTicketTypeColor(ticket.getType());
 			if (color != -1) {
 				return color;
@@ -37,7 +37,7 @@ public class ChunkColors {
 		};
 	}
 
-	private static int calculateTicketTypeColor(TicketType<?> type) {
+	private static int calculateTicketTypeColor(TicketType type) {
 		if (type == TicketType.START) {
 			return 0xBFFF00;
 		}

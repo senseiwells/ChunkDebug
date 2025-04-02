@@ -381,7 +381,7 @@ public class ChunkDebugMap {
 	private int calculateChunkColor(ChunkData data) {
 		ChunkPos pos = data.position();
 		ChunkStatus stage = this.client.config.showStages ? data.stage() : null;
-		List<Ticket<?>> tickets = this.client.config.showTickets ? data.tickets() : List.of();
+		List<Ticket> tickets = this.client.config.showTickets ? data.tickets() : List.of();
 		int color = ChunkColors.calculateChunkColor(data.status(), stage, tickets, data.unloading());
 		if ((pos.x + pos.z) % 2 == 0) {
 			color = ARGB.lerp(0.12F, color, 0xFFFFFF);

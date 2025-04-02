@@ -6,7 +6,6 @@ import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
 import me.senseiwells.chunkdebug.server.utils.LevelUtils;
 import net.minecraft.server.level.*;
-import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ public class ChunkDebugTracker {
 		}
 	}
 
-	public void updateTickets(long pos, SortedArraySet<Ticket<?>> tickets) {
+	public void updateTickets(long pos, List<Ticket> tickets) {
 		ChunkData data = this.chunks.get(pos);
 		if (data != null) {
 			data.updateTickets(tickets);

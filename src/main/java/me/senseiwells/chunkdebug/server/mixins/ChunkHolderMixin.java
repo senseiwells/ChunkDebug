@@ -5,7 +5,6 @@ import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import net.minecraft.server.level.*;
-import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 @Mixin(ChunkHolder.class)
@@ -36,8 +36,8 @@ public abstract class ChunkHolderMixin extends GenerationChunkHolder implements 
 		DistanceManager manager = chunkMap.getDistanceManager();
 		long pos = this.pos.toLong();
 
-		SortedArraySet<Ticket<?>> tickets = ((DistanceManagerAccessor) manager).getTicketsFor(pos);
-		int statusLevel = ((DistanceManagerAccessor) manager).getTickingTracker().getLevel(this.pos);
+		List<Ticket> tickets = ((DistanceManagerAccessor) manager).getTicketsStorage().getTickets(pos);
+		int statusLevel = ((DistanceManagerAccessor) manager).getSimulationChunkTracker().getLevel(this.pos);
 
 		ChunkStatus stage = this.getPersistedStatus();
 		return new ChunkData(this.pos, stage, tickets, this.getTicketLevel(), statusLevel, false);

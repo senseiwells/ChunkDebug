@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.2.3"
+val modVersion = "2.2.4"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -16,6 +16,7 @@ repositories {
 	maven("https://maven.parchmentmc.org/")
 	maven("https://api.modrinth.com/maven")
 	maven("https://maven2.bai.lol")
+	maven("https://maven.supersanta.me/snapshots")
 }
 
 dependencies {
@@ -27,7 +28,10 @@ dependencies {
 	})
 	modImplementation(libs.fabric.loader)
 	modImplementation(libs.fabric.api)
-	modCompileOnly(explosion.fabric(libs.c2me))
+
+	include(modImplementation(libs.keybinds.get())!!)
+
+	// modCompileOnly(explosion.fabric(libs.c2me))
 
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)

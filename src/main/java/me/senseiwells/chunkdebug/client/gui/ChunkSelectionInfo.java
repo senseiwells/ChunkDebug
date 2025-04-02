@@ -55,7 +55,7 @@ public record ChunkSelectionInfo(
 
 				if (!data.tickets().isEmpty()) {
 					tickets.add(Component.translatable("chunk-debug.info.tickets"));
-					for (Ticket<?> ticket : data.tickets()) {
+					for (Ticket ticket : data.tickets()) {
 						Component type = prettify(ticket.getType());
 						Component level = prettify(ticket.getTicketLevel());
 						tickets.add(Component.translatable("chunk-debug.info.tickets.details", type, level));
@@ -94,11 +94,11 @@ public record ChunkSelectionInfo(
 			// We must order them correctly
 			Arrays.stream(FullChunkStatus.values()).forEachOrdered(s -> statuses.put(s, 0));
 
-			Object2IntOpenHashMap<TicketType<?>> types = new Object2IntOpenHashMap<>();
+			Object2IntOpenHashMap<TicketType> types = new Object2IntOpenHashMap<>();
 
 			List<ChunkData> selected = selection.stream().mapToObj(chunks::get).filter(Objects::nonNull).toList();
 			for (ChunkData chunk : selected) {
-				for (Ticket<?> ticket : chunk.tickets()) {
+				for (Ticket ticket : chunk.tickets()) {
 					types.addTo(ticket.getType(), 1);
 				}
 				statuses.addTo(chunk.status(), 1);
@@ -121,7 +121,7 @@ public record ChunkSelectionInfo(
 			}
 
 			stages.add(Component.translatable("chunk-debug.info.tickets.distribution"));
-			for (Object2IntMap.Entry<TicketType<?>> entry : types.object2IntEntrySet()) {
+			for (Object2IntMap.Entry<TicketType> entry : types.object2IntEntrySet()) {
 				Component line = Component.empty()
 					.append(prettify(entry.getKey()).withColor(0xFFFFFF))
 					.append(": ")
@@ -145,11 +145,9 @@ public record ChunkSelectionInfo(
 		return Component.translatable("chunk-debug.status." + status.name().toLowerCase()).withColor(HL);
 	}
 
-	private static MutableComponent prettify(TicketType<?> type) {
-		if (ExtraStreamCodecs.isCustomTicketType(type)) {
-			return Component.literal(type.toString()).withColor(HL);
-		}
-		return Component.translatable("chunk-debug.ticket.type." + type).withColor(HL);
+	private static MutableComponent prettify(TicketType type) {
+		String name = ExtraStreamCodecs.getTicketTypeAsString(type);
+		return Component.translatable("chunk-debug.ticket.type." + name).withColor(HL);
 	}
 
 	private static MutableComponent prettify(ChunkStatus stage) {

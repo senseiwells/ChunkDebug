@@ -2,14 +2,15 @@ package me.senseiwells.chunkdebug.server.mixins;
 
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.MutableChunkDebugTrackerHolder;
-import net.minecraft.server.level.TickingTracker;
+import net.minecraft.server.level.LoadingChunkTracker;
+import net.minecraft.server.level.SimulationChunkTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(TickingTracker.class)
+@Mixin({LoadingChunkTracker.class, SimulationChunkTracker.class})
 public class TickingTrackerMixin implements MutableChunkDebugTrackerHolder {
 	@Unique private ChunkDebugTracker chunkdebug$tracker;
 
