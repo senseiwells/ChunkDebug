@@ -78,7 +78,9 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			Fixed compatability issue with Worldthreader
+			- Updated to 1.21.5
+			- Support for c2me has been temporarily removed, this will hopefully be fixed in a future version.
+			- The chunk debug key now supports multiple keys.
             """.trimIndent()
 		)
 		type = STABLE
