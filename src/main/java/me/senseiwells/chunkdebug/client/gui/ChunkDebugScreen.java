@@ -8,6 +8,7 @@ import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
 import me.senseiwells.chunkdebug.client.gui.widget.IntegerEditbox;
 import me.senseiwells.chunkdebug.client.gui.widget.ToggleButton;
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
+import me.senseiwells.keybinds.api.InputKeys;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -198,7 +199,8 @@ public class ChunkDebugScreen extends Screen {
 			this.map.resetData();
 			return true;
 		}
-		if (this.minecraft != null && ChunkDebugClient.getInstance().keybind.matches(keyCode, scanCode)) {
+		InputKeys keys = ChunkDebugClient.getInstance().keybind.keys();
+		if (keys.size() == 1 && keys.isLastKey(InputConstants.Type.KEYSYM.getOrCreate(keyCode))) {
 			this.onClose();
 			return true;
 		}

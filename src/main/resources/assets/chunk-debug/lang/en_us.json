@@ -2,7 +2,7 @@
   "chunk-debug.screen.title": "ChunkDebug Map",
   "chunk-debug.screen.unavailable": "ChunkDebug is unavailable",
 
-  "chunk-debug.key": "Open ChunkDebug",
+  "key.chunk-debug.map": "Open ChunkDebug",
 
   "chunk-debug.boolean.true": "True",
   "chunk-debug.boolean.false": "False",

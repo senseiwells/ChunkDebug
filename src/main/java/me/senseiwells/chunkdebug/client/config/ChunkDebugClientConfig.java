@@ -3,11 +3,13 @@ package me.senseiwells.chunkdebug.client.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.client.utils.Corner;
+import me.senseiwells.keybinds.api.InputKeys;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.BufferedReader;
@@ -26,6 +28,7 @@ public class ChunkDebugClientConfig {
 	public boolean showTickets;
 	public boolean showMinimap;
 	public int chunkRetention;
+	public InputKeys chunkDebugMapKeys;
 
 	public ChunkDebugClientConfig(
 		Corner minimapCorner,
@@ -35,7 +38,8 @@ public class ChunkDebugClientConfig {
 		boolean showStages,
 		boolean showTickets,
 		boolean showMinimap,
-		int chunkRetention
+		int chunkRetention,
+		InputKeys chunkDebugMapKeys
 	) {
 		this.minimapCorner = minimapCorner;
 		this.minimapOffsetX = minimapOffsetX;
@@ -45,6 +49,7 @@ public class ChunkDebugClientConfig {
 		this.showTickets = showTickets;
 		this.showMinimap = showMinimap;
 		this.chunkRetention = chunkRetention;
+		this.chunkDebugMapKeys = chunkDebugMapKeys;
 	}
 
 	public ChunkDebugClientConfig() {
@@ -56,7 +61,8 @@ public class ChunkDebugClientConfig {
 			true,
 			true,
 			true,
-			0
+			0,
+			InputKeys.of(InputConstants.KEY_F6)
 		);
 	}
 
@@ -72,7 +78,8 @@ public class ChunkDebugClientConfig {
 			Codec.BOOL.fieldOf("show_stages").forGetter(config -> config.showStages),
 			Codec.BOOL.fieldOf("show_tickets").forGetter(config -> config.showTickets),
 			Codec.BOOL.fieldOf("show_minimap").forGetter(config -> config.showMinimap),
-			Codec.INT.fieldOf("chunk_retention").forGetter(config -> config.chunkRetention)
+			Codec.INT.fieldOf("chunk_retention").forGetter(config -> config.chunkRetention),
+			InputKeys.CODEC.fieldOf("chunk_debug_map_keys").forGetter(config -> config.chunkDebugMapKeys)
 		).apply(instance, ChunkDebugClientConfig::new);
 	});
 

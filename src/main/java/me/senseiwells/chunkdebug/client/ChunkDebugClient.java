@@ -1,14 +1,18 @@
 package me.senseiwells.chunkdebug.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugMap;
 import me.senseiwells.chunkdebug.client.gui.ChunkDebugScreen;
 import me.senseiwells.chunkdebug.common.network.*;
+import me.senseiwells.keybinds.api.InputKeys;
+import me.senseiwells.keybinds.api.Keybind;
+import me.senseiwells.keybinds.api.KeybindListener;
+import me.senseiwells.keybinds.api.KeybindManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
@@ -24,7 +28,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -32,8 +35,8 @@ import java.util.function.Supplier;
 public class ChunkDebugClient implements ClientModInitializer {
 	private static ChunkDebugClient instance;
 
-	public final KeyMapping keybind = new KeyMapping("chunk-debug.key", GLFW.GLFW_KEY_F6, "key.categories.misc");
 	public final ChunkDebugClientConfig config = ChunkDebugClientConfig.read();
+	public final Keybind keybind = KeybindManager.register(ChunkDebug.id("map"), InputKeys.of(InputConstants.KEY_F6));
 
 	@Nullable
 	private ChunkDebugMap map;
@@ -46,7 +49,11 @@ public class ChunkDebugClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		instance = this;
 
-		KeyBindingHelper.registerKeyBinding(this.keybind);
+		this.keybind.setKeys(this.config.chunkDebugMapKeys);
+		KeybindManager.addToControlsScreen(KeyMapping.CATEGORY_MISC, this.keybind);
+		this.keybind.addListener(KeybindListener.onSetKeys(keys -> {
+			this.config.chunkDebugMapKeys = keys;
+		}));
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
 		ClientLifecycleEvents.CLIENT_STOPPING.register(this::onClientStopping);
@@ -95,7 +102,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 		if (this.map != null) {
 			this.map.tick();
 		}
-		if (this.keybind.consumeClick() && minecraft.screen == null) {
+		if (this.keybind.consumeClicks() != 0 && minecraft.screen == null) {
 			ChunkDebugScreen screen = this.createChunkDebugScreen(null);
 			if (screen == null) {
 				minecraft.gui.getChat().addMessage(
