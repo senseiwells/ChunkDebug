@@ -26,7 +26,7 @@ If you are playing on a server, then you will need the correct permissions to us
 You must be opped, or alternatively you must have the `"chunk-debug"` permission from a 
 permissions mod, for example [Luck Perms](https://modrinth.com/mod/luckperms). 
 Alternatively, if you wish to allow all players to use ChunkDebug you can set the 
-`"require_permissions"` config in the `chunk-debug-server.json` to `true`. 
+`"require_permissions"` config in the `chunk-debug-server.json` to `false`. 
 Be careful when
 enabling this as ChunkDebug is a powerful tool!
 
