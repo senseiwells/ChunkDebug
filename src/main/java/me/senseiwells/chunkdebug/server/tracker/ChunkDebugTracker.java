@@ -120,8 +120,11 @@ public class ChunkDebugTracker {
 	}
 
 	private void markDirty(long pos) {
-		this.checkSameThread();
-		this.dirty.add(pos);
+		// For compatibility with c2me - if the server is stopping, we don't care anyway
+		if (!this.level.getServer().isStopped()) {
+			this.checkSameThread();
+			this.dirty.add(pos);
+		}
 	}
 
 	private void checkSameThread() {

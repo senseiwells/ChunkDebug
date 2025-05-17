@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.3.0"
+val modVersion = "2.3.1"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -31,7 +31,8 @@ dependencies {
 
 	include(modImplementation(libs.keybinds.get())!!)
 
-	// modCompileOnly(explosion.fabric(libs.c2me))
+	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
+	modCompileOnly(explosion.fabric(libs.c2me.get().toString()))
 
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
@@ -58,10 +59,10 @@ java {
 
 tasks {
 	processResources {
-		inputs.property("version", project.version)
+		inputs.property("version", releaseVersion)
 		filesMatching("fabric.mod.json") {
 			expand(mutableMapOf(
-				"version" to project.version,
+				"version" to releaseVersion,
 				"minecraft_dependency" to libs.versions.minecraft.get().replaceAfterLast('.', "x"),
 				"fabric_loader_dependency" to libs.versions.fabric.loader.get(),
 			))
@@ -78,9 +79,7 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			- Updated to 1.21.5
-			- Support for c2me has been temporarily removed, this will hopefully be fixed in a future version.
-			- The chunk debug key now supports multiple keys.
+			- Support for c2me has been re-implemented
             """.trimIndent()
 		)
 		type = STABLE

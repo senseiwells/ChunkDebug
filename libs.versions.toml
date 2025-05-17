@@ -7,12 +7,12 @@ permissions   = "0.3.3"
 keybinds      = "0.1.15+1.21.5"
 
 # Compatability dependencies
-c2me          = "0.3.2+beta.1.0+1.21.5"
+c2me          = "0.3.2+rc.1.0+1.21.5"
 
 # Plugins
 fabric-loom   = "1.10-SNAPSHOT"
 mod-publish   = "0.8.4"
-explosion     = "0.3.1"
+explosion     = "0.1.0"
 
 [libraries]
 minecraft     = { module = "com.mojang:minecraft"              , version.ref = "minecraft" }

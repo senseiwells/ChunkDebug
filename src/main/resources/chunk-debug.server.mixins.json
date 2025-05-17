@@ -15,8 +15,13 @@
     "TicketAccessor",
     "TicketStorageMixin",
     "TickingTrackerMixin",
+    "compat.c2me.ChunkMapMixin",
     "compat.c2me.LevelChunkMixin",
-    "compat.c2me.ProtoChunkMixin"
+    "compat.c2me.NewChunkHolderVanillaInterfaceMixin",
+    "compat.c2me.ProtoChunkMixin",
+    "compat.c2me.StatusAdvancingSchedulerAccessor",
+    "compat.c2me.TheChunkSystemMixin",
+    "compat.c2me.TickingTrackerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
