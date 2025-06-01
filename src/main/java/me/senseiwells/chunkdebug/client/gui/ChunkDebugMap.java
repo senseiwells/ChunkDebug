@@ -223,7 +223,11 @@ public class ChunkDebugMap {
 	void returnToPlayer() {
 		if (this.minecraft.player != null) {
 			this.dimensionIndex = this.dimensions.indexOf(this.minecraft.player.level().dimension());
-			this.setMapCenter(this.minecraft.player.chunkPosition());
+			if (this.dimensionIndex != -1) {
+				this.setMapCenter(this.minecraft.player.chunkPosition());
+			} else {
+				this.dimensionIndex = 0;
+			}
 		}
 	}
 
