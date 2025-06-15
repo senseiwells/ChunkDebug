@@ -80,13 +80,15 @@ public class ChunkDebugTracker {
 
 	public void set(ChunkData data) {
 		long pos = data.position().toLong();
-		this.chunks.put(pos, data);
-		this.markDirty(pos);
+		if (this.markDirty(pos)) {
+			this.chunks.put(pos, data);
+		}
 	}
 
 	public void unload(long pos) {
-		this.chunks.remove(pos);
-		this.markDirty(pos);
+		if (this.markDirty(pos)) {
+			this.chunks.remove(pos);
+		}
 	}
 
 	public void updateStage(long pos, ChunkStatus stage) {
@@ -119,12 +121,14 @@ public class ChunkDebugTracker {
 		}
 	}
 
-	private void markDirty(long pos) {
+	private boolean markDirty(long pos) {
 		// For compatibility with c2me - if the server is stopping, we don't care anyway
 		if (!this.level.getServer().isStopped()) {
 			this.checkSameThread();
 			this.dirty.add(pos);
+			return true;
 		}
+		return false;
 	}
 
 	private void checkSameThread() {

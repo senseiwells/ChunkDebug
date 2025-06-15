@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.3.1"
+val modVersion = "2.3.2"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -79,7 +79,7 @@ tasks {
 			"""
 			## ChunkDebug $modVersion
 			
-			- Support for c2me has been re-implemented
+			- Fixes a bug where quitting a singleplayer world with c2me causes an error 
             """.trimIndent()
 		)
 		type = STABLE
