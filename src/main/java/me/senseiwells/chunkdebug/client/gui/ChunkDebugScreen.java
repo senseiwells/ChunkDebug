@@ -151,7 +151,7 @@ public class ChunkDebugScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
-		// this.renderBlurredBackground(graphics);
+		this.renderBlurredBackground(graphics);
 
 		ChunkDebugMap.DimensionState state = this.map.state();
 
