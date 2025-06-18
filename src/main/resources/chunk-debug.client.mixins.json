@@ -3,7 +3,6 @@
   "package": "me.senseiwells.chunkdebug.client.mixins",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "GuiMixin",
     "LevelLoadingScreenAccessor",
     "MinecraftMixin"
   ],

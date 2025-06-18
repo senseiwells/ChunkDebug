@@ -2,18 +2,23 @@ package me.senseiwells.chunkdebug.client.gui;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import me.senseiwells.chunkdebug.client.ChunkDebugClient;
 import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
+import me.senseiwells.chunkdebug.client.gui.state.ColoredChunkDataRenderState;
 import me.senseiwells.chunkdebug.client.utils.Bounds;
 import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.Ticket;
@@ -22,6 +27,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import org.joml.Matrix3x2f;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -104,17 +110,17 @@ public class ChunkDebugMap {
 	public void resize(int width, int height) {
 		DimensionState state = this.state();
 
-		double oldCenterX = this.width / 2.0;
-		double oldCenterY = this.height / 2.0;
+		float oldCenterX = this.width / 2.0F;
+		float oldCenterY = this.height / 2.0F;
 
-		double currentX = (oldCenterX - state.offsetX) / state.scale;
-		double currentY = (oldCenterY - state.offsetY) / state.scale;
+		float currentX = (oldCenterX - state.offsetX) / state.scale;
+		float currentY = (oldCenterY - state.offsetY) / state.scale;
 
 		this.width = width;
 		this.height = height;
 
-		double newCenterX = width / 2.0;
-		double newCenterY = height / 2.0;
+		float newCenterX = width / 2.0F;
+		float newCenterY = height / 2.0F;
 		state.offsetX = newCenterX - currentX * state.scale;
 		state.offsetY = newCenterY - currentY * state.scale;
 
@@ -133,43 +139,45 @@ public class ChunkDebugMap {
 		Bounds bounds = this.getMinimapBounds();
 		int minX = bounds.minX(), minY = bounds.minY(), maxX = bounds.maxX(), maxY = bounds.maxY();
 
-		graphics.pose().pushPose();
+		graphics.pose().pushMatrix();
 
 		graphics.fill(minX - 3, minY - 3, maxX + 3, maxY + 3, HL_BG_LIGHT);
 		graphics.fill(minX, minY, maxX, maxY, HL_BG_DARK);
 
 		graphics.enableScissor(minX, minY, maxX, maxY);
-		graphics.pose().translate(minX + this.config.minimapSize / 2.0, minY + this.config.minimapSize / 2.0, 0.0F);
+		graphics.pose().translate(minX + this.config.minimapSize / 2.0F, minY + this.config.minimapSize / 2.0F);
 
 		DimensionState state;
 		if (this.minimap == Minimap.STATIC) {
 			state = this.state();
-			double offsetX = (this.width / 2.0 - state.offsetX) / state.scale;
-			double offsetY = (this.height / 2.0 - state.offsetY) / state.scale;
+			float offsetX = (this.width / 2.0F - state.offsetX) / state.scale;
+			float offsetY = (this.height / 2.0F - state.offsetY) / state.scale;
 
-			graphics.pose().scale(state.scale * MINIMAP_SCALE, state.scale * MINIMAP_SCALE, 0.0F);
-			graphics.pose().translate(-offsetX, -offsetY, 0.0F);
+			graphics.pose().scale(state.scale * MINIMAP_SCALE, state.scale * MINIMAP_SCALE);
+			graphics.pose().translate(-offsetX, -offsetY);
 		} else {
 			LocalPlayer player = this.minecraft.player;
 			ResourceKey<Level> dimension = player.level().dimension();
 			state = this.state(dimension);
 			ChunkPos pos = player.chunkPosition();
 
-			graphics.pose().scale(state.scale * MINIMAP_SCALE, state.scale * MINIMAP_SCALE, 0.0F);
-			graphics.pose().translate(-pos.x - 0.5, -pos.z - 0.5, 0.0F);
+			graphics.pose().scale(state.scale * MINIMAP_SCALE, state.scale * MINIMAP_SCALE);
+			graphics.pose().translate(-pos.x - 0.5F, -pos.z - 0.5F);
 		}
 
 		this.renderMap(graphics, state);
 
 		graphics.disableScissor();
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	void renderMap(GuiGraphics graphics, DimensionState state) {
+		Int2ObjectMap<List<ChunkPos>> states = new Int2ObjectOpenHashMap<>();
 		for (ChunkData data : state.chunks.values()) {
 			ChunkPos pos = data.position();
 			int color = this.calculateChunkColor(data);
-			graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
+			List<ChunkPos> positions = states.computeIfAbsent(color, c -> new ObjectArrayList<>());
+			positions.add(pos);
 		}
 
 		if (this.config.chunkRetention > 0) {
@@ -179,9 +187,17 @@ public class ChunkDebugMap {
 				ChunkData data = entry.getValue();
 				ChunkPos pos = data.position();
 				int color = this.calculateChunkColor(data) & alpha;
-				graphics.fill(pos.x, pos.z, pos.x + 1, pos.z + 1, color);
+				List<ChunkPos> positions = states.computeIfAbsent(color, c -> new ObjectArrayList<>());
+				positions.add(pos);
 			}
 		}
+
+		Matrix3x2f matrix = new Matrix3x2f(graphics.pose());
+		ScreenRectangle scissor = graphics.scissorStack.peek();
+		ColoredChunkDataRenderState data = new ColoredChunkDataRenderState(
+			RenderPipelines.GUI, TextureSetup.noTexture(), matrix, states, scissor
+		);
+		graphics.guiRenderState.submitGuiElement(data);
 
 		if (state.selection != null) {
 			this.renderChunkSelection(graphics, state.selection, SELECTED_OUTLINE_COLOR);
@@ -308,7 +324,7 @@ public class ChunkDebugMap {
 	}
 
 	private void renderChunkSelection(GuiGraphics graphics, ChunkSelection selection, int color) {
-		this.renderChunkSelection(graphics, selection, 0.3F, color);
+		this.renderChunkSelection(graphics, selection, 0.4F, color);
 	}
 
 	private void renderChunkSelection(GuiGraphics graphics, ChunkSelection selection, float thickness, int color) {
@@ -329,8 +345,8 @@ public class ChunkDebugMap {
 
 	private void setMapCenter(int x, int z) {
 		DimensionState state = this.state();
-		state.offsetX = (this.width / 2.0) - x * state.scale;
-		state.offsetY = (this.height / 2.0) - z * state.scale;
+		state.offsetX = (this.width / 2.0F) - x * state.scale;
+		state.offsetY = (this.height / 2.0F) - z * state.scale;
 		this.center = new ChunkPos(x, z);
 	}
 
@@ -344,8 +360,8 @@ public class ChunkDebugMap {
 			if (player != null && player.level().dimension() == state.dimension) {
 				center = player.chunkPosition();
 			}
-			state.offsetX = (this.width / 2.0) - center.x * state.scale;
-			state.offsetY = (this.height / 2.0) - center.z * state.scale;
+			state.offsetX = (this.width / 2.0F) - center.x * state.scale;
+			state.offsetY = (this.height / 2.0F) - center.z * state.scale;
 			state.initialized = true;
 		}
 	}
@@ -433,8 +449,8 @@ public class ChunkDebugMap {
 
 		float scale = 1.0F;
 
-		double offsetX = 0.0;
-		double offsetY = 0.0;
+		float offsetX = 0.0F;
+		float offsetY = 0.0F;
 
 		private DimensionState(ResourceKey<Level> dimension, Executor clusterWorker) {
 			this.dimension = dimension;

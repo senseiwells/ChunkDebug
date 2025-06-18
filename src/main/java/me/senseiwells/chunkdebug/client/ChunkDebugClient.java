@@ -14,6 +14,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
@@ -62,6 +64,10 @@ public class ChunkDebugClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(ByePayload.TYPE, this::handleBye);
 		ClientPlayNetworking.registerGlobalReceiver(ChunkDataPayload.TYPE, this::handleChunkData);
 		ClientPlayNetworking.registerGlobalReceiver(ChunkUnloadPayload.TYPE, this::handleChunkUnload);
+
+		HudElementRegistry.attachElementAfter(
+			VanillaHudElements.TITLE_AND_SUBTITLE, ChunkDebug.id("minimap"), this::onGuiRender
+		);
 	}
 
 	@Nullable

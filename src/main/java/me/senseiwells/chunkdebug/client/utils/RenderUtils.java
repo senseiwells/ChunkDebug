@@ -1,15 +1,18 @@
 package me.senseiwells.chunkdebug.client.utils;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import me.senseiwells.chunkdebug.client.gui.state.FloatColoredRectangleRenderState;
+import me.senseiwells.chunkdebug.client.gui.state.FloatColoredTriangleRenderState;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
 import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import org.joml.Matrix4f;
+import net.minecraft.util.Mth;
+import org.joml.Matrix3x2f;
 
 public class RenderUtils {
 	public static final int HL_BG_LIGHT = 0xC8353B48;
@@ -28,14 +31,12 @@ public class RenderUtils {
 	}
 
 	public static void fill(GuiGraphics graphics, float minX, float minY, float maxX, float maxY, int color) {
-		Matrix4f matrix4f = graphics.pose().last().pose();
-		graphics.drawSpecial(source -> {
-			VertexConsumer consumer = source.getBuffer(RenderType.gui());
-			consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
-			consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
-			consumer.addVertex(matrix4f, maxX, maxY, 0.0F).setColor(color);
-			consumer.addVertex(matrix4f, maxX, minY, 0.0F).setColor(color);
-		});
+		ScreenRectangle scissor = graphics.scissorStack.peek();
+		Matrix3x2f pose = new Matrix3x2f(graphics.pose());
+		FloatColoredRectangleRenderState state = new FloatColoredRectangleRenderState(
+			RenderPipelines.GUI, TextureSetup.noTexture(), pose, minX, minY, maxX, maxY, color, color, scissor
+		);
+		graphics.guiRenderState.submitGuiElement(state);
 	}
 
 	public static void triangle(
@@ -47,17 +48,14 @@ public class RenderUtils {
 		float angle,
 		int color
 	) {
-		graphics.pose().pushPose();
-		graphics.pose().rotateAround(Axis.ZP.rotationDegrees(angle), (minX + maxX) / 2, (minY + maxY) / 2, 0);
-		Matrix4f matrix4f = graphics.pose().last().pose();
-		graphics.drawSpecial(source -> {
-			VertexConsumer consumer = source.getBuffer(RenderType.gui());
-			consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
-			consumer.addVertex(matrix4f, minX, maxY, 0.0F).setColor(color);
-			consumer.addVertex(matrix4f, maxX, maxY - (maxY - minY) / 2, 0.0F).setColor(color);
-			consumer.addVertex(matrix4f, minX, minY, 0.0F).setColor(color);
-		});
-		graphics.pose().popPose();
+		Matrix3x2f pose = graphics.pose().pushMatrix();
+		ScreenRectangle scissor = graphics.scissorStack.peek();
+		Matrix3x2f copy = pose.rotateAbout(angle * Mth.DEG_TO_RAD, (minX + maxX) / 2, (minY + maxY) / 2, new Matrix3x2f());
+		FloatColoredTriangleRenderState state = new FloatColoredTriangleRenderState(
+			RenderPipelines.GUI, TextureSetup.noTexture(), copy, minX, minY, maxX, maxY, color, scissor
+		);
+		graphics.guiRenderState.submitGuiElement(state);
+		graphics.pose().popMatrix();
 	}
 
 	public static void options(
@@ -111,7 +109,7 @@ public class RenderUtils {
 
 		offsetX += padding + buttonWidth;
 		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
-		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFF);
+		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFFFF);
 	}
 
 	public static void optionRight(
@@ -132,7 +130,7 @@ public class RenderUtils {
 		int offsetMaxY = offsetY + buttonHeight;
 
 		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
-		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFF);
+		graphics.drawString(font, name, offsetX + padding, (offsetY + offsetMaxY - 9) / 2 + 1, 0xFFFFFFFF);
 
 		toggle.setPosition(maxX - buttonWidth - padding, offsetY);
 	}

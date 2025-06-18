@@ -151,20 +151,20 @@ public class ChunkDebugScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
-		this.renderBlurredBackground();
+		// this.renderBlurredBackground(graphics);
 
 		ChunkDebugMap.DimensionState state = this.map.state();
 
-		graphics.pose().pushPose();
-		graphics.pose().translate(state.offsetX, state.offsetY, 0.0);
-		graphics.pose().scale(state.scale, state.scale, 0.0F);
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(state.offsetX, state.offsetY);
+		graphics.pose().scale(state.scale, state.scale);
 
 		this.map.renderMap(graphics, state);
 
 		this.map.renderChunkSelecting(graphics, mouseX, mouseY);
 		this.map.renderChunkClusters(graphics);
 
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 
 		if (this.showMinimap.isToggled()) {
 			this.map.renderMinimap(graphics);
@@ -271,8 +271,8 @@ public class ChunkDebugScreen extends Screen {
 				this.map.config.minimapOffsetX += dragX;
 				this.map.config.minimapOffsetY += dragY;
 			} else {
-				state.offsetX += dragX;
-				state.offsetY += dragY;
+				state.offsetX += (float) dragX;
+				state.offsetY += (float) dragY;
 				this.map.updateCenter();
 			}
 			return true;
@@ -292,8 +292,8 @@ public class ChunkDebugScreen extends Screen {
 		double currentY = (mouseY - state.offsetY) / state.scale;
 
 		state.scale = Mth.clamp(state.scale + (float) scrollY * 0.5F, 1.0F, 64.0F);
-		state.offsetX = mouseX - currentX * state.scale;
-		state.offsetY = mouseY - currentY * state.scale;
+		state.offsetX = (float) (mouseX - currentX * state.scale);
+		state.offsetY = (float) (mouseY - currentY * state.scale);
 		return true;
 	}
 
@@ -318,7 +318,7 @@ public class ChunkDebugScreen extends Screen {
 			return;
 		}
 
-		graphics.pose().pushPose();
+		graphics.pose().pushMatrix();
 		Component title = Component.translatable("chunk-debug.settings").withColor(HL);
 		Component player = Component.translatable("chunk-debug.settings.return");
 		Component clusters = Component.translatable("chunk-debug.settings.clusters");
@@ -383,7 +383,7 @@ public class ChunkDebugScreen extends Screen {
 		offsetY += gap;
 		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, fade, this.chunkRetention);
 
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	private void renderChunkSelectionMenu(GuiGraphics graphics, ChunkDebugMap.DimensionState state) {
@@ -392,7 +392,7 @@ public class ChunkDebugScreen extends Screen {
 			return;
 		}
 
-		graphics.pose().pushPose();
+		graphics.pose().pushMatrix();
 
 		ChunkSelectionInfo info = ChunkSelectionInfo.create(state.selection, state.chunks());
 
@@ -413,7 +413,7 @@ public class ChunkDebugScreen extends Screen {
 			offsetY = this.renderInnerChunkSelectionInfo(graphics, section, padding, minX, maxX, offsetY);
 		}
 
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	private int renderInnerChunkSelectionInfo(
