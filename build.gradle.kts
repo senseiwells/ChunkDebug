@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.3.2"
+val modVersion = "2.4.0"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -77,9 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			## ChunkDebug $modVersion
-			
-			- Fixes a bug where quitting a singleplayer world with c2me causes an error 
+			- Updated to 1.21.6
             """.trimIndent()
 		)
 		type = STABLE
