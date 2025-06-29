@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.4.0"
+val modVersion = "2.4.2"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -77,7 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- Updated to 1.21.6
+			- Fix a crash when scrolling in the controls' menu
             """.trimIndent()
 		)
 		type = STABLE

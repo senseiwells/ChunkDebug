@@ -3,8 +3,8 @@ minecraft     = "1.21.6"
 parchment     = "1.21.4:2025.03.23"
 fabric-loader = "0.16.14"
 fabric-api    = "0.127.0+1.21.6"
-permissions   = "0.3.3"
-keybinds      = "0.1.15+1.21.5"
+permissions   = "0.4.0"
+keybinds      = "0.1.15+1.21.6"
 
 # Compatability dependencies
 c2me          = "0.3.4+alpha.0.42+1.21.6"
