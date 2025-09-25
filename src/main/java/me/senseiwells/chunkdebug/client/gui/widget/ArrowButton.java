@@ -4,6 +4,7 @@ import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 import static me.senseiwells.chunkdebug.client.utils.RenderUtils.HL;
@@ -18,20 +19,20 @@ public class ArrowButton extends AbstractButton {
 		this.action = pressed;
 	}
 
-	@Override
-	public void onPress() {
-		this.action.run();
-	}
+    @Override
+    public void onPress(InputWithModifiers modifiers) {
+        this.action.run();
+    }
 
-	@Override
+    @Override
 	protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
 		int minX = this.getX();
 		int minY = this.getY();
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
-		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
+		graphics.submitOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+        graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 		int dx = this.getWidth() / 4;
 		int dy = this.getHeight() / 4;
 		int angle = this.direction.ordinal() * 360 / 4;

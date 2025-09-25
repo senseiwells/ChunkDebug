@@ -64,7 +64,7 @@ public class ExtraStreamCodecs {
 		if (optional.isEmpty()) {
 			type = CUSTOM_TICKET_TYPES.inverse().get(location);
 			if (type == null) {
-				type = new TicketType(0, true, TicketType.TicketUse.LOADING);
+				type = new TicketType(0, TicketType.FLAG_PERSIST | TicketType.FLAG_LOADING);
 				CUSTOM_TICKET_TYPES.put(type, location);
 			}
 		} else {

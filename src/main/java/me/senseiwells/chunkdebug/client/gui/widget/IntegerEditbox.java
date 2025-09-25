@@ -4,6 +4,7 @@ import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
@@ -30,17 +31,17 @@ public class IntegerEditbox extends EditBox {
 		this.setValue(String.valueOf(value));
 	}
 
-	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (super.keyPressed(keyCode, scanCode, modifiers)) {
-			return true;
-		}
-		if (keyCode == GLFW.GLFW_KEY_ENTER) {
-			this.setFocused(false);
-			return false;
-		}
-		return false;
-	}
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
+            return true;
+        }
+        if (event.key() == GLFW.GLFW_KEY_ENTER) {
+            this.setFocused(false);
+            return false;
+        }
+        return false;
+    }
 
 	@Override
 	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -49,7 +50,7 @@ public class IntegerEditbox extends EditBox {
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+		graphics.submitOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
 		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 
 		if (this.isHovered()) {

@@ -1,16 +1,16 @@
 [versions]
-minecraft     = "1.21.6"
-parchment     = "1.21.4:2025.03.23"
-fabric-loader = "0.16.14"
-fabric-api    = "0.127.0+1.21.6"
-permissions   = "0.4.0"
-keybinds      = "0.1.15+1.21.6"
+minecraft     = "1.21.9-rc1"
+parchment     = "1.21.8:2025.09.14"
+fabric-loader = "0.17.2"
+fabric-api    = "0.133.12+1.21.9"
+permissions   = "0.4.1"
+keybinds      = "0.2.0+1.21.9-rc1"
 
 # Compatability dependencies
-c2me          = "0.3.4+alpha.0.42+1.21.6"
+c2me          = "0.3.5+alpha.0.33+1.21.9-rc1"
 
 # Plugins
-fabric-loom   = "1.10-SNAPSHOT"
+fabric-loom   = "1.11-SNAPSHOT"
 mod-publish   = "0.8.4"
 explosion     = "0.1.0"
 

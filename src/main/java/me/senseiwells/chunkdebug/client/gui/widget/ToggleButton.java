@@ -5,6 +5,7 @@ import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 import static me.senseiwells.chunkdebug.client.utils.RenderUtils.HL;
@@ -31,7 +32,7 @@ public class ToggleButton extends AbstractButton {
 	}
 
 	@Override
-	public void onPress() {
+	public void onPress(InputWithModifiers modifiers) {
 		this.toggled = !this.toggled;
 		this.action.accept(this.toggled);
 	}
@@ -43,7 +44,7 @@ public class ToggleButton extends AbstractButton {
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+		graphics.submitOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
 		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 		if (this.toggled) {
 			int dx = this.getWidth() / 4;

@@ -52,7 +52,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 		instance = this;
 
 		this.keybind.setKeys(this.config.chunkDebugMapKeys);
-		KeybindManager.addToControlsScreen(KeyMapping.CATEGORY_MISC, this.keybind);
+		KeybindManager.addToControlsScreen(KeyMapping.Category.MISC, this.keybind);
 		this.keybind.addListener(KeybindListener.onSetKeys(keys -> {
 			this.config.chunkDebugMapKeys = keys;
 		}));

@@ -31,16 +31,16 @@ public record ColoredChunkDataRenderState(
     }
 
     @Override
-    public void buildVertices(VertexConsumer vertexConsumer, float layer) {
+    public void buildVertices(VertexConsumer vertexConsumer) {
         for (Int2ObjectMap.Entry<List<ChunkPos>> chunks : this.chunks.int2ObjectEntrySet()) {
             int color = chunks.getIntKey();
             for (ChunkPos pos : chunks.getValue()) {
                 int minX = pos.x, maxX = minX + 1;
                 int minY = pos.z, maxY = minY + 1;
-                vertexConsumer.addVertexWith2DPose(this.pose, minX, minY, layer).setColor(color);
-                vertexConsumer.addVertexWith2DPose(this.pose, minX, maxY, layer).setColor(color);
-                vertexConsumer.addVertexWith2DPose(this.pose, maxX, maxY, layer).setColor(color);
-                vertexConsumer.addVertexWith2DPose(this.pose, maxX, minY, layer).setColor(color);
+                vertexConsumer.addVertexWith2DPose(this.pose, minX, minY).setColor(color);
+                vertexConsumer.addVertexWith2DPose(this.pose, minX, maxY).setColor(color);
+                vertexConsumer.addVertexWith2DPose(this.pose, maxX, maxY).setColor(color);
+                vertexConsumer.addVertexWith2DPose(this.pose, maxX, minY).setColor(color);
             }
         }
     }

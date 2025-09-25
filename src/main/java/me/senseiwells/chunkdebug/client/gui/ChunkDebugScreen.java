@@ -12,6 +12,8 @@ import me.senseiwells.keybinds.api.InputKeys;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -183,29 +185,29 @@ public class ChunkDebugScreen extends Screen {
 		super.render(graphics, mouseX, mouseY, partial);
 	}
 
-	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (super.keyPressed(keyCode, scanCode, modifiers)) {
-			return true;
-		}
-		if (keyCode == InputConstants.KEY_F1) {
-			boolean visible = this.settings.isToggled() || this.breakdown.isToggled();
-			this.settings.setToggled(!visible);
-			this.breakdown.setToggled(!visible);
-			return true;
-		}
-		if (keyCode == InputConstants.KEY_R && Screen.hasControlDown()) {
-			ChunkDebugClient.getInstance().refresh();
-			this.map.resetData();
-			return true;
-		}
-		InputKeys keys = ChunkDebugClient.getInstance().keybind.keys();
-		if (keys.size() == 1 && keys.isLastKey(InputConstants.Type.KEYSYM.getOrCreate(keyCode))) {
-			this.onClose();
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_F1) {
+            boolean visible = this.settings.isToggled() || this.breakdown.isToggled();
+            this.settings.setToggled(!visible);
+            this.breakdown.setToggled(!visible);
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_R && event.hasControlDown()) {
+            ChunkDebugClient.getInstance().refresh();
+            this.map.resetData();
+            return true;
+        }
+        InputKeys keys = ChunkDebugClient.getInstance().keybind.keys();
+        if (keys.size() == 1 && keys.isLastKey(InputConstants.getKey(event))) {
+            this.onClose();
+            return true;
+        }
+        return false;
+    }
 
 	@Override
 	public void onClose() {
@@ -221,64 +223,64 @@ public class ChunkDebugScreen extends Screen {
 
 	}
 
-	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (super.mouseClicked(mouseX, mouseY, button)) {
-			return true;
-		}
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        if (super.mouseClicked(event, bl)) {
+            return true;
+        }
 
-		this.chunkPosX.setFocused(false);
-		this.chunkPosZ.setFocused(false);
-		this.chunkRetention.setFocused(false);
-		if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
-			ChunkDebugMap.DimensionState state = this.map.state();
-			state.first = this.map.convertScreenToChunkPos(mouseX, mouseY);
-			return true;
-		}
-		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
-			if (this.showMinimap.isToggled() && this.map.getMinimapBounds().contains(mouseX, mouseY)) {
-				this.draggingMinimap = true;
-				return true;
-			}
-		}
-		return false;
-	}
+        this.chunkPosX.setFocused(false);
+        this.chunkPosZ.setFocused(false);
+        this.chunkRetention.setFocused(false);
+        if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
+            ChunkDebugMap.DimensionState state = this.map.state();
+            state.first = this.map.convertScreenToChunkPos(event.x(), event.y());
+            return true;
+        }
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            if (this.showMinimap.isToggled() && this.map.getMinimapBounds().contains(event.x(), event.y())) {
+                this.draggingMinimap = true;
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		ChunkDebugMap.DimensionState state = this.map.state();
-		if (state.first != null && button == InputConstants.MOUSE_BUTTON_RIGHT) {
-			ChunkSelection selection = new ChunkSelection(state.first, this.map.convertScreenToChunkPos(mouseX, mouseY));
-			state.first = null;
-			if (selection.equals(state.selection)) {
-				state.selection = null;
-			} else {
-				state.selection = selection;
-			}
-			return true;
-		}
-		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
-			this.draggingMinimap = false;
-		}
-		return super.mouseReleased(mouseX, mouseY, button);
-	}
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        ChunkDebugMap.DimensionState state = this.map.state();
+        if (state.first != null && event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
+            ChunkSelection selection = new ChunkSelection(state.first, this.map.convertScreenToChunkPos(event.x(), event.y()));
+            state.first = null;
+            if (selection.equals(state.selection)) {
+                state.selection = null;
+            } else {
+                state.selection = selection;
+            }
+            return true;
+        }
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            this.draggingMinimap = false;
+        }
+        return super.mouseReleased(event);
+    }
 
-	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-		ChunkDebugMap.DimensionState state = this.map.state();
-		if (button == InputConstants.MOUSE_BUTTON_LEFT) {
-			if (this.draggingMinimap) {
-				this.map.config.minimapOffsetX += dragX;
-				this.map.config.minimapOffsetY += dragY;
-			} else {
-				state.offsetX += (float) dragX;
-				state.offsetY += (float) dragY;
-				this.map.updateCenter();
-			}
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        ChunkDebugMap.DimensionState state = this.map.state();
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            if (this.draggingMinimap) {
+                this.map.config.minimapOffsetX += dragX;
+                this.map.config.minimapOffsetY += dragY;
+            } else {
+                state.offsetX += (float) dragX;
+                state.offsetY += (float) dragY;
+                this.map.updateCenter();
+            }
+            return true;
+        }
+        return false;
+    }
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {

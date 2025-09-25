@@ -44,7 +44,8 @@
   "chunk-debug.status.block_ticking": "Block Ticking",
   "chunk-debug.status.entity_ticking": "Entity Ticking",
 
-  "chunk-debug.ticket.type.minecraft:start": "Spawn Chunks",
+  "chunk-debug.ticket.type.minecraft:player_spawn": "Spawning Player",
+  "chunk-debug.ticket.type.minecraft:spawn_search": "Searching for Spawn",
   "chunk-debug.ticket.type.minecraft:dragon": "Ender Dragon",
   "chunk-debug.ticket.type.minecraft:player_loading": "Player Loading",
   "chunk-debug.ticket.type.minecraft:player_simulation": "Player Simulation",

@@ -36,10 +36,11 @@ public record FloatColoredTriangleRenderState(
         this(pipeline, textureSetup, pose, minX, minY, maxX, maxY, color, scissorArea, getBounds(minX, minY, maxX, maxY, pose, scissorArea));
     }
 
-    public void buildVertices(VertexConsumer vertexConsumer, float layer) {
-        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.minY, layer).setColor(this.color);
-        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.maxY, layer).setColor(this.color);
-        vertexConsumer.addVertexWith2DPose(this.pose, this.maxX, this.maxY - (this.maxY - this.minY) / 2, layer).setColor(this.color);
-        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.minY, layer).setColor(this.color);
+    @Override
+    public void buildVertices(VertexConsumer vertexConsumer) {
+        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.minY).setColor(this.color);
+        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.maxY).setColor(this.color);
+        vertexConsumer.addVertexWith2DPose(this.pose, this.maxX, this.maxY - (this.maxY - this.minY) / 2).setColor(this.color);
+        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.minY).setColor(this.color);
     }
 }

@@ -37,11 +37,12 @@ public record FloatColoredRectangleRenderState(
         this(pipeline, textureSetup, pose, minX, minY, maxX, maxY, col1, col2, scissorArea, getBounds(minX, minY, maxX, maxY, pose, scissorArea));
     }
 
-    public void buildVertices(VertexConsumer vertexConsumer, float layer) {
-        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.minY, layer).setColor(this.col1);
-        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.maxY, layer).setColor(this.col2);
-        vertexConsumer.addVertexWith2DPose(this.pose, this.maxX, this.maxY, layer).setColor(this.col2);
-        vertexConsumer.addVertexWith2DPose(this.pose, this.maxX, this.minY, layer).setColor(this.col1);
+    @Override
+    public void buildVertices(VertexConsumer vertexConsumer) {
+        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.minY).setColor(this.col1);
+        vertexConsumer.addVertexWith2DPose(this.pose, this.minX, this.maxY).setColor(this.col2);
+        vertexConsumer.addVertexWith2DPose(this.pose, this.maxX, this.maxY).setColor(this.col2);
+        vertexConsumer.addVertexWith2DPose(this.pose, this.maxX, this.minY).setColor(this.col1);
     }
 
     @Nullable
@@ -56,9 +57,6 @@ public record FloatColoredRectangleRenderState(
         ScreenRectangle bounds = new ScreenRectangle(
             (int) minX, (int) minY, Mth.ceil(maxX - minX), Mth.ceil(maxY - minY)
         ).transformMaxBounds(pose);
-        // bounds = new ScreenRectangle(
-        //     bounds.left() - 2, bounds.bottom() - 2, bounds.width() + 2, bounds.height() + 2
-        // );
         return scissor != null ? scissor.intersection(bounds) : bounds;
     }
 }

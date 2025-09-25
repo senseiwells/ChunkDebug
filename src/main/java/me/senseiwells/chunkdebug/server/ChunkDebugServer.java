@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -34,7 +35,7 @@ public class ChunkDebugServer implements ModInitializer {
 
 	private static ChunkDebugServer instance;
 
-	private final Multimap<ResourceKey<Level>, UUID> watching = Multimaps.synchronizedSetMultimap(HashMultimap.create());
+	private final Multimap<@NotNull ResourceKey<Level>, @NotNull UUID> watching = Multimaps.synchronizedSetMultimap(HashMultimap.create());
 	private final ChunkDebugServerConfig config = ChunkDebugServerConfig.read();
 
 	public static ChunkDebugServer getInstance() {
@@ -55,8 +56,8 @@ public class ChunkDebugServer implements ModInitializer {
 	}
 
 	public boolean isPermitted(ServerPlayer player) {
-		if (Objects.requireNonNull(player.getServer()).isDedicatedServer() && this.config.requirePermissions()) {
-			return Permissions.check(player, "chunk-debug", 2) || player.hasPermissions(2);
+		if (player.level().getServer().isDedicatedServer() && this.config.requirePermissions()) {
+			return Permissions.check(player, "chunk-debug", 2);
 		}
 		return true;
 	}

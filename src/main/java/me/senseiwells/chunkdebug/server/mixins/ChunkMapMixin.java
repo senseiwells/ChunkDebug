@@ -59,7 +59,8 @@ public class ChunkMapMixin implements ChunkHolderSupplier {
 		method = "applyStep",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/server/level/progress/ChunkProgressListener;onStatusChange(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/status/ChunkStatus;)V"
+			target = "Lnet/minecraft/world/level/chunk/status/ChunkStep;apply(Lnet/minecraft/world/level/chunk/status/WorldGenContext;Lnet/minecraft/util/StaticCache2D;Lnet/minecraft/world/level/chunk/ChunkAccess;)Ljava/util/concurrent/CompletableFuture;",
+            shift = At.Shift.AFTER
 		)
 	)
 	private void onStatusChange(

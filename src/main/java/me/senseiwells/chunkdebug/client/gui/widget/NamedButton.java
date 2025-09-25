@@ -6,6 +6,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 public class NamedButton extends AbstractButton {
@@ -17,7 +18,7 @@ public class NamedButton extends AbstractButton {
 	}
 
 	@Override
-	public void onPress() {
+	public void onPress(InputWithModifiers modifiers) {
 		this.action.run();
 	}
 
@@ -29,7 +30,7 @@ public class NamedButton extends AbstractButton {
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+		graphics.submitOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
 		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 
 		renderScrollingString(graphics, minecraft.font, this.getMessage(), minX, minY, maxX, maxY);
