@@ -1,13 +1,13 @@
 [versions]
-minecraft     = "1.21.9-rc1"
+minecraft     = "1.21.9"
 parchment     = "1.21.8:2025.09.14"
 fabric-loader = "0.17.2"
 fabric-api    = "0.133.12+1.21.9"
 permissions   = "0.4.1"
-keybinds      = "0.2.0+1.21.9-rc1"
+keybinds      = "0.2.1+1.21.9"
 
 # Compatability dependencies
-c2me          = "0.3.5+alpha.0.33+1.21.9-rc1"
+c2me          = "0.3.5+alpha.0.38+1.21.9-rc1"
 
 # Plugins
 fabric-loom   = "1.11-SNAPSHOT"
