@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.5.0"
+val modVersion = "2.5.1"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -77,7 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- Updated to 1.21.9
+			- Fixes a disconnection bug related to chunk generation statuses
             """.trimIndent()
 		)
 		type = STABLE

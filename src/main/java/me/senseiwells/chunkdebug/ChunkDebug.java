@@ -11,7 +11,7 @@ public class ChunkDebug implements ModInitializer {
 	public static final String MOD_ID = "chunk-debug";
 	public static final Logger LOGGER = LogManager.getLogger("ChunkDebug");
 
-	public static final int PROTOCOL_VERSION = 3;
+	public static final int PROTOCOL_VERSION = 4;
 
 	@Override
 	public void onInitialize() {
