@@ -1,9 +1,9 @@
 package me.senseiwells.chunkdebug.common.utils;
 
 import com.google.common.collect.HashBiMap;
+import io.netty.buffer.ByteBuf;
 import me.senseiwells.chunkdebug.server.mixins.TicketAccessor;
 import net.minecraft.Util;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,8 +24,7 @@ public class ExtraStreamCodecs {
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ResourceKey<Level>> DIMENSION = StreamCodec.of(ExtraStreamCodecs::encodeDimension, ExtraStreamCodecs::decodeDimension);
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<ResourceKey<Level>>> DIMENSIONS = ByteBufCodecs.<RegistryFriendlyByteBuf, ResourceKey<Level>>list().apply(DIMENSION);
-	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<ChunkStatus>> CHUNK_STATUS = ByteBufCodecs.holderRegistry(Registries.CHUNK_STATUS);
-	public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Holder<ChunkStatus>>> OPTIONAL_CHUNK_STATUS = ByteBufCodecs.optional(CHUNK_STATUS);
+	public static final StreamCodec<ByteBuf, Optional<ChunkStatus>> OPTIONAL_CHUNK_STATUS = ByteBufCodecs.fromCodec(ExtraCodecs.OPTIONAL_CHUNK_STATUS);
 	public static final StreamCodec<FriendlyByteBuf, Ticket> TICKET = StreamCodec.of(ExtraStreamCodecs::encodeTicket, ExtraStreamCodecs::decodeTicket);
 	public static final StreamCodec<FriendlyByteBuf, List<Ticket>> TICKETS = ByteBufCodecs.<FriendlyByteBuf, Ticket>list().apply(TICKET);
 

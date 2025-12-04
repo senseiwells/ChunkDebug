@@ -1,9 +1,6 @@
 package me.senseiwells.chunkdebug.common.utils;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -119,11 +116,7 @@ public class ChunkData {
 		buf.writeInt(data.tickingStatusLevel);
 		buf.writeBoolean(data.unloading);
 
-		Optional<Holder<ChunkStatus>> status = buf.registryAccess().lookup(Registries.CHUNK_STATUS)
-			.orElse(BuiltInRegistries.CHUNK_STATUS)
-			.getResourceKey(data.stage)
-			.flatMap(BuiltInRegistries.CHUNK_STATUS::get);
-		ExtraStreamCodecs.OPTIONAL_CHUNK_STATUS.encode(buf, status);
+		ExtraStreamCodecs.OPTIONAL_CHUNK_STATUS.encode(buf, Optional.ofNullable(data.stage));
 		ExtraStreamCodecs.TICKETS.encode(buf, data.tickets);
 	}
 
@@ -133,7 +126,7 @@ public class ChunkData {
 		int tickingStatusLevel = buf.readInt();
 		boolean unloading = buf.readBoolean();
 
-		ChunkStatus status = ExtraStreamCodecs.OPTIONAL_CHUNK_STATUS.decode(buf).map(Holder::value).orElse(null);
+		ChunkStatus status = ExtraStreamCodecs.OPTIONAL_CHUNK_STATUS.decode(buf).orElse(null);
 		List<Ticket> tickets = ExtraStreamCodecs.TICKETS.decode(buf);
 		return new ChunkData(pos, status, tickets, statusLevel, tickingStatusLevel, unloading);
 	}
