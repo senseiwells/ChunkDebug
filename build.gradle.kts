@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.5.1"
+val modVersion = "2.5.2"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -77,7 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- Fixes a disconnection bug related to chunk generation statuses
+			- ChunkDebug will now remember the last minimap mode you had selected when joining a world
             """.trimIndent()
 		)
 		type = STABLE
