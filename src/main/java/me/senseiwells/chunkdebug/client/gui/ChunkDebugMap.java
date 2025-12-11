@@ -2,6 +2,7 @@ package me.senseiwells.chunkdebug.client.gui;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.*;
@@ -24,9 +25,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.Ticket;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
 
 import java.util.*;
@@ -65,7 +68,6 @@ public class ChunkDebugMap {
 
 	final ChunkDebugClientConfig config;
 
-	Minimap minimap = Minimap.NONE;
 	ChunkPos center = ChunkPos.ZERO;
 
 	int dimensionWidth = 0;
@@ -132,7 +134,7 @@ public class ChunkDebugMap {
 	}
 
 	public void renderMinimap(GuiGraphics graphics) {
-		if (this.minimap == Minimap.NONE || this.minecraft.player == null) {
+		if (this.config.minimapMode == Minimap.NONE || this.minecraft.player == null) {
 			return;
 		}
 
@@ -148,7 +150,7 @@ public class ChunkDebugMap {
 		graphics.pose().translate(minX + this.config.minimapSize / 2.0F, minY + this.config.minimapSize / 2.0F);
 
 		DimensionState state;
-		if (this.minimap == Minimap.STATIC) {
+		if (this.config.minimapMode == Minimap.STATIC) {
 			state = this.state();
 			float offsetX = (this.width / 2.0F - state.offsetX) / state.scale;
 			float offsetY = (this.height / 2.0F - state.offsetY) / state.scale;
@@ -229,11 +231,11 @@ public class ChunkDebugMap {
 	}
 
 	void nextMinimap() {
-		this.minimap = this.minimap.next();
+		this.config.minimapMode = this.config.minimapMode.next();
 	}
 
 	void previousMinimap() {
-		this.minimap = this.minimap.previous();
+		this.config.minimapMode = this.config.minimapMode.previous();
 	}
 
 	void returnToPlayer() {
@@ -296,7 +298,7 @@ public class ChunkDebugMap {
 	}
 
 	Component getMinimapName() {
-		return this.minimap.pretty();
+		return this.config.minimapMode.pretty();
 	}
 
 	Bounds getMinimapBounds() {
@@ -409,8 +411,10 @@ public class ChunkDebugMap {
 		return color | 0xFF000000;
 	}
 
-	public enum Minimap {
+	public enum Minimap implements StringRepresentable {
 		NONE, STATIC, FOLLOW;
+
+        public static final Codec<Minimap> CODEC = StringRepresentable.fromEnum(Minimap::values);
 
 		public Minimap previous() {
 			return switch (this) {
@@ -431,7 +435,13 @@ public class ChunkDebugMap {
 		public Component pretty() {
 			return Component.translatable("chunk-debug.settings.minimap." + this.name().toLowerCase());
 		}
-	}
+
+        @NotNull
+        @Override
+        public String getSerializedName() {
+            return this.name().toLowerCase();
+        }
+    }
 
 	static class DimensionState {
 		private final Multimap<Integer, ChunkData> unloaded = HashMultimap.create();

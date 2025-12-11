@@ -145,7 +145,7 @@ public class ChunkDebugScreen extends Screen {
 
 	@Override
 	public void removed() {
-		if (this.map.minimap == ChunkDebugMap.Minimap.NONE) {
+		if (this.map.config.minimapMode == ChunkDebugMap.Minimap.NONE) {
 			ChunkDebugClient.getInstance().stopWatching();
 			this.map.resetStates();
 		}

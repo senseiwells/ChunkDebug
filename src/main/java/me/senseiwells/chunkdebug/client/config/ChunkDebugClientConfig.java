@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.senseiwells.chunkdebug.ChunkDebug;
+import me.senseiwells.chunkdebug.client.gui.ChunkDebugMap;
 import me.senseiwells.chunkdebug.client.utils.Corner;
 import me.senseiwells.keybinds.api.InputKeys;
 import net.fabricmc.loader.api.FabricLoader;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public class ChunkDebugClientConfig {
+    public ChunkDebugMap.Minimap minimapMode;
 	public Corner minimapCorner;
 	public double minimapOffsetX;
 	public double minimapOffsetY;
@@ -31,6 +33,7 @@ public class ChunkDebugClientConfig {
 	public InputKeys chunkDebugMapKeys;
 
 	public ChunkDebugClientConfig(
+        ChunkDebugMap.Minimap minimapMode,
 		Corner minimapCorner,
 		double minimapOffsetX,
 		double minimapOffsetY,
@@ -41,6 +44,7 @@ public class ChunkDebugClientConfig {
 		int chunkRetention,
 		InputKeys chunkDebugMapKeys
 	) {
+        this.minimapMode = minimapMode;
 		this.minimapCorner = minimapCorner;
 		this.minimapOffsetX = minimapOffsetX;
 		this.minimapOffsetY = minimapOffsetY;
@@ -54,6 +58,7 @@ public class ChunkDebugClientConfig {
 
 	public ChunkDebugClientConfig() {
 		this(
+            ChunkDebugMap.Minimap.NONE,
 			Corner.TOP_LEFT,
 			0.0,
 			0.0,
@@ -71,6 +76,7 @@ public class ChunkDebugClientConfig {
 
 	public static final Codec<ChunkDebugClientConfig> CODEC = RecordCodecBuilder.create(instance -> {
 		return instance.group(
+            ChunkDebugMap.Minimap.CODEC.optionalFieldOf("minimap_mode", ChunkDebugMap.Minimap.NONE).forGetter(config -> config.minimapMode),
 			Corner.CODEC.fieldOf("minimap_corner").forGetter(config -> config.minimapCorner),
 			Codec.DOUBLE.fieldOf("minimap_offset_x").forGetter(config -> config.minimapOffsetX),
 			Codec.DOUBLE.fieldOf("minimap_offset_y").forGetter(config -> config.minimapOffsetY),
