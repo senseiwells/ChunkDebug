@@ -16,21 +16,22 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
 import static me.senseiwells.chunkdebug.client.utils.RenderUtils.*;
 
+@SuppressWarnings("NotNullFieldNotInitialized")
 public class ChunkDebugScreen extends Screen {
 	private static final int MENU_PADDING = 3;
 
 	private final ChunkDebugMap map;
-	private final Screen parent;
+	@Nullable private final Screen parent;
 
 	private boolean draggingMinimap = false;
 
-	private ToggleButton breakdown;
+    private ToggleButton breakdown;
 	private ToggleButton settings;
 
 	private ArrowButton dimensionLeft;
@@ -211,12 +212,8 @@ public class ChunkDebugScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		if (this.minecraft != null) {
-			this.minecraft.setScreen(this.parent);
-			return;
-		}
-		super.onClose();
-	}
+        this.minecraft.setScreen(this.parent);
+    }
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
@@ -348,14 +345,14 @@ public class ChunkDebugScreen extends Screen {
 		int gap = padding + 15;
 
 		Component mode = this.map.getMinimapName();
-		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, mode, this.minimapLeft, this.minimapRight);
+		RenderUtils.options(graphics, minX, maxX, offsetY, padding, mode, this.minimapLeft, this.minimapRight);
 
 		offsetY += gap + 3;
-		Component dimension = Component.literal(this.map.dimension().location().toString());
-		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, dimension, this.dimensionLeft, this.dimensionRight);
+		Component dimension = Component.literal(this.map.dimension().identifier().toString());
+		RenderUtils.options(graphics, minX, maxX, offsetY, padding, dimension, this.dimensionLeft, this.dimensionRight);
 
 		offsetY += gap;
-		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, clusters, this.clustersLeft, this.clustersRight);
+		RenderUtils.options(graphics, minX, maxX, offsetY, padding, clusters, this.clustersLeft, this.clustersRight);
 
 		offsetY += gap;
 
@@ -380,7 +377,7 @@ public class ChunkDebugScreen extends Screen {
 		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, minimap, this.showMinimap);
 
 		offsetY += gap;
-		RenderUtils.options(graphics, this.font, minX, maxX, offsetY, padding, corner, this.minimapCornerLeft, this.minimapCornerRight);
+		RenderUtils.options(graphics, minX, maxX, offsetY, padding, corner, this.minimapCornerLeft, this.minimapCornerRight);
 
 		offsetY += gap;
 		RenderUtils.optionLeft(graphics, this.font, minX, maxX, offsetY, padding, fade, this.chunkRetention);

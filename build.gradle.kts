@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.5.2"
+val modVersion = "2.6.0"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -40,7 +40,7 @@ dependencies {
 }
 
 loom {
-	accessWidenerPath.set(file("src/main/resources/chunk-debug.accesswidener"))
+	accessWidenerPath.set(file("src/main/resources/chunk-debug.classtweaker"))
 
 	runs {
 		getByName("server") {
@@ -77,7 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- ChunkDebug will now remember the last minimap mode you had selected when joining a world
+			- Update to 1.21.11
             """.trimIndent()
 		)
 		type = STABLE

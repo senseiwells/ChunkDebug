@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StaticCache2D;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStep;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -74,7 +75,7 @@ public class ChunkMapMixin implements ChunkHolderSupplier {
 	}
 
 	@Override
-	public void chunkdebug$forEachChunkHolder(Consumer<ChunkHolder> consumer) {
+	public void chunkdebug$forEachChunkHolder(@NonNull Consumer<ChunkHolder> consumer) {
 		this.visibleChunkMap.values().forEach(consumer);
 	}
 }

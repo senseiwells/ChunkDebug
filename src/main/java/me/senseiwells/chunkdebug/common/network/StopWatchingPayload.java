@@ -7,7 +7,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -19,7 +18,6 @@ public record StopWatchingPayload(List<ResourceKey<Level>> dimensions) implement
 		this(List.of());
 	}
 
-	@NotNull
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;

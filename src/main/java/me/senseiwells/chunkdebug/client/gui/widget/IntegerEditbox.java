@@ -50,7 +50,7 @@ public class IntegerEditbox extends EditBox {
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.submitOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
 		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 
 		if (this.isHovered()) {

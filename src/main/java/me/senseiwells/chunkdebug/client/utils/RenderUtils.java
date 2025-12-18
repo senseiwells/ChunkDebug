@@ -3,7 +3,7 @@ package me.senseiwells.chunkdebug.client.utils;
 import me.senseiwells.chunkdebug.client.gui.state.FloatColoredRectangleRenderState;
 import me.senseiwells.chunkdebug.client.gui.state.FloatColoredTriangleRenderState;
 import me.senseiwells.chunkdebug.client.gui.widget.ArrowButton;
-import me.senseiwells.chunkdebug.client.gui.widget.NamedButton;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -60,7 +60,6 @@ public class RenderUtils {
 
 	public static void options(
 		GuiGraphics graphics,
-		Font font,
 		int minX,
 		int maxX,
 		int offsetY,
@@ -85,7 +84,9 @@ public class RenderUtils {
 		offsetX += padding + buttonWidth;
 		offsetMaxX -= padding;
 		graphics.fill(offsetX, offsetY, offsetMaxX, offsetMaxY, BG_DARK);
-		NamedButton.renderScrollingString(graphics, font, name, offsetX, offsetY, offsetMaxX, offsetMaxY);
+
+		ActiveTextCollector collector = graphics.textRenderer();
+		collector.acceptScrollingWithDefaultCenter(name, offsetX, offsetMaxX, offsetY, offsetMaxY);
 	}
 
 	public static void optionLeft(

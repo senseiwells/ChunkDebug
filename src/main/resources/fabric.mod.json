@@ -23,7 +23,7 @@
     "chunk-debug.server.mixins.json",
     "chunk-debug.client.mixins.json"
   ],
-  "accessWidener": "chunk-debug.accesswidener",
+  "accessWidener": "chunk-debug.classtweaker",
   "depends": {
     "fabricloader": ">=${fabric_loader_dependency}",
     "fabric-api": "*"

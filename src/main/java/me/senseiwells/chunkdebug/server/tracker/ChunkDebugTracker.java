@@ -36,8 +36,8 @@ public class ChunkDebugTracker {
 		LongIterator iter = this.dirty.iterator();
 		while (iter.hasNext()) {
 			long pos = iter.nextLong();
-			ChunkData data = this.chunks.get(pos);
-			if (data != null) {
+			if (this.chunks.containsKey(pos)) {
+				ChunkData data = this.chunks.get(pos);
 				updated.add(data);
 			} else {
 				removed.add(pos);
@@ -51,11 +51,13 @@ public class ChunkDebugTracker {
 		synchronized (this.stages) {
 			for (Long2ObjectMap.Entry<ChunkStatus> entry : this.stages.long2ObjectEntrySet()) {
 				long pos = entry.getLongKey();
-				ChunkData data = this.chunks.get(pos);
-				ChunkStatus stage = entry.getValue();
-				if (data != null && data.stage() != stage) {
-					data.updateStage(stage);
-					this.markDirty(pos);
+				if (this.chunks.containsKey(pos)) {
+					ChunkData data = this.chunks.get(pos);
+					ChunkStatus stage = entry.getValue();
+					if (data.stage() != stage) {
+						data.updateStage(stage);
+						this.markDirty(pos);
+					}
 				}
 			}
 
@@ -98,27 +100,27 @@ public class ChunkDebugTracker {
 	}
 
 	public void updateTickets(long pos, List<Ticket> tickets) {
-		ChunkData data = this.chunks.get(pos);
-		if (data != null) {
-			data.updateTickets(tickets);
-			this.markDirty(pos);
-		}
+		if (this.chunks.containsKey(pos)) {
+			ChunkData data = this.chunks.get(pos);
+            data.updateTickets(tickets);
+            this.markDirty(pos);
+        }
 	}
 
 	public void updateTickingStatusLevel(long pos, int level) {
-		ChunkData data = this.chunks.get(pos);
-		if (data != null) {
-			data.updateTickingStatusLevel(level);
-			this.markDirty(pos);
-		}
+		if (this.chunks.containsKey(pos)) {
+			ChunkData data = this.chunks.get(pos);
+            data.updateTickingStatusLevel(level);
+            this.markDirty(pos);
+        }
 	}
 
 	public void updateUnloading(long pos, boolean unloading) {
-		ChunkData data = this.chunks.get(pos);
-		if (data != null) {
-			data.updateUnloading(unloading);
-			this.markDirty(pos);
-		}
+		if (this.chunks.containsKey(pos)) {
+			ChunkData data = this.chunks.get(pos);
+            data.updateUnloading(unloading);
+            this.markDirty(pos);
+        }
 	}
 
 	private boolean markDirty(long pos) {

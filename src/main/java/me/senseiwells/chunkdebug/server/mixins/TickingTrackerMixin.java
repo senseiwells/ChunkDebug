@@ -4,6 +4,7 @@ import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.MutableChunkDebugTrackerHolder;
 import net.minecraft.server.level.LoadingChunkTracker;
 import net.minecraft.server.level.SimulationChunkTracker;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,10 +24,11 @@ public class TickingTrackerMixin implements MutableChunkDebugTrackerHolder {
 	}
 
 	@Override
-	public void chunkdebug$setTracker(ChunkDebugTracker tracker) {
+	public void chunkdebug$setTracker(@NonNull ChunkDebugTracker tracker) {
 		this.chunkdebug$tracker = tracker;
 	}
 
+	@NonNull
 	@Override
 	public ChunkDebugTracker chunkdebug$getTracker() {
 		return this.chunkdebug$tracker;

@@ -15,6 +15,7 @@ import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public record ChunkSelectionInfo(
 		return Math.max(width, font.width(this.title));
 	}
 
-	public static ChunkSelectionInfo create(ChunkSelection selection, Long2ObjectMap<ChunkData> chunks) {
+	public static ChunkSelectionInfo create(ChunkSelection selection, Long2ObjectMap<@Nullable ChunkData> chunks) {
 		Component title;
 		List<Component> location = new ArrayList<>();
 		List<Component> status = new ArrayList<>();
@@ -96,7 +97,11 @@ public record ChunkSelectionInfo(
 
 			Object2IntOpenHashMap<TicketType> types = new Object2IntOpenHashMap<>();
 
-			List<ChunkData> selected = selection.stream().mapToObj(chunks::get).filter(Objects::nonNull).toList();
+            // noinspection NullableProblems
+            List<ChunkData> selected = selection.stream()
+				.mapToObj(chunks::get)
+				.filter(Objects::nonNull)
+				.toList();
 			for (ChunkData chunk : selected) {
 				for (Ticket ticket : chunk.tickets()) {
 					types.addTo(ticket.getType(), 1);

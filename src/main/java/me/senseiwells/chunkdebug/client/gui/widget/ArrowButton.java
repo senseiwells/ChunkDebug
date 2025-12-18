@@ -24,15 +24,15 @@ public class ArrowButton extends AbstractButton {
         this.action.run();
     }
 
-    @Override
-	protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+	@Override
+	protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
 		int minX = this.getX();
 		int minY = this.getY();
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.submitOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
-        graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
+		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 		int dx = this.getWidth() / 4;
 		int dy = this.getHeight() / 4;
 		int angle = this.direction.ordinal() * 360 / 4;

@@ -3,6 +3,7 @@ package me.senseiwells.chunkdebug.server.mixins;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.minecraft.server.level.ServerLevel;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,6 +24,7 @@ public class ServerLevelMixin implements ChunkDebugTrackerHolder {
 		this.chunkdebug$tracker.tick();
 	}
 
+	@NonNull
 	@Override
 	public ChunkDebugTracker chunkdebug$getTracker() {
 		return this.chunkdebug$tracker;

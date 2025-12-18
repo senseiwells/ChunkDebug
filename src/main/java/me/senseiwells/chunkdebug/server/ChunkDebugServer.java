@@ -23,6 +23,7 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +58,7 @@ public class ChunkDebugServer implements ModInitializer {
 
 	public boolean isPermitted(ServerPlayer player) {
 		if (player.level().getServer().isDedicatedServer() && this.config.requirePermissions()) {
-			return Permissions.check(player, "chunk-debug", 2);
+			return Permissions.check(player, "chunk-debug", PermissionLevel.GAMEMASTERS);
 		}
 		return true;
 	}

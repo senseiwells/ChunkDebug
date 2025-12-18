@@ -3,7 +3,7 @@ package me.senseiwells.chunkdebug;
 import me.senseiwells.chunkdebug.common.network.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +25,7 @@ public class ChunkDebug implements ModInitializer {
 		PayloadTypeRegistry.playC2S().register(ChunkRefreshPayload.TYPE, ChunkRefreshPayload.STREAM_CODEC);
 	}
 
-	public static ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+	public static Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 }

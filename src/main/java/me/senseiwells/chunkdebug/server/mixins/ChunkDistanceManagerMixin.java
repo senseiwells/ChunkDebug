@@ -4,6 +4,7 @@ import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public class ChunkDistanceManagerMixin implements ChunkDebugTrackerHolder {
 	@Shadow @Final ChunkMap field_17443;
 
+	@NonNull
 	@Override
 	public ChunkDebugTracker chunkdebug$getTracker() {
 		ServerLevel level = ((ChunkMapAccessor) this.field_17443).getLevel();

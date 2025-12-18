@@ -29,22 +29,21 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class ChunkDebugClient implements ClientModInitializer {
-	private static ChunkDebugClient instance;
+    @Nullable private static ChunkDebugClient instance;
 
 	public final ChunkDebugClientConfig config = ChunkDebugClientConfig.read();
 	public final Keybind keybind = KeybindManager.register(ChunkDebug.id("map"), InputKeys.of(InputConstants.KEY_F6));
 
-	@Nullable
-	private ChunkDebugMap map;
+	@Nullable private ChunkDebugMap map;
 
 	public static ChunkDebugClient getInstance() {
-		return instance;
+		return Objects.requireNonNull(instance, "Tried to get ChunkDebugClient before it was initialized!");
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import me.senseiwells.chunkdebug.common.utils.ChunkData;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,8 +32,9 @@ public abstract class ChunkHolderMixin extends GenerationChunkHolder implements 
 		tracker.set(this.chunkdebug$getChunkData(chunkMap));
 	}
 
+	@NonNull
 	@Override
-	public ChunkData chunkdebug$getChunkData(ChunkMap chunkMap) {
+	public ChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
 		DistanceManager manager = chunkMap.getDistanceManager();
 		long pos = this.pos.toLong();
 

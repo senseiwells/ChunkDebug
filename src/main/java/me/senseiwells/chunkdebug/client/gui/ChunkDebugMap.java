@@ -29,8 +29,8 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2f;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -57,7 +57,7 @@ public class ChunkDebugMap {
 	private final Map<ResourceKey<Level>, DimensionState> states = new Object2ObjectOpenHashMap<>();
 	private final List<ResourceKey<Level>> dimensions = new ArrayList<>();
 
-	private ChunkSelection clusterSelection;
+	@Nullable private ChunkSelection clusterSelection;
 	private int clusterTicks = 0;
 	private int clusterIndex = 0;
 
@@ -390,7 +390,7 @@ public class ChunkDebugMap {
 			this.dimensions.add(Level.END);
 		}
 		int width = this.dimensions.stream().mapToInt(key -> {
-			return minecraft.font.width(key.location().toString());
+			return minecraft.font.width(key.identifier().toString());
 		}).max().orElse(10);
 		this.dimensionWidth = Math.min(width, 140);
 
@@ -406,7 +406,7 @@ public class ChunkDebugMap {
 		List<Ticket> tickets = this.client.config.showTickets ? data.tickets() : List.of();
 		int color = ChunkColors.calculateChunkColor(data.status(), stage, tickets, data.unloading());
 		if ((pos.x + pos.z) % 2 == 0) {
-			color = ARGB.lerp(0.12F, color, 0xFFFFFF);
+			color = ARGB.srgbLerp(0.12F, color, 0xFFFFFF);
 		}
 		return color | 0xFF000000;
 	}
@@ -436,7 +436,6 @@ public class ChunkDebugMap {
 			return Component.translatable("chunk-debug.settings.minimap." + this.name().toLowerCase());
 		}
 
-        @NotNull
         @Override
         public String getSerializedName() {
             return this.name().toLowerCase();
@@ -454,8 +453,8 @@ public class ChunkDebugMap {
 
 		private boolean initialized = false;
 
-		ChunkSelection selection;
-		ChunkPos first;
+		@Nullable ChunkSelection selection;
+		@Nullable ChunkPos first;
 
 		float scale = 1.0F;
 
@@ -482,8 +481,8 @@ public class ChunkDebugMap {
 			this.clusterWorker.execute(() -> {
 				this.clusters.remove(pos);
 			});
-			ChunkData data = this.chunks.remove(pos);
-			if (data != null) {
+			if (this.chunks.containsKey(pos)) {
+				ChunkData data = this.chunks.remove(pos);
 				this.unloaded.put(tick, data);
 				data.updateUnloading(false);
 			}

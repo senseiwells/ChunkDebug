@@ -9,6 +9,7 @@ import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.world.level.ChunkPos;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.concurrent.locks.StampedLock;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
 public class ChunkMapMixin implements ChunkHolderSupplier {
 	@Override
 	@SuppressWarnings("unchecked")
-	public void chunkdebug$forEachChunkHolder(Consumer<ChunkHolder> consumer) {
+	public void chunkdebug$forEachChunkHolder(@NonNull Consumer<ChunkHolder> consumer) {
 		TheChunkSystem system = ((IChunkSystemAccess) this).c2me$getTheChunkSystem();
 		var accessor = (StatusAdvancingSchedulerAccessor<ChunkPos, ChunkState, ChunkLoadingContext, NewChunkHolderVanillaInterface>) system;
 		StampedLock lock = accessor.getItemsLock();

@@ -1,17 +1,17 @@
 [versions]
-minecraft     = "1.21.9"
-parchment     = "1.21.8:2025.09.14"
-fabric-loader = "0.17.2"
-fabric-api    = "0.133.12+1.21.9"
-permissions   = "0.4.1"
-keybinds      = "0.2.1+1.21.9"
+minecraft     = "1.21.11"
+parchment     = "1.21.10:2025.10.12"
+fabric-loader = "0.18.3"
+fabric-api    = "0.140.0+1.21.11"
+permissions   = "0.6.1"
+keybinds      = "0.2.2+1.21.11"
 
 # Compatability dependencies
-c2me          = "0.3.5+alpha.0.38+1.21.9-rc1"
+c2me          = "0.3.6+beta.1.0+1.21.11"
 
 # Plugins
-fabric-loom   = "1.11-SNAPSHOT"
-mod-publish   = "0.8.4"
+fabric-loom   = "1.14-SNAPSHOT"
+mod-publish   = "1.1.0"
 explosion     = "0.1.0"
 
 [libraries]

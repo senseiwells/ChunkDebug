@@ -21,7 +21,7 @@ public abstract class ProtoChunkMixin extends ChunkAccess {
 		LevelHeightAccessor levelHeightAccessor,
         PalettedContainerFactory factory,
 		long inhabitedTime,
-		@Nullable LevelChunkSection[] sections,
+		LevelChunkSection[] sections,
 		@Nullable BlendingData blendingData
 	) {
 		super(chunkPos, upgradeData, levelHeightAccessor, factory, inhabitedTime, sections, blendingData);
