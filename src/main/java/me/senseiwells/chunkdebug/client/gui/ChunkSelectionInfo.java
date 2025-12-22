@@ -88,50 +88,51 @@ public record ChunkSelectionInfo(
 				.append(prettify(selection.sizeZ()));
 			location.add(Component.translatable("chunk-debug.info.area", area));
 
-			int lowestLevel = Integer.MAX_VALUE;
-			int highestLevel = Integer.MIN_VALUE;
-
-			Object2IntLinkedOpenHashMap<FullChunkStatus> statuses = new Object2IntLinkedOpenHashMap<>();
-			// We must order them correctly
-			Arrays.stream(FullChunkStatus.values()).forEachOrdered(s -> statuses.put(s, 0));
-
-			Object2IntOpenHashMap<TicketType> types = new Object2IntOpenHashMap<>();
-
-            // noinspection NullableProblems
-            List<ChunkData> selected = selection.stream()
+			// noinspection NullableProblems
+			List<ChunkData> selected = selection.stream()
 				.mapToObj(chunks::get)
 				.filter(Objects::nonNull)
 				.toList();
-			for (ChunkData chunk : selected) {
-				for (Ticket ticket : chunk.tickets()) {
-					types.addTo(ticket.getType(), 1);
-				}
-				statuses.addTo(chunk.status(), 1);
-				if (chunk.statusLevel() > highestLevel) {
-					highestLevel = chunk.statusLevel();
-				}
-				if (chunk.statusLevel() < lowestLevel) {
-					lowestLevel =  chunk.statusLevel();
-				}
-			}
+			if (!selected.isEmpty()) {
+				int lowestLevel = Integer.MAX_VALUE;
+				int highestLevel = Integer.MIN_VALUE;
 
-			status.add(Component.translatable("chunk-debug.info.status.range", prettify(lowestLevel), prettify(highestLevel)));
-			tickets.add(Component.translatable("chunk-debug.info.status.distribution"));
-			for (Object2IntMap.Entry<FullChunkStatus> entry : statuses.object2IntEntrySet()) {
-				Component line = Component.empty()
-					.append(prettify(entry.getKey()).withColor(0xFFFFFF))
-					.append(": ")
-					.append(prettify(entry.getIntValue()));
-				tickets.add(line);
-			}
+				Object2IntLinkedOpenHashMap<FullChunkStatus> statuses = new Object2IntLinkedOpenHashMap<>();
+				// We must order them correctly
+				Arrays.stream(FullChunkStatus.values()).forEachOrdered(s -> statuses.put(s, 0));
 
-			stages.add(Component.translatable("chunk-debug.info.tickets.distribution"));
-			for (Object2IntMap.Entry<TicketType> entry : types.object2IntEntrySet()) {
-				Component line = Component.empty()
-					.append(prettify(entry.getKey()).withColor(0xFFFFFF))
-					.append(": ")
-					.append(prettify(entry.getIntValue()));
-				stages.add(line);
+				Object2IntOpenHashMap<TicketType> types = new Object2IntOpenHashMap<>();
+				for (ChunkData chunk : selected) {
+					for (Ticket ticket : chunk.tickets()) {
+						types.addTo(ticket.getType(), 1);
+					}
+					statuses.addTo(chunk.status(), 1);
+					if (chunk.statusLevel() > highestLevel) {
+						highestLevel = chunk.statusLevel();
+					}
+					if (chunk.statusLevel() < lowestLevel) {
+						lowestLevel = chunk.statusLevel();
+					}
+				}
+
+				status.add(Component.translatable("chunk-debug.info.status.range", prettify(lowestLevel), prettify(highestLevel)));
+				tickets.add(Component.translatable("chunk-debug.info.status.distribution"));
+				for (Object2IntMap.Entry<FullChunkStatus> entry : statuses.object2IntEntrySet()) {
+					Component line = Component.empty()
+						.append(prettify(entry.getKey()).withColor(0xFFFFFF))
+						.append(": ")
+						.append(prettify(entry.getIntValue()));
+					tickets.add(line);
+				}
+
+				stages.add(Component.translatable("chunk-debug.info.tickets.distribution"));
+				for (Object2IntMap.Entry<TicketType> entry : types.object2IntEntrySet()) {
+					Component line = Component.empty()
+						.append(prettify(entry.getKey()).withColor(0xFFFFFF))
+						.append(": ")
+						.append(prettify(entry.getIntValue()));
+					stages.add(line);
+				}
 			}
 		}
 
