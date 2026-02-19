@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.6.0"
+val modVersion = "2.6.1"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -77,7 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- Update to 1.21.11
+			- Fixed a race condition causing disconnects
             """.trimIndent()
 		)
 		type = STABLE
