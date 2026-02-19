@@ -7,7 +7,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ChunkLevel;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.Ticket;
-import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.jetbrains.annotations.Nullable;
@@ -32,17 +31,6 @@ public class ChunkData {
 	public ChunkData(
 		ChunkPos position,
 		@Nullable ChunkStatus stage,
-		SortedArraySet<Ticket> tickets,
-		int statusLevel,
-		int tickingStatusLevel,
-		boolean unloading
-	) {
-		this(position, stage, ImmutableList.copyOf(tickets), statusLevel, tickingStatusLevel, unloading);
-	}
-
-	public ChunkData(
-		ChunkPos position,
-		@Nullable ChunkStatus stage,
 		List<Ticket> tickets,
 		int statusLevel,
 		int tickingStatusLevel,
@@ -50,11 +38,13 @@ public class ChunkData {
 	) {
 		this.position = position;
 		this.stage = stage;
-		this.tickets = tickets;
 
 		this.statusLevel = statusLevel;
 		this.tickingStatusLevel = tickingStatusLevel;
 		this.unloading = unloading;
+
+		// We need to make a copy of the tickets
+		this.updateTickets(tickets);
 	}
 
 	public ChunkPos position() {
