@@ -8,7 +8,6 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
 import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
-import me.senseiwells.chunkdebug.common.utils.MutableChunkData;
 import me.senseiwells.chunkdebug.server.config.ChunkDebugServerConfig;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
@@ -180,7 +179,7 @@ public class ChunkDebugServer implements ModInitializer {
 			return;
 		}
 		if (data.size() < PACKET_PARTITION_SIZE) {
-			consumer.accept(List.copyOf(data));
+			consumer.accept(data);
 			return;
 		}
 		for (Collection<T> partition : Iterables.partition(data, PACKET_PARTITION_SIZE)) {
