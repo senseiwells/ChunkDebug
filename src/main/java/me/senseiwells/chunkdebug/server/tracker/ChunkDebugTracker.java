@@ -1,7 +1,8 @@
 package me.senseiwells.chunkdebug.server.tracker;
 
 import it.unimi.dsi.fastutil.longs.*;
-import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
+import me.senseiwells.chunkdebug.common.utils.MutableChunkData;
 import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.holder.ChunkHolderSupplier;
 import me.senseiwells.chunkdebug.server.utils.LevelUtils;
@@ -13,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ChunkDebugTracker {
-	private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<MutableChunkData> chunks = new Long2ObjectOpenHashMap<>();
 	private final LongSet dirty = new LongOpenHashSet();
 
 	private final Long2ObjectMap<ChunkStatus> stages = new Long2ObjectOpenHashMap<>();
@@ -24,21 +25,21 @@ public class ChunkDebugTracker {
 		this.level = level;
 	}
 
-	public Collection<ChunkData> getChunks() {
+	public Collection<ImmutableChunkData> getChunks() {
 		this.checkSameThread();
-		return this.chunks.values();
+		return this.chunks.values().stream().map(MutableChunkData::immutable).toList();
 	}
 
 	public DirtyChunks getDirtyChunks() {
 		this.checkSameThread();
-		List<ChunkData> updated = new ArrayList<>(this.dirty.size());
+		List<ImmutableChunkData> updated = new ArrayList<>(this.dirty.size());
 		LongList removed = new LongArrayList();
 		LongIterator iter = this.dirty.iterator();
 		while (iter.hasNext()) {
 			long pos = iter.nextLong();
 			if (this.chunks.containsKey(pos)) {
-				ChunkData data = this.chunks.get(pos);
-				updated.add(data);
+				MutableChunkData data = this.chunks.get(pos);
+				updated.add(data.immutable());
 			} else {
 				removed.add(pos);
 			}
@@ -52,7 +53,7 @@ public class ChunkDebugTracker {
 			for (Long2ObjectMap.Entry<ChunkStatus> entry : this.stages.long2ObjectEntrySet()) {
 				long pos = entry.getLongKey();
 				if (this.chunks.containsKey(pos)) {
-					ChunkData data = this.chunks.get(pos);
+					MutableChunkData data = this.chunks.get(pos);
 					ChunkStatus stage = entry.getValue();
 					if (data.stage() != stage) {
 						data.updateStage(stage);
@@ -80,7 +81,7 @@ public class ChunkDebugTracker {
 		});
 	}
 
-	public void set(ChunkData data) {
+	public void set(MutableChunkData data) {
 		long pos = data.position().toLong();
 		if (this.markDirty(pos)) {
 			this.chunks.put(pos, data);
@@ -101,7 +102,7 @@ public class ChunkDebugTracker {
 
 	public void updateTickets(long pos, List<Ticket> tickets) {
 		if (this.chunks.containsKey(pos)) {
-			ChunkData data = this.chunks.get(pos);
+			MutableChunkData data = this.chunks.get(pos);
             data.updateTickets(tickets);
             this.markDirty(pos);
         }
@@ -109,7 +110,7 @@ public class ChunkDebugTracker {
 
 	public void updateTickingStatusLevel(long pos, int level) {
 		if (this.chunks.containsKey(pos)) {
-			ChunkData data = this.chunks.get(pos);
+			MutableChunkData data = this.chunks.get(pos);
             data.updateTickingStatusLevel(level);
             this.markDirty(pos);
         }
@@ -117,7 +118,7 @@ public class ChunkDebugTracker {
 
 	public void updateUnloading(long pos, boolean unloading) {
 		if (this.chunks.containsKey(pos)) {
-			ChunkData data = this.chunks.get(pos);
+			MutableChunkData data = this.chunks.get(pos);
             data.updateUnloading(unloading);
             this.markDirty(pos);
         }
@@ -141,5 +142,5 @@ public class ChunkDebugTracker {
 		}
 	}
 
-	public record DirtyChunks(List<ChunkData> updated, LongList removed) { }
+	public record DirtyChunks(List<ImmutableChunkData> updated, LongList removed) { }
 }

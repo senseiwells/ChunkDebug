@@ -5,13 +5,13 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData.Ticket;
 import me.senseiwells.chunkdebug.common.utils.ExtraStreamCodecs;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.FullChunkStatus;
-import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -36,7 +36,7 @@ public record ChunkSelectionInfo(
 		return Math.max(width, font.width(this.title));
 	}
 
-	public static ChunkSelectionInfo create(ChunkSelection selection, Long2ObjectMap<@Nullable ChunkData> chunks) {
+	public static ChunkSelectionInfo create(ChunkSelection selection, Long2ObjectMap<@Nullable ImmutableChunkData> chunks) {
 		Component title;
 		List<Component> location = new ArrayList<>();
 		List<Component> status = new ArrayList<>();
@@ -48,7 +48,7 @@ public record ChunkSelectionInfo(
 			title = Component.translatable("chunk-debug.info.breakdown.chunk").withColor(HL);
 			location.add(Component.translatable("chunk-debug.info.location", prettify(pos)));
 
-			ChunkData data = chunks.get(pos.toLong());
+			ImmutableChunkData data = chunks.get(pos.toLong());
 			if (data != null) {
 				status.add(Component.translatable("chunk-debug.info.status", prettify(data.status())));
 				status.add(Component.translatable("chunk-debug.info.status.level", prettify(data.statusLevel())));
@@ -57,8 +57,8 @@ public record ChunkSelectionInfo(
 				if (!data.tickets().isEmpty()) {
 					tickets.add(Component.translatable("chunk-debug.info.tickets"));
 					for (Ticket ticket : data.tickets()) {
-						Component type = prettify(ticket.getType());
-						Component level = prettify(ticket.getTicketLevel());
+						Component type = prettify(ticket.type());
+						Component level = prettify(ticket.ticketLevel());
 						tickets.add(Component.translatable("chunk-debug.info.tickets.details", type, level));
 					}
 				}
@@ -89,7 +89,7 @@ public record ChunkSelectionInfo(
 			location.add(Component.translatable("chunk-debug.info.area", area));
 
 			// noinspection NullableProblems
-			List<ChunkData> selected = selection.stream()
+			List<ImmutableChunkData> selected = selection.stream()
 				.mapToObj(chunks::get)
 				.filter(Objects::nonNull)
 				.toList();
@@ -102,9 +102,9 @@ public record ChunkSelectionInfo(
 				Arrays.stream(FullChunkStatus.values()).forEachOrdered(s -> statuses.put(s, 0));
 
 				Object2IntOpenHashMap<TicketType> types = new Object2IntOpenHashMap<>();
-				for (ChunkData chunk : selected) {
+				for (ImmutableChunkData chunk : selected) {
 					for (Ticket ticket : chunk.tickets()) {
-						types.addTo(ticket.getType(), 1);
+						types.addTo(ticket.type(), 1);
 					}
 					statuses.addTo(chunk.status(), 1);
 					if (chunk.statusLevel() > highestLevel) {

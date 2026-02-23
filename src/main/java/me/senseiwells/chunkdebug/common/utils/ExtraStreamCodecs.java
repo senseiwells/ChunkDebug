@@ -3,7 +3,7 @@ package me.senseiwells.chunkdebug.common.utils;
 import com.google.common.collect.HashBiMap;
 import io.netty.buffer.ByteBuf;
 import me.senseiwells.chunkdebug.ChunkDebug;
-import me.senseiwells.chunkdebug.server.mixins.TicketAccessor;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData.Ticket;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,7 +12,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
@@ -48,13 +47,13 @@ public class ExtraStreamCodecs {
 	}
 
 	private static void encodeTicket(FriendlyByteBuf buf, Ticket ticket) {
-		Identifier id = BuiltInRegistries.TICKET_TYPE.getKey(ticket.getType());
+		Identifier id = BuiltInRegistries.TICKET_TYPE.getKey(ticket.type());
 		if (id == null) {
 			id = UNREGISTERED;
 		}
 		buf.writeIdentifier(id);
-		buf.writeInt((int) ((TicketAccessor) ticket).getRemainingTicks());
-		buf.writeInt(ticket.getTicketLevel());
+		buf.writeInt((int) ticket.ticksLeft());
+		buf.writeInt(ticket.ticketLevel());
 	}
 
 	private static Ticket decodeTicket(FriendlyByteBuf buf) {
@@ -73,6 +72,6 @@ public class ExtraStreamCodecs {
 
 		int ticksRemaining = buf.readInt();
 		int ticketLevel = buf.readInt();
-        return TicketAccessor.construct(type, ticketLevel, ticksRemaining);
+        return new Ticket(type, ticketLevel, ticksRemaining);
 	}
 }

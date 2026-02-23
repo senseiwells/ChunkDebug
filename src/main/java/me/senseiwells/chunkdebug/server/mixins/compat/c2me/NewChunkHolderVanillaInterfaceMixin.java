@@ -4,7 +4,7 @@ import com.ishland.c2me.rewrites.chunksystem.common.ChunkLoadingContext;
 import com.ishland.c2me.rewrites.chunksystem.common.ChunkState;
 import com.ishland.c2me.rewrites.chunksystem.common.NewChunkHolderVanillaInterface;
 import com.ishland.flowsched.scheduler.ItemHolder;
-import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.MutableChunkData;
 import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.mixins.ChunkMapAccessor;
 import me.senseiwells.chunkdebug.server.mixins.DistanceManagerAccessor;
@@ -48,7 +48,7 @@ public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChun
 
 	@NotNull
 	@Override
-	public ChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
+	public MutableChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
 		DistanceManager manager = chunkMap.getDistanceManager();
 		long pos = this.pos.toLong();
 
@@ -58,6 +58,6 @@ public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChun
 		ChunkState state = this.newHolder.getItem().get();
 		ChunkAccess chunk = state == null ? null : state.chunk();
 		ChunkStatus stage = chunk == null ? null : chunk.getPersistedStatus();
-		return new ChunkData(this.pos, stage, tickets, this.getTicketLevel(), statusLevel, false);
+		return new MutableChunkData(this.pos, stage, tickets, this.getTicketLevel(), statusLevel, false);
 	}
 }

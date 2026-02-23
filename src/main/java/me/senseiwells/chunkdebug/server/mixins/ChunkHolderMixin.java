@@ -3,7 +3,7 @@ package me.senseiwells.chunkdebug.server.mixins;
 import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
-import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.MutableChunkData;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -34,7 +34,7 @@ public abstract class ChunkHolderMixin extends GenerationChunkHolder implements 
 
 	@NonNull
 	@Override
-	public ChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
+	public MutableChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
 		DistanceManager manager = chunkMap.getDistanceManager();
 		long pos = this.pos.toLong();
 
@@ -42,6 +42,6 @@ public abstract class ChunkHolderMixin extends GenerationChunkHolder implements 
 		int statusLevel = ((DistanceManagerAccessor) manager).getSimulationChunkTracker().getLevel(this.pos);
 
 		ChunkStatus stage = this.getPersistedStatus();
-		return new ChunkData(this.pos, stage, tickets, this.getTicketLevel(), statusLevel, false);
+		return new MutableChunkData(this.pos, stage, tickets, this.getTicketLevel(), statusLevel, false);
 	}
 }

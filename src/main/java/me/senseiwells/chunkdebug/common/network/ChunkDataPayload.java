@@ -1,7 +1,8 @@
 package me.senseiwells.chunkdebug.common.network;
 
 import me.senseiwells.chunkdebug.ChunkDebug;
-import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
+import me.senseiwells.chunkdebug.common.utils.MutableChunkData;
 import me.senseiwells.chunkdebug.common.utils.ExtraStreamCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +14,7 @@ import java.util.Collection;
 
 public record ChunkDataPayload(
 	ResourceKey<Level> dimension,
-	Collection<ChunkData> chunks,
+	Collection<ImmutableChunkData> chunks,
 	int tick,
 	boolean initial
 ) implements CustomPacketPayload {
@@ -29,14 +30,14 @@ public record ChunkDataPayload(
 
 	private static void encode(ChunkDataPayload payload, RegistryFriendlyByteBuf buf) {
 		ExtraStreamCodecs.DIMENSION.encode(buf, payload.dimension);
-		ChunkData.LIST_STREAM_CODEC.encode(buf, payload.chunks);
+		ImmutableChunkData.LIST_STREAM_CODEC.encode(buf, payload.chunks);
 		buf.writeInt(payload.tick);
 		buf.writeBoolean(payload.initial);
 	}
 
 	private static ChunkDataPayload decode(RegistryFriendlyByteBuf buf) {
 		ResourceKey<Level> dimension = ExtraStreamCodecs.DIMENSION.decode(buf);
-		Collection<ChunkData> chunks = ChunkData.LIST_STREAM_CODEC.decode(buf);
+		Collection<ImmutableChunkData> chunks = ImmutableChunkData.LIST_STREAM_CODEC.decode(buf);
 		int tick = buf.readInt();
 		boolean initial = buf.readBoolean();
 		return new ChunkDataPayload(dimension, chunks, tick, initial);

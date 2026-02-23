@@ -9,10 +9,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(Ticket.class)
 public interface TicketAccessor {
 	@Accessor("ticksLeft")
-	long getRemainingTicks();
-
-	@Invoker("<init>")
- 	static Ticket construct(TicketType type, int ticketLevel, long ticksRemaining) {
-		throw new AssertionError();
-	}
+	long accessTicksLeft();
 }

@@ -2,8 +2,9 @@ package me.senseiwells.chunkdebug.client.gui;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.senseiwells.chunkdebug.client.mixins.LevelLoadingScreenAccessor;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData.Ticket;
 import net.minecraft.server.level.FullChunkStatus;
-import net.minecraft.server.level.Ticket;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,7 @@ public class ChunkColors {
         }
 
         for (Ticket ticket : tickets) {
-            int color = TICKET_COLORS.getInt(ticket.getType());
+            int color = TICKET_COLORS.getInt(ticket.type());
             if (color != -1) {
                 return color;
             }

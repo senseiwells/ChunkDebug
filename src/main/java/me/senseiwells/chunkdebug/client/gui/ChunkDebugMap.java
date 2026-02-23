@@ -13,7 +13,8 @@ import me.senseiwells.chunkdebug.client.ChunkDebugClient;
 import me.senseiwells.chunkdebug.client.config.ChunkDebugClientConfig;
 import me.senseiwells.chunkdebug.client.gui.state.ColoredChunkDataRenderState;
 import me.senseiwells.chunkdebug.client.utils.Bounds;
-import me.senseiwells.chunkdebug.common.utils.ChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
+import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData.Ticket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -22,7 +23,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.Ticket;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -82,9 +82,9 @@ public class ChunkDebugMap {
 		this.height = this.minecraft.getWindow().getGuiScaledHeight();
 	}
 
-	public void updateChunks(ResourceKey<Level> dimension, Collection<ChunkData> chunks) {
+	public void updateChunks(ResourceKey<Level> dimension, Collection<ImmutableChunkData> chunks) {
 		DimensionState state = this.state(dimension);
-		for (ChunkData chunk : chunks) {
+		for (ImmutableChunkData chunk : chunks) {
 			state.add(chunk.position().toLong(), chunk);
 		}
 	}
@@ -175,7 +175,7 @@ public class ChunkDebugMap {
 
 	void renderMap(GuiGraphics graphics, DimensionState state) {
 		Int2ObjectMap<List<ChunkPos>> states = new Int2ObjectOpenHashMap<>();
-		for (ChunkData data : state.chunks.values()) {
+		for (ImmutableChunkData data : state.chunks.values()) {
 			ChunkPos pos = data.position();
 			int color = this.calculateChunkColor(data);
 			List<ChunkPos> positions = states.computeIfAbsent(color, c -> new ObjectArrayList<>());
@@ -183,10 +183,10 @@ public class ChunkDebugMap {
 		}
 
 		if (this.config.chunkRetention > 0) {
-			for (Map.Entry<Integer, ChunkData> entry : state.unloaded.entries()) {
+			for (Map.Entry<Integer, ImmutableChunkData> entry : state.unloaded.entries()) {
 				float delta = (float) (entry.getKey() - this.ticks) / this.config.chunkRetention;
 				int alpha = ((byte) (delta * 255)) << 24 | 0xFFFFFF;
-				ChunkData data = entry.getValue();
+				ImmutableChunkData data = entry.getValue();
 				ChunkPos pos = data.position();
 				int color = this.calculateChunkColor(data) & alpha;
 				List<ChunkPos> positions = states.computeIfAbsent(color, c -> new ObjectArrayList<>());
@@ -400,7 +400,7 @@ public class ChunkDebugMap {
 		}
 	}
 
-	private int calculateChunkColor(ChunkData data) {
+	private int calculateChunkColor(ImmutableChunkData data) {
 		ChunkPos pos = data.position();
 		ChunkStatus stage = this.client.config.showStages ? data.stage() : null;
 		List<Ticket> tickets = this.client.config.showTickets ? data.tickets() : List.of();
@@ -443,9 +443,9 @@ public class ChunkDebugMap {
     }
 
 	static class DimensionState {
-		private final Multimap<Integer, ChunkData> unloaded = HashMultimap.create();
+		private final Multimap<Integer, ImmutableChunkData> unloaded = HashMultimap.create();
 
-		private final Long2ObjectMap<ChunkData> chunks = new Long2ObjectOpenHashMap<>();
+		private final Long2ObjectMap<ImmutableChunkData> chunks = new Long2ObjectOpenHashMap<>();
 		private final ChunkClusters clusters = new ChunkClusters();
 		private final ResourceKey<Level> dimension;
 
@@ -466,11 +466,11 @@ public class ChunkDebugMap {
 			this.clusterWorker = clusterWorker;
 		}
 
-		Long2ObjectMap<ChunkData> chunks() {
+		Long2ObjectMap<ImmutableChunkData> chunks() {
 			return this.chunks;
 		}
 
-		private void add(long pos, ChunkData data) {
+		private void add(long pos, ImmutableChunkData data) {
 			this.chunks.put(pos, data);
 			this.clusterWorker.execute(() -> {
 				this.clusters.add(pos);
@@ -482,9 +482,8 @@ public class ChunkDebugMap {
 				this.clusters.remove(pos);
 			});
 			if (this.chunks.containsKey(pos)) {
-				ChunkData data = this.chunks.remove(pos);
-				this.unloaded.put(tick, data);
-				data.updateUnloading(false);
+				ImmutableChunkData data = this.chunks.remove(pos);
+				this.unloaded.put(tick, data.withoutUnloading());
 			}
 		}
 
