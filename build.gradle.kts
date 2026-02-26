@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.6.2"
+val modVersion = "2.6.3"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -32,7 +32,7 @@ dependencies {
 	include(modImplementation(libs.keybinds.get())!!)
 
 	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
-	modImplementation(explosion.fabric(libs.c2me.get().toString()))
+	modCompileOnly(explosion.fabric(libs.c2me.get().toString()))
 
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
@@ -77,8 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- Fixed another race condition
-			- Fixed compiled java version
+			- Fixed compatibility with c2me
             """.trimIndent()
 		)
 		type = STABLE
