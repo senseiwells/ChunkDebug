@@ -54,6 +54,7 @@
   "chunk-debug.ticket.type.minecraft:ender_pearl": "Ender Pearl",
   "chunk-debug.ticket.type.minecraft:forced": "Forced",
   "chunk-debug.ticket.type.minecraft:unknown": "Unknown",
+  "chunk-debug.ticket.type.chunk-debug:unregistered": "Unregistered",
 
   "chunk-debug.stage.minecraft:empty": "Empty",
   "chunk-debug.stage.minecraft:structure_starts": "Structure Starts",

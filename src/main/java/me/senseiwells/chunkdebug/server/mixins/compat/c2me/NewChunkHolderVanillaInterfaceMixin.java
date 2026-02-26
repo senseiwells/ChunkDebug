@@ -6,10 +6,7 @@ import com.ishland.c2me.rewrites.chunksystem.common.NewChunkHolderVanillaInterfa
 import com.ishland.flowsched.scheduler.ItemHolder;
 import me.senseiwells.chunkdebug.common.utils.MutableChunkData;
 import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
-import me.senseiwells.chunkdebug.server.mixins.ChunkMapAccessor;
 import me.senseiwells.chunkdebug.server.mixins.DistanceManagerAccessor;
-import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
-import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -19,12 +16,8 @@ import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 @Mixin(NewChunkHolderVanillaInterface.class)
 public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChunkHolder implements ChunkDataSupplier {
@@ -36,16 +29,6 @@ public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChun
 		super(pos);
 	}
 
-	@Inject(
-		method = "updateFutures",
-		at = @At("RETURN")
-	)
-	private void onTick(ChunkMap chunkMap, Executor executor, CallbackInfo ci) {
-		ServerLevel level = ((ChunkMapAccessor) chunkMap).getLevel();
-		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
-		tracker.set(this.chunkdebug$getChunkData(chunkMap));
-	}
-
 	@NotNull
 	@Override
 	public MutableChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
@@ -53,11 +36,15 @@ public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChun
 		long pos = this.pos.toLong();
 
 		List<Ticket> tickets = ((DistanceManagerAccessor) manager).getTicketsStorage().getTickets(pos);
-		int statusLevel = ((DistanceManagerAccessor) manager).getSimulationChunkTracker().getLevel(this.pos);
+		int level = this.getTicketLevel();
+		int tickingLevel = level;
+		if (level == 32 && !chunkMap.getDistanceManager().inBlockTickingRange(pos)) {
+			tickingLevel = 33;
+		}
 
 		ChunkState state = this.newHolder.getItem().get();
 		ChunkAccess chunk = state == null ? null : state.chunk();
 		ChunkStatus stage = chunk == null ? null : chunk.getPersistedStatus();
-		return new MutableChunkData(this.pos, stage, tickets, this.getTicketLevel(), statusLevel, false);
+		return new MutableChunkData(this.pos, stage, tickets, level, tickingLevel, false);
 	}
 }

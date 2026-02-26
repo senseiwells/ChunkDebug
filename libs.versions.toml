@@ -7,7 +7,7 @@ permissions   = "0.6.1"
 keybinds      = "0.2.2+1.21.11"
 
 # Compatability dependencies
-c2me          = "0.3.6+beta.1.0+1.21.11"
+c2me          = "0.3.6.0.0"
 
 # Plugins
 fabric-loom   = "1.14-SNAPSHOT"

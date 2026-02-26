@@ -32,7 +32,7 @@ dependencies {
 	include(modImplementation(libs.keybinds.get())!!)
 
 	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
-	modCompileOnly(explosion.fabric(libs.c2me.get().toString()))
+	modImplementation(explosion.fabric(libs.c2me.get().toString()))
 
 	includeModImplementation(libs.permissions) {
 		exclude(libs.fabric.api.get().group)
