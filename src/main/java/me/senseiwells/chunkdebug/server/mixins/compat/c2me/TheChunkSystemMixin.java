@@ -35,8 +35,10 @@ public class TheChunkSystemMixin {
 		ServerLevel level = ((ChunkMapAccessor) this.tacs).getLevel();
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
 		NewChunkHolderVanillaInterface chunk = holder.getUserData().get();
-		MutableChunkData data = ((ChunkDataSupplier) chunk).chunkdebug$getChunkData(this.tacs);
-		level.getServer().execute(() -> tracker.set(data));
+		level.getServer().execute(() -> {
+			MutableChunkData data = ((ChunkDataSupplier) chunk).chunkdebug$getChunkData(this.tacs);
+			tracker.set(data);
+		});
 	}
 
 	@Inject(

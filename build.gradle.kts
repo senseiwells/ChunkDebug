@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.6.3"
+val modVersion = "2.6.4"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -77,7 +77,7 @@ tasks {
 		file = remapJar.get().archiveFile
 		changelog.set(
 			"""
-			- Fixed compatibility with c2me
+			- Fixed c2me compatibility threading issue
             """.trimIndent()
 		)
 		type = STABLE
