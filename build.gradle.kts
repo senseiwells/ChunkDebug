@@ -75,7 +75,7 @@ tasks {
 		file = jar.get().archiveFile
 		changelog.set(
 			"""
-			- Fixed c2me compatibility threading issue
+			- Updated to 26.1
             """.trimIndent()
 		)
 		type = STABLE
