@@ -33,7 +33,7 @@ public class TicketStorageMixin implements MutableChunkDebugTrackerHolder {
             target = "Ljava/util/List;iterator()Ljava/util/Iterator;"
         )
     )
-    private void onAddTicket(long pos, Ticket ticket, CallbackInfoReturnable<Boolean> cir, @Local List<Ticket> tickets) {
+    private void onAddTicket(long pos, Ticket ticket, CallbackInfoReturnable<Boolean> cir, @Local(name = "tickets") List<Ticket> tickets) {
         if (this.chunkdebug$tracker != null) {
             this.chunkdebug$tracker.updateTickets(pos, tickets);
         }

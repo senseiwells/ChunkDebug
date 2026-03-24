@@ -51,7 +51,7 @@ public class TheChunkSystemMixin {
 		ItemHolder<ChunkPos, ChunkState, ChunkLoadingContext, NewChunkHolderVanillaInterface> holder,
 		CallbackInfo ci
 	) {
-		long pos = holder.getKey().toLong();
+		long pos = holder.getKey().pack();
 		ServerLevel level = ((ChunkMapAccessor) this.tacs).getLevel();
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
 		LevelUtils.execute(level, () -> tracker.unload(pos));

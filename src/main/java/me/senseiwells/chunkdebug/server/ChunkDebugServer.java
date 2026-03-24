@@ -13,8 +13,8 @@ import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
 import me.senseiwells.chunkdebug.server.utils.LevelUtils;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceKey;
@@ -47,8 +47,8 @@ public class ChunkDebugServer implements ModInitializer {
 	public void onInitialize() {
 		instance = this;
 
-		ServerWorldEvents.UNLOAD.register(this::unloadLevel);
-		ServerTickEvents.END_WORLD_TICK.register(this::sendUpdatesToWatching);
+		ServerLevelEvents.UNLOAD.register(this::unloadLevel);
+		ServerTickEvents.END_LEVEL_TICK.register(this::sendUpdatesToWatching);
 		ServerPlayConnectionEvents.JOIN.register(this::sendHelloPayload);
 
 		ServerPlayNetworking.registerGlobalReceiver(StartWatchingPayload.TYPE, this::handleStartWatching);

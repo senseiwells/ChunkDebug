@@ -20,7 +20,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
@@ -90,7 +90,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 	}
 
 	@ApiStatus.Internal
-	public void onGuiRender(GuiGraphics graphics, @SuppressWarnings("unused") DeltaTracker tracker) {
+	public void onGuiRender(GuiGraphicsExtractor graphics, @SuppressWarnings("unused") DeltaTracker tracker) {
 		if (this.map != null) {
 			this.map.renderMinimap(graphics);
 		}
@@ -110,7 +110,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 		if (this.keybind.consumeClicks() != 0 && minecraft.screen == null) {
 			ChunkDebugScreen screen = this.createChunkDebugScreen(null);
 			if (screen == null) {
-				minecraft.gui.getChat().addMessage(
+				minecraft.gui.getChat().addServerSystemMessage(
 					Component.translatable("chunk-debug.screen.unavailable").withStyle(ChatFormatting.RED)
 				);
 			} else {

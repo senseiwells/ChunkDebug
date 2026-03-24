@@ -4,7 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "LevelLoadingScreenAccessor",
-    "MinecraftMixin"
+    "GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

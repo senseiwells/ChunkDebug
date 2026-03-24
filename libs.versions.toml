@@ -1,16 +1,16 @@
 [versions]
-minecraft     = "1.21.11"
+minecraft     = "26.1"
 parchment     = "1.21.10:2025.10.12"
-fabric-loader = "0.18.3"
-fabric-api    = "0.140.0+1.21.11"
-permissions   = "0.6.1"
-keybinds      = "0.2.2+1.21.11"
+fabric-loader = "0.18.4"
+fabric-api    = "0.144.0+26.1"
+permissions   = "0.7.0-SNAPSHOT"
+keybinds      = "0.3.0+26.1"
 
 # Compatability dependencies
-c2me          = "0.3.6.0.0"
+c2me          = "0.3.7+alpha.0.59+26.1"
 
 # Plugins
-fabric-loom   = "1.14-SNAPSHOT"
+fabric-loom   = "1.15-SNAPSHOT"
 mod-publish   = "1.1.0"
 explosion     = "0.1.0"
 
@@ -26,5 +26,5 @@ c2me          = { module = "maven.modrinth:c2me-fabric", version.ref = "c2me" }
 
 [plugins]
 mod-publish   = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }
-fabric-loom   = { id = "fabric-loom"                    , version.ref = "fabric-loom" }
+fabric-loom   = { id = "net.fabricmc.fabric-loom"       , version.ref = "fabric-loom" }
 explosion     = { id = "lol.bai.explosion"              , version.ref = "explosion" }

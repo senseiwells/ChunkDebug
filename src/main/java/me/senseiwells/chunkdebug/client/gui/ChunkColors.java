@@ -2,7 +2,6 @@ package me.senseiwells.chunkdebug.client.gui;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.senseiwells.chunkdebug.client.mixins.LevelLoadingScreenAccessor;
-import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
 import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData.Ticket;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.TicketType;

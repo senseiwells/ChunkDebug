@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 public class DistanceManagerMixin {
 	@Shadow @Final private SimulationChunkTracker simulationChunkTracker;
 	@Shadow @Final private LoadingChunkTracker loadingChunkTracker;
-	@Shadow @Final TicketStorage ticketStorage;
+	@Shadow @Final private TicketStorage ticketStorage;
 
 	@Inject(
 		method = "<init>",

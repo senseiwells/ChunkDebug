@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.world.level.ChunkPos;
 import org.joml.Matrix3x2f;
 import org.jspecify.annotations.Nullable;
@@ -35,8 +35,8 @@ public record ColoredChunkDataRenderState(
         for (Int2ObjectMap.Entry<List<ChunkPos>> chunks : this.chunks.int2ObjectEntrySet()) {
             int color = chunks.getIntKey();
             for (ChunkPos pos : chunks.getValue()) {
-                int minX = pos.x, maxX = minX + 1;
-                int minY = pos.z, maxY = minY + 1;
+                int minX = pos.x(), maxX = minX + 1;
+                int minY = pos.z(), maxY = minY + 1;
                 vertexConsumer.addVertexWith2DPose(this.pose, minX, minY).setColor(color);
                 vertexConsumer.addVertexWith2DPose(this.pose, minX, maxY).setColor(color);
                 vertexConsumer.addVertexWith2DPose(this.pose, maxX, maxY).setColor(color);
@@ -59,10 +59,10 @@ public record ColoredChunkDataRenderState(
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
         for (List<ChunkPos> entry : chunks.values()) {
             for (ChunkPos pos : entry) {
-                minX = Math.min(minX, pos.x);
-                maxX = Math.max(maxX, pos.x);
-                minY = Math.min(minY, pos.x);
-                maxY = Math.max(maxY, pos.x);
+                minX = Math.min(minX, pos.x());
+                maxX = Math.max(maxX, pos.x());
+                minY = Math.min(minY, pos.x());
+                maxY = Math.max(maxY, pos.x());
             }
         }
 

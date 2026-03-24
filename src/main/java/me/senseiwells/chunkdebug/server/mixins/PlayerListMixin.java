@@ -18,7 +18,7 @@ public class PlayerListMixin {
 			target = "Lnet/minecraft/server/players/PlayerList;sendPlayerPermissionLevel(Lnet/minecraft/server/level/ServerPlayer;)V"
 		)
 	)
-	private void onOpPlayer(CallbackInfo ci, @Local ServerPlayer player) {
+	private void onOpPlayer(CallbackInfo ci, @Local(name = "player") ServerPlayer player) {
 		ChunkDebugServer.getInstance().onOpPlayer(player);
 	}
 
@@ -29,7 +29,7 @@ public class PlayerListMixin {
 			target = "Lnet/minecraft/server/players/PlayerList;sendPlayerPermissionLevel(Lnet/minecraft/server/level/ServerPlayer;)V"
 		)
 	)
-	private void onDeOpPlayer(CallbackInfo ci, @Local ServerPlayer player) {
+	private void onDeOpPlayer(CallbackInfo ci, @Local(name = "player") ServerPlayer player) {
 		ChunkDebugServer.getInstance().onDeOpPlayer(player);
 	}
 }

@@ -82,7 +82,7 @@ public class ChunkDebugTracker {
 	}
 
 	public void set(MutableChunkData data) {
-		long pos = data.position().toLong();
+		long pos = data.position().pack();
 		if (this.markDirty(pos)) {
 			this.chunks.put(pos, data);
 		}

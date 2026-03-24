@@ -9,7 +9,7 @@ import me.senseiwells.chunkdebug.client.gui.widget.IntegerEditbox;
 import me.senseiwells.chunkdebug.client.gui.widget.ToggleButton;
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import me.senseiwells.keybinds.api.InputKeys;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -153,8 +153,8 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
-		this.renderBlurredBackground(graphics);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		this.extractBlurredBackground(graphics);
 
 		ChunkDebugMap.DimensionState state = this.map.state();
 
@@ -177,13 +177,13 @@ public class ChunkDebugScreen extends Screen {
 		this.renderSettingsMenu(graphics);
 
 		if (!this.chunkPosX.isFocused()) {
-			this.chunkPosX.setIntValue(this.map.center.x);
+			this.chunkPosX.setIntValue(this.map.center.x());
 		}
 		if (!this.chunkPosZ.isFocused()) {
-			this.chunkPosZ.setIntValue(this.map.center.z);
+			this.chunkPosZ.setIntValue(this.map.center.z());
 		}
 
-		super.render(graphics, mouseX, mouseY, partial);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
     @Override
@@ -216,7 +216,7 @@ public class ChunkDebugScreen extends Screen {
     }
 
 	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 
 	}
 
@@ -301,7 +301,7 @@ public class ChunkDebugScreen extends Screen {
 		return false;
 	}
 
-	private void renderSettingsMenu(GuiGraphics graphics) {
+	private void renderSettingsMenu(GuiGraphicsExtractor graphics) {
 		RenderUtils.setVisible(
 			this.settings.isToggled(),
 			this.dimensionLeft, this.dimensionRight,
@@ -339,7 +339,7 @@ public class ChunkDebugScreen extends Screen {
 		int centerX = (maxX + minX) / 2;
 
 		graphics.fill(minX, minY, maxX, maxY, HL_BG_LIGHT);
-		graphics.drawString(this.font, title, minX + padding, minY + padding, 0xFFFFFFFF);
+		graphics.text(this.font, title, minX + padding, minY + padding, 0xFFFFFFFF);
 
 		int offsetY = minY + padding * 2 + this.font.lineHeight;
 		int gap = padding + 15;
@@ -385,7 +385,7 @@ public class ChunkDebugScreen extends Screen {
 		graphics.pose().popMatrix();
 	}
 
-	private void renderChunkSelectionMenu(GuiGraphics graphics, ChunkDebugMap.DimensionState state) {
+	private void renderChunkSelectionMenu(GuiGraphicsExtractor graphics, ChunkDebugMap.DimensionState state) {
 		this.breakdown.visible = state.selection != null;
 		if (!this.breakdown.visible || !this.breakdown.isToggled()) {
 			return;
@@ -403,7 +403,7 @@ public class ChunkDebugScreen extends Screen {
 		int maxY = this.height - padding;
 		graphics.fill(minX, minY, maxX, maxY, HL_BG_LIGHT);
 
-		graphics.drawString(this.font, info.title(), minX + padding, minY + padding, 0xFFFFFFFF);
+		graphics.text(this.font, info.title(), minX + padding, minY + padding, 0xFFFFFFFF);
 
 		minX += padding;
 		maxX -= padding;
@@ -416,7 +416,7 @@ public class ChunkDebugScreen extends Screen {
 	}
 
 	private int renderInnerChunkSelectionInfo(
-		GuiGraphics graphics,
+		GuiGraphicsExtractor graphics,
 		List<Component> lines,
 		int padding,
 		int minX,
@@ -432,7 +432,7 @@ public class ChunkDebugScreen extends Screen {
 		graphics.fill(minX, offsetY + increment - padding, maxX, maxY, BG_DARK);
 		for (Component line : lines) {
 			offsetY += this.font.lineHeight + padding;
-			graphics.drawString(this.font, line, minX + padding, offsetY, 0xFFFFFFFF);
+			graphics.text(this.font, line, minX + padding, offsetY, 0xFFFFFFFF);
 		}
 		return maxY - padding;
 	}

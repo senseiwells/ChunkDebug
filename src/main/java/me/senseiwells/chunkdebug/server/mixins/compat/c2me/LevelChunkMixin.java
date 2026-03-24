@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelChunk.class)
 public abstract class LevelChunkMixin extends ChunkAccess {
-    @Shadow @Final Level level;
+    @Shadow @Final private Level level;
 
     @NotNull @Shadow public abstract ChunkStatus getPersistedStatus();
 
@@ -40,7 +40,7 @@ public abstract class LevelChunkMixin extends ChunkAccess {
 	private void onPostLoad(CallbackInfo ci) {
 		if (this.level instanceof ChunkDebugTrackerHolder holder) {
 			ChunkDebugTracker tracker = holder.chunkdebug$getTracker();
-			tracker.updateStage(this.chunkPos.toLong(), this.getPersistedStatus());
+			tracker.updateStage(this.chunkPos.pack(), this.getPersistedStatus());
 		}
 	}
 }

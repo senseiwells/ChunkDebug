@@ -2,7 +2,7 @@ package me.senseiwells.chunkdebug.client.gui.widget;
 
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
@@ -44,13 +44,13 @@ public class IntegerEditbox extends EditBox {
     }
 
 	@Override
-	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+	public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int minX = this.getX();
 		int minY = this.getY();
 		int maxX = minX + this.getWidth();
 		int maxY = minY + this.getHeight();
 
-		graphics.renderOutline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
+		graphics.outline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), RenderUtils.BG_DARK);
 		graphics.fill(minX, minY, maxX, maxY, RenderUtils.BG_LIGHT);
 
 		if (this.isHovered()) {
@@ -58,7 +58,7 @@ public class IntegerEditbox extends EditBox {
 		}
 
 		this.height += 1;
-		super.renderWidget(graphics, mouseX, mouseY, partialTick);
+		super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
 		this.height -= 1;
 
 		if (!this.valid) {

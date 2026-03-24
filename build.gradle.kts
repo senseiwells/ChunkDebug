@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.6.4"
+val modVersion = "2.7.0"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -17,30 +17,28 @@ repositories {
 	maven("https://api.modrinth.com/maven")
 	maven("https://maven2.bai.lol")
 	maven("https://maven.supersanta.me/snapshots")
+	mavenLocal()
 }
 
 dependencies {
 	minecraft(libs.minecraft)
-	@Suppress("UnstableApiUsage")
-	mappings(loom.layered {
-		officialMojangMappings()
-		parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.get()}@zip")
-	})
-	modImplementation(libs.fabric.loader)
-	modImplementation(libs.fabric.api)
+	implementation(libs.fabric.loader)
+	implementation(libs.fabric.api)
 
-	include(modImplementation(libs.keybinds.get())!!)
+	include(implementation(libs.keybinds.get())!!)
 
 	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
-	modCompileOnly(explosion.fabric(libs.c2me.get().toString()))
+	compileOnly(explosion.fabric(libs.c2me.get().toString()))
 
-	includeModImplementation(libs.permissions) {
-		exclude(libs.fabric.api.get().group)
-	}
+	implementation(libs.permissions)
 }
 
 loom {
 	accessWidenerPath.set(file("src/main/resources/chunk-debug.classtweaker"))
+
+	decompilerOptions.named("vineflower") {
+		options.put("mark-corresponding-synthetics", "1")
+	}
 
 	runs {
 		getByName("server") {
@@ -74,7 +72,7 @@ tasks {
 	}
 
 	publishMods {
-		file = remapJar.get().archiveFile
+		file = jar.get().archiveFile
 		changelog.set(
 			"""
 			- Fixed c2me compatibility threading issue
@@ -122,9 +120,4 @@ tasks {
 			}
 		}
 	}
-}
-
-private fun DependencyHandler.includeModImplementation(provider: Provider<*>, action: Action<ExternalModuleDependency>) {
-	include(provider, action)
-	modImplementation(provider, action)
 }

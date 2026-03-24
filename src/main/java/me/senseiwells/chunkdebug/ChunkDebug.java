@@ -15,14 +15,14 @@ public class ChunkDebug implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		PayloadTypeRegistry.playS2C().register(HelloPayload.TYPE, HelloPayload.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(ByePayload.TYPE, ByePayload.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(ChunkDataPayload.TYPE, ChunkDataPayload.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(ChunkUnloadPayload.TYPE, ChunkUnloadPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ByePayload.TYPE, ByePayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ChunkDataPayload.TYPE, ChunkDataPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ChunkUnloadPayload.TYPE, ChunkUnloadPayload.STREAM_CODEC);
 
-		PayloadTypeRegistry.playC2S().register(StartWatchingPayload.TYPE, StartWatchingPayload.STREAM_CODEC);
-		PayloadTypeRegistry.playC2S().register(StopWatchingPayload.TYPE, StopWatchingPayload.STREAM_CODEC);
-		PayloadTypeRegistry.playC2S().register(ChunkRefreshPayload.TYPE, ChunkRefreshPayload.STREAM_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(StartWatchingPayload.TYPE, StartWatchingPayload.STREAM_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(StopWatchingPayload.TYPE, StopWatchingPayload.STREAM_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ChunkRefreshPayload.TYPE, ChunkRefreshPayload.STREAM_CODEC);
 	}
 
 	public static Identifier id(String path) {

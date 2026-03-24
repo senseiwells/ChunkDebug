@@ -149,6 +149,6 @@ public class ChunkClusters {
 	}
 
 	private static long pack(int x, int z) {
-		return ChunkPos.asLong(x, z);
+		return ChunkPos.pack(x, z);
 	}
 }

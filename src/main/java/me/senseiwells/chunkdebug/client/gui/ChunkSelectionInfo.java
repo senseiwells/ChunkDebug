@@ -48,7 +48,7 @@ public record ChunkSelectionInfo(
 			title = Component.translatable("chunk-debug.info.breakdown.chunk").withColor(HL);
 			location.add(Component.translatable("chunk-debug.info.location", prettify(pos)));
 
-			ImmutableChunkData data = chunks.get(pos.toLong());
+			ImmutableChunkData data = chunks.get(pos.pack());
 			if (data != null) {
 				status.add(Component.translatable("chunk-debug.info.status", prettify(data.status())));
 				status.add(Component.translatable("chunk-debug.info.status.level", prettify(data.statusLevel())));

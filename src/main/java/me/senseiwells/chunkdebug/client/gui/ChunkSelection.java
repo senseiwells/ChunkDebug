@@ -15,7 +15,7 @@ public class ChunkSelection {
 	public final int maxZ;
 
 	public ChunkSelection(ChunkPos first, ChunkPos second) {
-		this(first.x, first.z, second.x, second.z);
+		this(first.x(), first.z(), second.x(), second.z());
 	}
 
 	public ChunkSelection(int x1, int z1, int x2, int z2) {
@@ -51,7 +51,7 @@ public class ChunkSelection {
 
 	public LongStream stream() {
 		return LongStream.rangeClosed(this.minX, this.maxX).flatMap(x -> {
-			return LongStream.rangeClosed(this.minZ, this.maxZ).map(z -> ChunkPos.asLong((int) x, (int) z));
+			return LongStream.rangeClosed(this.minZ, this.maxZ).map(z -> ChunkPos.pack((int) x, (int) z));
 		});
 	}
 
@@ -84,10 +84,10 @@ public class ChunkSelection {
 		int maxX = Integer.MIN_VALUE;
 		int maxZ = Integer.MIN_VALUE;
 		for (ChunkPos pos : positions) {
-			minX = Math.min(minX, pos.x);
-			minZ = Math.min(minZ, pos.z);
-			maxX = Math.max(maxX, pos.x);
-			maxZ = Math.max(maxZ, pos.z);
+			minX = Math.min(minX, pos.x());
+			minZ = Math.min(minZ, pos.z());
+			maxX = Math.max(maxX, pos.x());
+			maxZ = Math.max(maxZ, pos.z());
 		}
 		return new ChunkSelection(minX, minZ, maxX, maxZ);
 	}

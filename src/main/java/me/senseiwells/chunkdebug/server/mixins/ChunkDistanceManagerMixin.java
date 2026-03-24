@@ -11,12 +11,13 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ChunkMap.DistanceManager.class)
 public class ChunkDistanceManagerMixin implements ChunkDebugTrackerHolder {
-	@Shadow @Final ChunkMap field_17443;
+	@Shadow @Final ChunkMap this$0;
 
 	@NonNull
 	@Override
 	public ChunkDebugTracker chunkdebug$getTracker() {
-		ServerLevel level = ((ChunkMapAccessor) this.field_17443).getLevel();
+
+		ServerLevel level = ((ChunkMapAccessor) this.this$0).getLevel();
 		return ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
 	}
 }

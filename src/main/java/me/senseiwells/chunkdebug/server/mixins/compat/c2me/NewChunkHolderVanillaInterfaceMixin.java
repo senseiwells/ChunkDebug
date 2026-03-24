@@ -33,7 +33,7 @@ public abstract class NewChunkHolderVanillaInterfaceMixin extends GenerationChun
 	@Override
 	public MutableChunkData chunkdebug$getChunkData(@NonNull ChunkMap chunkMap) {
 		DistanceManager manager = chunkMap.getDistanceManager();
-		long pos = this.pos.toLong();
+		long pos = this.pos.pack();
 
 		List<Ticket> tickets = ((DistanceManagerAccessor) manager).getTicketsStorage().getTickets(pos);
 		int level = this.getTicketLevel();

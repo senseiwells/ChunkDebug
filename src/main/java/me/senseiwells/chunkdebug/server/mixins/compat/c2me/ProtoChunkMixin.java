@@ -34,7 +34,7 @@ public abstract class ProtoChunkMixin extends ChunkAccess {
 	private void onSetPersistedStatus(ChunkStatus status, CallbackInfo ci) {
 		if (this.levelHeightAccessor instanceof ChunkDebugTrackerHolder holder) {
 			ChunkDebugTracker tracker = holder.chunkdebug$getTracker();
-			tracker.updateStage(this.chunkPos.toLong(), status);
+			tracker.updateStage(this.chunkPos.pack(), status);
 		}
 	}
 }

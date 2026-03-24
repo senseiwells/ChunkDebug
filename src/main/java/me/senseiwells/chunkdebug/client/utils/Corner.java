@@ -40,7 +40,6 @@ public enum Corner implements StringRepresentable {
 		return this == TOP_LEFT || this == BOTTOM_LEFT;
 	}
 
-	@NotNull
 	@Override
 	public String getSerializedName() {
 		return this.name().toLowerCase(Locale.ROOT);

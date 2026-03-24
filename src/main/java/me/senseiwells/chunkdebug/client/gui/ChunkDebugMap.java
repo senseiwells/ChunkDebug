@@ -16,7 +16,7 @@ import me.senseiwells.chunkdebug.client.utils.Bounds;
 import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
 import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData.Ticket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.player.LocalPlayer;
@@ -85,7 +85,7 @@ public class ChunkDebugMap {
 	public void updateChunks(ResourceKey<Level> dimension, Collection<ImmutableChunkData> chunks) {
 		DimensionState state = this.state(dimension);
 		for (ImmutableChunkData chunk : chunks) {
-			state.add(chunk.position().toLong(), chunk);
+			state.add(chunk.position().pack(), chunk);
 		}
 	}
 
@@ -133,7 +133,7 @@ public class ChunkDebugMap {
 		this.executor.shutdown();
 	}
 
-	public void renderMinimap(GuiGraphics graphics) {
+	public void renderMinimap(GuiGraphicsExtractor graphics) {
 		if (this.config.minimapMode == Minimap.NONE || this.minecraft.player == null) {
 			return;
 		}
@@ -164,7 +164,7 @@ public class ChunkDebugMap {
 			ChunkPos pos = player.chunkPosition();
 
 			graphics.pose().scale(state.scale * MINIMAP_SCALE, state.scale * MINIMAP_SCALE);
-			graphics.pose().translate(-pos.x - 0.5F, -pos.z - 0.5F);
+			graphics.pose().translate(-pos.x() - 0.5F, -pos.z() - 0.5F);
 		}
 
 		this.renderMap(graphics, state);
@@ -173,7 +173,7 @@ public class ChunkDebugMap {
 		graphics.pose().popMatrix();
 	}
 
-	void renderMap(GuiGraphics graphics, DimensionState state) {
+	void renderMap(GuiGraphicsExtractor graphics, DimensionState state) {
 		Int2ObjectMap<List<ChunkPos>> states = new Int2ObjectOpenHashMap<>();
 		for (ImmutableChunkData data : state.chunks.values()) {
 			ChunkPos pos = data.position();
@@ -199,7 +199,7 @@ public class ChunkDebugMap {
 		ColoredChunkDataRenderState data = new ColoredChunkDataRenderState(
 			RenderPipelines.GUI, TextureSetup.noTexture(), matrix, states, scissor
 		);
-		graphics.guiRenderState.submitGuiElement(data);
+		graphics.guiRenderState.addGuiElement(data);
 
 		if (state.selection != null) {
 			this.renderChunkSelection(graphics, state.selection, SELECTED_OUTLINE_COLOR);
@@ -212,7 +212,7 @@ public class ChunkDebugMap {
 		}
 	}
 
-	void renderChunkSelecting(GuiGraphics graphics, double mouseX, double mouseY) {
+	void renderChunkSelecting(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
 		DimensionState state = this.state();
 		if (state.first != null) {
 			ChunkSelection selection = new ChunkSelection(state.first, this.convertScreenToChunkPos(mouseX, mouseY));
@@ -220,7 +220,7 @@ public class ChunkDebugMap {
 		}
 	}
 
-	void renderChunkClusters(GuiGraphics graphics) {
+	void renderChunkClusters(GuiGraphicsExtractor graphics) {
 		if (this.clusterSelection != null) {
 			this.renderChunkSelection(graphics, this.clusterSelection, 2.0F, CLUSTER_OUTLINE_COLOR);
 		}
@@ -262,11 +262,11 @@ public class ChunkDebugMap {
 	}
 
 	void setMapCenterX(int x) {
-		this.setMapCenter(x, this.center.z);
+		this.setMapCenter(x, this.center.z());
 	}
 
 	void setMapCenterZ(int z) {
-		this.setMapCenter(this.center.x, z);
+		this.setMapCenter(this.center.x(), z);
 	}
 
 	void updateCenter() {
@@ -325,16 +325,16 @@ public class ChunkDebugMap {
 		return this.dimensions.get(this.dimensionIndex);
 	}
 
-	private void renderChunkSelection(GuiGraphics graphics, ChunkSelection selection, int color) {
+	private void renderChunkSelection(GuiGraphicsExtractor graphics, ChunkSelection selection, int color) {
 		this.renderChunkSelection(graphics, selection, 0.4F, color);
 	}
 
-	private void renderChunkSelection(GuiGraphics graphics, ChunkSelection selection, float thickness, int color) {
+	private void renderChunkSelection(GuiGraphicsExtractor graphics, ChunkSelection selection, float thickness, int color) {
 		outline(graphics, selection.minX, selection.minZ, selection.sizeX(), selection.sizeZ(), thickness, color);
 	}
 
-	private void renderPlayer(GuiGraphics graphics, ChunkPos pos) {
-		outline(graphics, pos.x, pos.z, 1, 1, 0.3F, PLAYER_COLOR);
+	private void renderPlayer(GuiGraphicsExtractor graphics, ChunkPos pos) {
+		outline(graphics, pos.x(), pos.z(), 1, 1, 0.3F, PLAYER_COLOR);
 	}
 
 	private boolean isWatching(ResourceKey<Level> dimension) {
@@ -342,7 +342,7 @@ public class ChunkDebugMap {
 	}
 
 	private void setMapCenter(ChunkPos pos) {
-		this.setMapCenter(pos.x, pos.z);
+		this.setMapCenter(pos.x(), pos.z());
 	}
 
 	private void setMapCenter(int x, int z) {
@@ -362,8 +362,8 @@ public class ChunkDebugMap {
 			if (player != null && player.level().dimension() == state.dimension) {
 				center = player.chunkPosition();
 			}
-			state.offsetX = (this.width / 2.0F) - center.x * state.scale;
-			state.offsetY = (this.height / 2.0F) - center.z * state.scale;
+			state.offsetX = (this.width / 2.0F) - center.x() * state.scale;
+			state.offsetY = (this.height / 2.0F) - center.z() * state.scale;
 			state.initialized = true;
 		}
 	}
@@ -405,7 +405,7 @@ public class ChunkDebugMap {
 		ChunkStatus stage = this.client.config.showStages ? data.stage() : null;
 		List<Ticket> tickets = this.client.config.showTickets ? data.tickets() : List.of();
 		int color = ChunkColors.calculateChunkColor(data.status(), stage, tickets, data.unloading());
-		if ((pos.x + pos.z) % 2 == 0) {
+		if ((pos.x() + pos.z()) % 2 == 0) {
 			color = ARGB.srgbLerp(0.12F, color, 0xFFFFFF);
 		}
 		return color | 0xFF000000;
@@ -491,7 +491,7 @@ public class ChunkDebugMap {
 			return CompletableFuture.supplyAsync(() -> {
 				int corrected = (index + this.clusters.count()) % this.clusters.count();
 				LongSet cluster = this.clusters.getCluster(corrected);
-				List<ChunkPos> positions = cluster.longStream().mapToObj(ChunkPos::new).toList();
+				List<ChunkPos> positions = cluster.longStream().mapToObj(ChunkPos::unpack).toList();
 				return ObjectIntPair.of(ChunkSelection.fromPositions(positions), corrected);
 			}, this.clusterWorker);
 		}

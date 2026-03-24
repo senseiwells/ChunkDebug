@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 
 @Mixin(ChunkMap.class)
 public class ChunkMapMixin implements ChunkHolderSupplier {
-	@Shadow @Final ServerLevel level;
+	@Shadow @Final private ServerLevel level;
 
 	@Shadow private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> visibleChunkMap;
 
@@ -38,17 +38,16 @@ public class ChunkMapMixin implements ChunkHolderSupplier {
 			target = "Lnet/minecraft/server/level/ChunkMap;scheduleUnload(JLnet/minecraft/server/level/ChunkHolder;)V"
 		)
 	)
-	private void onScheduleUnloadHolder(BooleanSupplier hasMoreTime, CallbackInfo ci, @Local long pos) {
+	private void onScheduleUnloadHolder(BooleanSupplier hasMoreTime, CallbackInfo ci, @Local(name = "pos") long pos) {
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) this.level).chunkdebug$getTracker();
 		tracker.updateUnloading(pos, true);
 	}
 
 	@Inject(
-		method = "method_60440",
+		method = "lambda$scheduleUnload$0",
 		at = @At(
 			value = "INVOKE",
-			target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;remove(JLjava/lang/Object;)Z",
-			remap = false
+			target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;remove(JLjava/lang/Object;)Z"
 		)
 	)
 	private void onUnloadHolder(ChunkHolder chunkHolder, CompletableFuture<?> future, long pos, CallbackInfo ci) {
@@ -71,7 +70,7 @@ public class ChunkMapMixin implements ChunkHolderSupplier {
 		CallbackInfoReturnable<CompletableFuture<ChunkAccess>> cir
 	) {
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) this.level).chunkdebug$getTracker();
-		tracker.updateStage(chunk.getPos().toLong(), step.targetStatus());
+		tracker.updateStage(chunk.getPos().pack(), step.targetStatus());
 	}
 
 	@Override
