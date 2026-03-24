@@ -30,7 +30,7 @@ dependencies {
 	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
 	compileOnly(explosion.fabric(libs.c2me.get().toString()))
 
-	implementation(libs.permissions)
+	include(implementation(libs.permissions.get())!!)
 }
 
 loom {
