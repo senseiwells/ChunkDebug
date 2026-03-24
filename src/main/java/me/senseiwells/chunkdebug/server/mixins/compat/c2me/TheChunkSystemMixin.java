@@ -8,6 +8,7 @@ import me.senseiwells.chunkdebug.server.holder.ChunkDataSupplier;
 import me.senseiwells.chunkdebug.server.mixins.ChunkMapAccessor;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTracker;
 import me.senseiwells.chunkdebug.server.tracker.ChunkDebugTrackerHolder;
+import me.senseiwells.chunkdebug.server.utils.LevelUtils;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -35,7 +36,7 @@ public class TheChunkSystemMixin {
 		ServerLevel level = ((ChunkMapAccessor) this.tacs).getLevel();
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
 		NewChunkHolderVanillaInterface chunk = holder.getUserData().get();
-		level.getServer().execute(() -> {
+		LevelUtils.execute(level, () -> {
 			MutableChunkData data = ((ChunkDataSupplier) chunk).chunkdebug$getChunkData(this.tacs);
 			tracker.set(data);
 		});
@@ -53,6 +54,6 @@ public class TheChunkSystemMixin {
 		long pos = holder.getKey().toLong();
 		ServerLevel level = ((ChunkMapAccessor) this.tacs).getLevel();
 		ChunkDebugTracker tracker = ((ChunkDebugTrackerHolder) level).chunkdebug$getTracker();
-		level.getServer().execute(() -> tracker.unload(pos));
+		LevelUtils.execute(level, () -> tracker.unload(pos));
 	}
 }
