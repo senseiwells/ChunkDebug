@@ -3,7 +3,7 @@ minecraft     = "26.1"
 parchment     = "1.21.10:2025.10.12"
 fabric-loader = "0.18.4"
 fabric-api    = "0.144.0+26.1"
-permissions   = "0.7.0-SNAPSHOT"
+permissions   = "0.7.0"
 keybinds      = "0.3.0+26.1"
 
 # Compatability dependencies
