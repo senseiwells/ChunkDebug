@@ -61,7 +61,7 @@ tasks {
 		filesMatching("fabric.mod.json") {
 			expand(mutableMapOf(
 				"version" to releaseVersion,
-				"minecraft_dependency" to libs.versions.minecraft.get().replaceAfterLast('.', "x"),
+				"minecraft_dependency" to "~${libs.versions.minecraft.get()}",
 				"fabric_loader_dependency" to libs.versions.fabric.loader.get(),
 			))
 		}
