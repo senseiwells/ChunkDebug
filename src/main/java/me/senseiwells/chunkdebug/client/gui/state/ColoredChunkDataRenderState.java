@@ -61,8 +61,8 @@ public record ColoredChunkDataRenderState(
             for (ChunkPos pos : entry) {
                 minX = Math.min(minX, pos.x());
                 maxX = Math.max(maxX, pos.x());
-                minY = Math.min(minY, pos.x());
-                maxY = Math.max(maxY, pos.x());
+                minY = Math.min(minY, pos.z());
+                maxY = Math.max(maxY, pos.z());
             }
         }
 

@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.7.1"
+val modVersion = "2.7.2"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -75,7 +75,7 @@ tasks {
 		file = jar.get().archiveFile
 		changelog.set(
 			"""
-			- Updated to 26.1
+			- Fixed minimap rendering issue
             """.trimIndent()
 		)
 		type = STABLE
