@@ -74,6 +74,7 @@ tasks {
 		changelog.set(
 			"""
 			- Update to 26.2
+			- Changed "chunk-debug" permission to "chunk-debug.map"
             """.trimIndent()
 		)
 		type = STABLE
