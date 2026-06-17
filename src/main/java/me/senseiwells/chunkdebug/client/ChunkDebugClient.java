@@ -107,14 +107,14 @@ public class ChunkDebugClient implements ClientModInitializer {
 		if (this.map != null) {
 			this.map.tick();
 		}
-		if (this.keybind.consumeClicks() != 0 && minecraft.screen == null) {
+		if (this.keybind.consumeClicks() != 0 && minecraft.gui.screen() == null) {
 			ChunkDebugScreen screen = this.createChunkDebugScreen(null);
 			if (screen == null) {
-				minecraft.gui.getChat().addServerSystemMessage(
+				minecraft.gui.hud.getChat().addClientSystemMessage(
 					Component.translatable("chunk-debug.screen.unavailable").withStyle(ChatFormatting.RED)
 				);
 			} else {
-				minecraft.setScreen(screen);
+				minecraft.gui.setScreen(screen);
 			}
 		}
 	}
@@ -137,7 +137,7 @@ public class ChunkDebugClient implements ClientModInitializer {
 
 	private void handleBye(ByePayload payload, ClientPlayNetworking.Context context) {
 		Minecraft minecraft = context.client();
-		if (minecraft.screen instanceof ChunkDebugScreen screen) {
+		if (minecraft.gui.screen() instanceof ChunkDebugScreen screen) {
 			screen.onClose();
 		}
 		this.setChunkMap(null);

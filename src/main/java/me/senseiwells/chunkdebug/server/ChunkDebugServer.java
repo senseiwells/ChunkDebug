@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.senseiwells.chunkdebug.ChunkDebug;
 import me.senseiwells.chunkdebug.common.network.*;
 import me.senseiwells.chunkdebug.common.utils.ImmutableChunkData;
@@ -56,9 +55,10 @@ public class ChunkDebugServer implements ModInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(ChunkRefreshPayload.TYPE, this::handleRefresh);
 	}
 
-	public boolean isPermitted(ServerPlayer player) {
+	@SuppressWarnings("UnstableApiUsage")
+    public boolean isPermitted(ServerPlayer player) {
 		if (player.level().getServer().isDedicatedServer() && this.config.requirePermissions()) {
-			return Permissions.check(player, "chunk-debug", PermissionLevel.GAMEMASTERS);
+			return player.checkPermission(ChunkDebug.id("map"), PermissionLevel.GAMEMASTERS);
 		}
 		return true;
 	}

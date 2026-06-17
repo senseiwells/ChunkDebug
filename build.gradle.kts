@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.7.2"
+val modVersion = "2.8.0"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -29,8 +29,6 @@ dependencies {
 
 	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
 	compileOnly(explosion.fabric(libs.c2me.get().toString()))
-
-	include(implementation(libs.permissions.get())!!)
 }
 
 loom {
@@ -42,11 +40,11 @@ loom {
 
 	runs {
 		getByName("server") {
-			runDir = "run/server"
+			runDirectory.set(file("run/server"))
 		}
 
 		getByName("client") {
-			runDir = "run/client"
+			runDirectory.set(file("run/client"))
 		}
 	}
 }
@@ -75,7 +73,7 @@ tasks {
 		file = jar.get().archiveFile
 		changelog.set(
 			"""
-			- Fixed minimap rendering issue
+			- Update to 26.2
             """.trimIndent()
 		)
 		type = STABLE
