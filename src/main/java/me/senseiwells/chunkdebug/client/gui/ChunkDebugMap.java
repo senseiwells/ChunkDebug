@@ -322,7 +322,10 @@ public class ChunkDebugMap {
 		if (this.dimensions.isEmpty()) {
 			this.loadDimensions();
 		}
-		return this.dimensions.get(this.dimensionIndex);
+		if (0 < this.dimensionIndex && this.dimensionIndex < this.dimensions.size()) {
+			return this.dimensions.get(this.dimensionIndex);
+		}
+		return Level.OVERWORLD;
 	}
 
 	private void renderChunkSelection(GuiGraphicsExtractor graphics, ChunkSelection selection, int color) {

@@ -1,12 +1,12 @@
 package me.senseiwells.chunkdebug.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.senseiwells.chunkdebug.client.utils.RenderUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.function.IntConsumer;
 
@@ -36,7 +36,7 @@ public class IntegerEditbox extends EditBox {
         if (super.keyPressed(event)) {
             return true;
         }
-        if (event.key() == GLFW.GLFW_KEY_ENTER) {
+        if (event.key() == InputConstants.KEY_NUMPADENTER) {
             this.setFocused(false);
             return false;
         }

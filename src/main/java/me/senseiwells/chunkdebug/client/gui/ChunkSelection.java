@@ -1,6 +1,7 @@
 package me.senseiwells.chunkdebug.client.gui;
 
 import net.minecraft.world.level.ChunkPos;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class ChunkSelection {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}

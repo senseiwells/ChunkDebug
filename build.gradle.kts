@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.8.0"
+val modVersion = "2.9.0"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -27,7 +27,6 @@ dependencies {
 
 	include(implementation(libs.keybinds.get())!!)
 
-	// FIXME: Using older version of explosion, https://github.com/badasintended/explosion/issues/4
 	compileOnly(explosion.fabric(libs.c2me.get().toString()))
 }
 
@@ -73,8 +72,7 @@ tasks {
 		file = jar.get().archiveFile
 		changelog.set(
 			"""
-			- Update to 26.2
-			- Changed "chunk-debug" permission to "chunk-debug.map"
+			- Update to 26.3
             """.trimIndent()
 		)
 		type = STABLE

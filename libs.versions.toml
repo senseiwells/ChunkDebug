@@ -1,16 +1,16 @@
 [versions]
-minecraft     = "26.2"
-fabric-loader = "0.19.3"
-fabric-api    = "0.152.1+26.2"
-keybinds      = "0.5.0+26.2"
+minecraft     = "26.3"
+fabric-loader = "0.19.5"
+fabric-api    = "0.160.5+26.3"
+keybinds      = "0.6.2+26.3"
 
 # Compatability dependencies
-c2me          = "0.4.1-alpha.0.3+26.2"
+c2me          = "0.4.2-alpha.0.85+26.3"
 
 # Plugins
 fabric-loom   = "1.17-SNAPSHOT"
-mod-publish   = "1.1.0"
-explosion     = "0.1.0"
+mod-publish   = "2.2.0"
+explosion     = "0.3.2"
 
 [libraries]
 minecraft     = { module = "com.mojang:minecraft"              , version.ref = "minecraft" }
