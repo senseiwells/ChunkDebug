@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val modVersion = "2.9.0"
+val modVersion = "2.9.1"
 val releaseVersion = "${modVersion}+${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -72,7 +72,7 @@ tasks {
 		file = jar.get().archiveFile
 		changelog.set(
 			"""
-			- Update to 26.3
+			- Fix vanilla keybinds appearing twice in controls menu with the controlling mod
             """.trimIndent()
 		)
 		type = STABLE

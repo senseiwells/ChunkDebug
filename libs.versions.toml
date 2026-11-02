@@ -2,7 +2,7 @@
 minecraft     = "26.3"
 fabric-loader = "0.19.5"
 fabric-api    = "0.160.5+26.3"
-keybinds      = "0.6.2+26.3"
+keybinds      = "0.6.3+26.3"
 
 # Compatability dependencies
 c2me          = "0.4.2-alpha.0.85+26.3"
